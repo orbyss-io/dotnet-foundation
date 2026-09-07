@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>programkit-openapi-export</ToolCommandName>
+    <ToolCommandName>orbyss-foundation-openapi-export</ToolCommandName>
     <PackageId>Orbyss.Foundation.OpenApi.Exporter</PackageId>
     <Description>Side-effect-free composed OpenAPI exporter for Orbyss Foundation feature packages.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
