@@ -34,7 +34,7 @@ function proof(material, accessToken) {
 
 async function request(form, dpop) {
   const headers = {
-    Authorization: `Basic ${Buffer.from('program-kit-dpop-machine:local-dpop-machine-secret').toString('base64')}`,
+    Authorization: `Basic ${Buffer.from('orbyss-foundation-dpop-machine:local-dpop-machine-secret').toString('base64')}`,
     'Content-Type': 'application/x-www-form-urlencoded',
   };
   if (dpop) headers.DPoP = dpop;
@@ -43,13 +43,13 @@ async function request(form, dpop) {
   return { status: response.status, body: text ? JSON.parse(text) : {} };
 }
 
-const missing = await request({ grant_type: 'client_credentials', scope: 'program-kit-context' });
+const missing = await request({ grant_type: 'client_credentials', scope: 'orbyss-foundation-context' });
 if (missing.status < 400) throw new Error(`DPoP-required client accepted no proof: ${JSON.stringify(missing)}`);
 
 const material = keyMaterial();
 const acquisitionProof = proof(material);
 const issued = await request(
-  { grant_type: 'client_credentials', scope: 'program-kit-context' },
+  { grant_type: 'client_credentials', scope: 'orbyss-foundation-context' },
   acquisitionProof,
 );
 if (issued.status !== 200 || issued.body.token_type?.toLowerCase() !== 'dpop') {
@@ -63,7 +63,7 @@ if (claims.cnf?.jkt !== material.thumbprint
 }
 
 const replay = await request(
-  { grant_type: 'client_credentials', scope: 'program-kit-context' },
+  { grant_type: 'client_credentials', scope: 'orbyss-foundation-context' },
   acquisitionProof,
 );
 if (replay.status < 400) throw new Error(`Token endpoint accepted a replayed DPoP proof: ${JSON.stringify(replay)}`);
@@ -74,8 +74,8 @@ const exchanged = await request(
     subject_token: issued.body.access_token,
     subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
     requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-    audience: 'program-kit-api',
-    scope: 'program-kit-context',
+    audience: 'orbyss-foundation-api',
+    scope: 'orbyss-foundation-context',
   },
   proof(material, issued.body.access_token),
 );
@@ -85,7 +85,7 @@ if (exchanged.status !== 200 || exchanged.body.token_type?.toLowerCase() !== 'dp
 const exchangedClaims = decode(exchanged.body.access_token);
 if (exchangedClaims.cnf?.jkt !== material.thumbprint
     || exchangedClaims.sub !== claims.sub
-    || exchangedClaims.aud !== 'program-kit-api') {
+    || exchangedClaims.aud !== 'orbyss-foundation-api') {
   throw new Error(`Exchanged DPoP token lost binding, subject, or audience: ${JSON.stringify(exchangedClaims)}`);
 }
 
@@ -95,7 +95,7 @@ const wrongKey = await request(
     grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
     subject_token: issued.body.access_token,
     subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-    audience: 'program-kit-api',
+    audience: 'orbyss-foundation-api',
   },
   proof(attacker, issued.body.access_token),
 );

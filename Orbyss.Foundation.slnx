@@ -1,0 +1,41 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/dotnet/">
+    <Project Path="src/dotnet/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.Assurance/Orbyss.Foundation.Authentication.Assurance.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.ClientCredentials/Orbyss.Foundation.Authentication.ClientCredentials.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.DownstreamApi/Orbyss.Foundation.Authentication.DownstreamApi.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.DPoP/Orbyss.Foundation.Authentication.DPoP.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.SpaPkce/Orbyss.Foundation.Authentication.SpaPkce.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication.TokenExchange/Orbyss.Foundation.Authentication.TokenExchange.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.DomainEvents.Abstractions/Orbyss.Foundation.DomainEvents.Abstractions.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.DomainEvents/Orbyss.Foundation.DomainEvents.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Identity.Admin.Abstractions/Orbyss.Foundation.Identity.Admin.Abstractions.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Identity.Keycloak.Admin/Orbyss.Foundation.Identity.Keycloak.Admin.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Mcp.AspNetCore/Orbyss.Foundation.Mcp.AspNetCore.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Tasks.Abstractions/Orbyss.Foundation.Tasks.Abstractions.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Tasks/Orbyss.Foundation.Tasks.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Web.Discovery.Abstractions/Orbyss.Foundation.Web.Discovery.Abstractions.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Web.OpenApi/Orbyss.Foundation.Web.OpenApi.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
+    <Project Path="src/dotnet/Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/dotnet/">
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.Assurance.Probe/Orbyss.Foundation.Authentication.Assurance.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.BffCookie.Probe/Orbyss.Foundation.Authentication.BffCookie.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.ClientCredentials.Probe/Orbyss.Foundation.Authentication.ClientCredentials.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.DownstreamApi.Probe/Orbyss.Foundation.Authentication.DownstreamApi.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.DPoP.Probe/Orbyss.Foundation.Authentication.DPoP.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.JwksRotation.Probe/Orbyss.Foundation.Authentication.JwksRotation.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.TokenExchange.Probe/Orbyss.Foundation.Authentication.TokenExchange.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.DomainEvents.Probe/Orbyss.Foundation.DomainEvents.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Identity.Keycloak.Admin.Probe/Orbyss.Foundation.Identity.Keycloak.Admin.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Web.Discovery.Probe/Orbyss.Foundation.Web.Discovery.Probe.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Shared authenticated stateless MCP transport feature for Orbyss Foundation tool contributors.</Description>
+    <PackageId>Orbyss.Foundation.Mcp.AspNetCore</PackageId>
+    <PackageTags>orbyss-foundation;mcp;aspnetcore;cshells</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
+  </ItemGroup>
+  <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
+</Project>

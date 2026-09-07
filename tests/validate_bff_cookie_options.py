@@ -7,8 +7,8 @@ from pathlib import Path
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
     project = root / (
-        "tests/dotnet/ProgramKit.Authentication.BffCookie.Probe/"
-        "ProgramKit.Authentication.BffCookie.Probe.csproj"
+        "tests/dotnet/Orbyss.Foundation.Authentication.BffCookie.Probe/"
+        "Orbyss.Foundation.Authentication.BffCookie.Probe.csproj"
     )
     result = subprocess.run(
         [
@@ -28,7 +28,7 @@ def main() -> int:
     )
     if result.returncode != 0:
         raise AssertionError(
-            "Program Kit BFF cookie-options probe failed.\n"
+            "Orbyss Foundation BFF cookie-options probe failed.\n"
             f"stdout:\n{result.stdout}\n"
             f"stderr:\n{result.stderr}"
         )

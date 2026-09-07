@@ -11,10 +11,10 @@ def main() -> int:
     root = Path(__file__).resolve().parents[1]
     runtime = root / "src/dotnet"
     authentication_packages = sorted(
-        path for path in runtime.iterdir() if path.is_dir() and path.name.startswith("ProgramKit.Authentication")
+        path for path in runtime.iterdir() if path.is_dir() and path.name.startswith("Orbyss.Foundation.Authentication")
     )
     if not authentication_packages:
-        raise AssertionError("No Program Kit authentication runtime packages were found")
+        raise AssertionError("No Orbyss Foundation authentication runtime packages were found")
 
     for package in authentication_packages:
         for path in package.rglob("*"):
@@ -29,7 +29,7 @@ def main() -> int:
                         f"Provider-specific name {provider!r} leaked into runtime authentication package {path}"
                     )
 
-    identity_abstractions = runtime / "ProgramKit.Identity.Admin.Abstractions"
+    identity_abstractions = runtime / "Orbyss.Foundation.Identity.Admin.Abstractions"
     for path in identity_abstractions.rglob("*"):
         if not path.is_file() or "bin" in path.parts or "obj" in path.parts:
             continue
@@ -43,14 +43,12 @@ def main() -> int:
                 )
 
     validator = (
-        runtime / "ProgramKit.Authentication/ProgramKitWebOptionsValidator.cs"
+        runtime / "Orbyss.Foundation.Authentication/FoundationWebOptionsValidator.cs"
     ).read_text(encoding="utf-8")
     if "authority.IsLoopback" not in validator or 'Host.Equals("keycloak"' in validator:
         raise AssertionError("The local HTTP authority exception must be loopback-only and provider-neutral")
 
-    contract = (
-        root / "extensions/program-kit-dotnet/references/secure-web-profiles.md"
-    ).read_text(encoding="utf-8")
+    contract = (root / "docs/authentication.md").read_text(encoding="utf-8")
     normalized_contract = " ".join(contract.split())
     for required in (
         "Provider-neutral capability boundary",

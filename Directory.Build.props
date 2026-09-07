@@ -1,5 +1,5 @@
 <Project>
-  <Import Project="eng/ProgramKit.Version.props" />
+  <Import Project="eng/Foundation.Version.props" />
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -12,15 +12,15 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
-    <RepositoryUrl>https://github.com/orbyss-io/program-kit</RepositoryUrl>
+    <RepositoryUrl>https://github.com/orbyss-io/dotnet-foundation</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Authors>Orbyss</Authors>
     <Company>Orbyss</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'ProgramKit.Analyzers'">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)src/dotnet/ProgramKit.Analyzers/ProgramKit.Analyzers.csproj"
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Orbyss.Foundation.Analyzers'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/dotnet/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

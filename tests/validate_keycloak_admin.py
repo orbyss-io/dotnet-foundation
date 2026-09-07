@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECT = ROOT / "tests/dotnet/ProgramKit.Identity.Keycloak.Admin.Probe/ProgramKit.Identity.Keycloak.Admin.Probe.csproj"
+PROJECT = ROOT / "tests/dotnet/Orbyss.Foundation.Identity.Keycloak.Admin.Probe/Orbyss.Foundation.Identity.Keycloak.Admin.Probe.csproj"
 
 
 def main() -> int:

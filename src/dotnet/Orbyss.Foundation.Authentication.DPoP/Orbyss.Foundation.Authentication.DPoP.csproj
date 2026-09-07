@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Provider-neutral RFC 9449 DPoP validation as a CShells middleware feature.</Description>
+    <PackageId>Orbyss.Foundation.Authentication.DPoP</PackageId>
+    <PackageTags>orbyss-foundation;cshells;authentication;oauth;dpop;rfc9449</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Orbyss.Foundation.Authentication.SpaPkce/Orbyss.Foundation.Authentication.SpaPkce.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

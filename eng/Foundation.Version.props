@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <FoundationVersion>0.1.0</FoundationVersion>
+    <Version>$(FoundationVersion)</Version>
+    <PackageVersion>$(FoundationVersion)</PackageVersion>
+  </PropertyGroup>
+</Project>

@@ -1,4 +1,4 @@
-namespace ProgramKit.Analyzers.Probe;
+namespace Orbyss.Foundation.Analyzers.Probe;
 
 internal sealed class FirstDeclaration
 {

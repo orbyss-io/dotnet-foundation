@@ -6,7 +6,7 @@ from pathlib import Path
 
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
-    project = root / "tests/dotnet/ProgramKit.Authentication.JwksRotation.Probe"
+    project = root / "tests/dotnet/Orbyss.Foundation.Authentication.JwksRotation.Probe"
     completed = subprocess.run(
         ["dotnet", "run", "--project", str(project), "-c", "Release", "--no-build"],
         cwd=root,

@@ -7,8 +7,8 @@ from pathlib import Path
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
     project = root / (
-        "tests/dotnet/ProgramKit.Authentication.DownstreamApi.Probe/"
-        "ProgramKit.Authentication.DownstreamApi.Probe.csproj"
+        "tests/dotnet/Orbyss.Foundation.Authentication.DownstreamApi.Probe/"
+        "Orbyss.Foundation.Authentication.DownstreamApi.Probe.csproj"
     )
     result = subprocess.run(
         [

@@ -25,7 +25,7 @@ def main() -> int:
     output = result.stdout + result.stderr
     if result.returncode == 0:
         raise AssertionError("The invalid analyzer probe unexpectedly compiled.")
-    for rule_id in ("PK1003", "PK1004", "PK1005"):
+    for rule_id in ("ORB1003", "ORB1004", "ORB1005"):
         if rule_id not in output:
             raise AssertionError(f"The analyzer probe did not report {rule_id}.\n{output}")
 
@@ -37,13 +37,13 @@ def main() -> int:
         text=True,
     )
     feature_output = feature.stdout + feature.stderr
-    if feature.returncode == 0 or "PK1006" not in feature_output:
+    if feature.returncode == 0 or "ORB1006" not in feature_output:
         raise AssertionError(
-            "The analyzer did not reject a dotted ProgramKitFeatureIdentity whose CLR "
+            "The analyzer did not reject a dotted FoundationFeatureIdentity whose CLR "
             f"[ShellFeature] name diverges.\n{feature_output}"
         )
 
-    print("Program Kit C# structure, documentation, and feature-identity analyzers passed.")
+    print("Orbyss Foundation C# structure, documentation, and feature-identity analyzers passed.")
     return 0
 
 

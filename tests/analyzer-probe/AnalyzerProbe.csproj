@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/dotnet/ProgramKit.Analyzers/ProgramKit.Analyzers.csproj"
+    <ProjectReference Include="../../src/dotnet/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

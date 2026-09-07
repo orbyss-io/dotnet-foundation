@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Provider-neutral authenticated downstream API calls as a CShells feature.</Description>
+    <PackageId>Orbyss.Foundation.Authentication.DownstreamApi</PackageId>
+    <PackageTags>orbyss-foundation;cshells;authentication;oauth;downstream-api;delegation</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.Abstractions" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Orbyss.Foundation.Authentication.ClientCredentials/Orbyss.Foundation.Authentication.ClientCredentials.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Authentication.TokenExchange/Orbyss.Foundation.Authentication.TokenExchange.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

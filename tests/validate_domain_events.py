@@ -6,7 +6,7 @@ from pathlib import Path
 
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
-    project = root / "tests/dotnet/ProgramKit.DomainEvents.Probe/ProgramKit.DomainEvents.Probe.csproj"
+    project = root / "tests/dotnet/Orbyss.Foundation.DomainEvents.Probe/Orbyss.Foundation.DomainEvents.Probe.csproj"
     result = subprocess.run(
         [
             "dotnet",
@@ -24,11 +24,11 @@ def main() -> int:
     )
     if result.returncode != 0:
         raise AssertionError(
-            "Program Kit domain-event probe failed.\n"
+            "Orbyss Foundation domain-event probe failed.\n"
             f"stdout:\n{result.stdout}\n"
             f"stderr:\n{result.stderr}"
         )
-    print("Program Kit domain-event dispatch semantics passed.")
+    print("Orbyss Foundation domain-event dispatch semantics passed.")
     return 0
 
 

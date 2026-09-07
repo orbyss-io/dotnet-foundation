@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Direct SPA-PKCE bearer authentication as a CShells middleware feature.</Description>
+    <PackageId>Orbyss.Foundation.Authentication.SpaPkce</PackageId>
+    <PackageTags>orbyss-foundation;cshells;authentication;oidc;pkce;spa</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

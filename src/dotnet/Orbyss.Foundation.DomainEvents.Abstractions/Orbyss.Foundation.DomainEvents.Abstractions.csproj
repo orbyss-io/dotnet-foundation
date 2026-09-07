@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Lightweight in-process domain-event contracts for Orbyss Foundation features.</Description>
+    <PackageId>Orbyss.Foundation.DomainEvents.Abstractions</PackageId>
+    <PackageTags>orbyss-foundation;domain-events;ddd;cshells</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

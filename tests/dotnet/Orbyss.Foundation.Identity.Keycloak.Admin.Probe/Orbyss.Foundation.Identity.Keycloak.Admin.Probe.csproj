@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.Abstractions" />
+    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Identity.Admin.Abstractions/Orbyss.Foundation.Identity.Admin.Abstractions.csproj" />
+    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Identity.Keycloak.Admin/Orbyss.Foundation.Identity.Keycloak.Admin.csproj" />
+  </ItemGroup>
+</Project>

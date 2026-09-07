@@ -15,109 +15,57 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.13"
 
-      - name: Install pinned Spec Kit
-        run: python -m pip install --disable-pip-version-check "specify-cli==1.0.1"
-
-      - name: Validate Program Kit components
-        run: python tests/validate_components.py
-
-      - name: Set up pinned UI acceptance Node
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
-          node-version: "24.20.0"
+          global-json-file: global.json
 
-      - name: Set up pinned UI acceptance npm
-        run: npm install --global npm@11.19.0 --ignore-scripts --no-audit --no-fund
+      - name: Restore locked dependency graph
+        run: dotnet restore Orbyss.Foundation.slnx --locked-mode --configfile NuGet.config
 
-      - name: Validate UI experience and public content contracts
-        run: python tests/validate_ui_experience.py
+      - name: Build Foundation
+        run: dotnet build Orbyss.Foundation.slnx -c Release --no-restore
 
-      - name: Validate UI accessibility, keyboard and analytics in Chromium
-        run: python tests/validate_ui_browser.py --install --install-browser
+      - name: Validate Foundation contracts
+        shell: bash
+        run: |
+          validators=(
+            validate_analyzer.py
+            validate_authentication_provider_boundary.py
+            validate_bff_cookie_options.py
+            validate_assurance.py
+            validate_client_credentials.py
+            validate_token_exchange.py
+            validate_downstream_api.py
+            validate_dpop.py
+            validate_jwks_rotation.py
+            validate_domain_events.py
+            validate_keycloak_admin.py
+          )
+          for validator in "${validators[@]}"; do
+            python "tests/$validator"
+          done
 
-      - name: Validate web security assurance evidence
-        run: python tests/validate_web_security_assurance.py
+      - name: Pack Foundation packages
+        run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:PackageOutputPath="$PWD/artifacts/nuget"
 
-      - name: Validate provider-neutral authentication boundaries
-        run: python tests/validate_authentication_provider_boundary.py
+      - name: Require the complete package family
+        shell: bash
+        run: |
+          shopt -s nullglob
+          packages=(artifacts/nuget/*.nupkg)
+          [[ ${#packages[@]} -eq 22 ]] || { echo "Expected 22 Foundation packages, found ${#packages[@]}." >&2; exit 1; }
+          python tests/validate_package_metadata.py --packages artifacts/nuget
 
-      - name: Validate Codex agent bootstrap boundary
-        run: python tests/validate_codex_bootstrap.py
-
-      - name: Validate governance-state transitions
-        run: python tests/validate_governance_state.py
-
-      - name: Validate sequential offline/local upgrade
-        run: python tests/validate_local_upgrade.py
-
-      - name: Validate bootstrap context generation
-        run: python tests/validate_bootstrap_context.py
-
-      - name: Validate conversational bootstrap intake and architecture map
-        run: python tests/validate_bootstrap_intake.py
-
-      - name: Validate C4 projection viewing and cleanup
-        run: python tests/validate_c4_view.py
-
-      - name: Validate live bootstrap acceptance contracts without running agents
-        run: python tests/validate_live_bootstrap_acceptance.py
-
-      - name: Validate profile-gated .NET scaffold
-        run: python tests/validate_dotnet_scaffold.py
-
-      - name: Validate .NET runtime version coherence
-        run: python tests/validate_dotnet_runtime.py
-
-      - name: Validate solution test-project discovery
-        run: python tests/validate_dotnet_test_discovery.py
-
-      - name: Validate bundle manifest
-        run: specify bundle validate --path . --offline
-
-      - name: Build release assets
-        run: python scripts/build_release.py
-
-      - name: Validate packaged UI in a clean consumer
-        run: python tests/validate_packaged_ui.py
-
-      - name: Validate clean-consumer bootstrap consistency
-        run: python tests/validate_bootstrap_consistency_e2e.py
-
-      - name: Test packaged components and bundle graph
-        run: python tests/validate_release_install.py
-
-      - name: Test candidate upgrade from previous stable release
-        run: python tests/validate_public_upgrade.py --candidate-dir artifacts
-
-      - name: Upload validation artifacts
+      - name: Upload packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: program-kit-${{ github.sha }}
-          path: artifacts/
+          name: orbyss-foundation-${{ github.sha }}
+          path: artifacts/nuget/*.nupkg
           if-no-files-found: error
-          retention-days: 14
-
-  windows-bootstrap:
-    runs-on: windows-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.13"
-
-      - name: Install pinned Spec Kit
-        run: python -m pip install --disable-pip-version-check "specify-cli==1.0.1"
-
-      - name: Validate Python-flavor Codex bootstrap on Windows
-        run: python tests/validate_codex_bootstrap.py
