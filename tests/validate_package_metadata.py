@@ -23,6 +23,9 @@ def main() -> int:
     parser.add_argument("--packages", type=Path, default=ROOT / "artifacts/nuget")
     args = parser.parse_args()
 
+    if (ROOT / "src/dotnet").exists() or (ROOT / "eng").exists():
+        raise AssertionError("Foundation must keep a flat src layout and repository tooling under scripts/.")
+
     expected_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     expected_ids = {
         project.stem
