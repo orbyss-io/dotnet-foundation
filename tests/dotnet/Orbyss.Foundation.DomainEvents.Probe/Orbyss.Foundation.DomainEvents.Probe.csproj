@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.DomainEvents.Abstractions/Orbyss.Foundation.DomainEvents.Abstractions.csproj" />
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.DomainEvents/Orbyss.Foundation.DomainEvents.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.DomainEvents.Abstractions/Orbyss.Foundation.DomainEvents.Abstractions.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.DomainEvents/Orbyss.Foundation.DomainEvents.csproj" />
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ def main() -> int:
     expected_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     expected_ids = {
         project.stem
-        for project in (ROOT / "src/dotnet").glob("*/*.csproj")
+        for project in (ROOT / "src").glob("Orbyss.Foundation*/*.csproj")
         if project.stem != "Orbyss.Foundation.Host"
     }
     if len(expected_ids) != 22:
@@ -64,4 +64,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

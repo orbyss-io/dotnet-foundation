@@ -1,6 +1,8 @@
 <Project>
-  <Import Project="eng/Foundation.Version.props" />
   <PropertyGroup>
+    <FoundationVersion>0.1.0</FoundationVersion>
+    <Version>$(FoundationVersion)</Version>
+    <PackageVersion>$(FoundationVersion)</PackageVersion>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -20,7 +22,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'Orbyss.Foundation.Analyzers'">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)src/dotnet/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj"
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

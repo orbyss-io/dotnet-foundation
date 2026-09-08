@@ -9,7 +9,7 @@ PROVIDER_NAMES = ("keycloak", "auth0", "okta", "cognito", "identityserver", "ent
 
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
-    runtime = root / "src/dotnet"
+    runtime = root / "src"
     authentication_packages = sorted(
         path for path in runtime.iterdir() if path.is_dir() and path.name.startswith("Orbyss.Foundation.Authentication")
     )

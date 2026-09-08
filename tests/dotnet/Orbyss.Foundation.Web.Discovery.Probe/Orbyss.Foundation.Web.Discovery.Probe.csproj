@@ -2,6 +2,6 @@
   <PropertyGroup><IsPackable>false</IsPackable></PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CShells.AspNetCore.Abstractions" />
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
   </ItemGroup>
 </Project>

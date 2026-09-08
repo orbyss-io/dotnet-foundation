@@ -11,6 +11,6 @@
     <PackageReference Include="CShells.AspNetCore.Abstractions" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />
   </ItemGroup>
 </Project>

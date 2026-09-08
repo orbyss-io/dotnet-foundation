@@ -6,6 +6,6 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="CShells.Abstractions" />
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Authentication.TokenExchange/Orbyss.Foundation.Authentication.TokenExchange.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication.TokenExchange/Orbyss.Foundation.Authentication.TokenExchange.csproj" />
   </ItemGroup>
 </Project>

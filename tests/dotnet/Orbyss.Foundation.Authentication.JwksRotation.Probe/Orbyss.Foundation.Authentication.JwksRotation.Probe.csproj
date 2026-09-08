@@ -8,7 +8,7 @@
     <PackageReference Include="CShells.Abstractions" />
     <PackageReference Include="CShells.AspNetCore.Abstractions" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
-    <ProjectReference Include="../../../src/dotnet/Orbyss.Foundation.Authentication.SpaPkce/Orbyss.Foundation.Authentication.SpaPkce.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication.SpaPkce/Orbyss.Foundation.Authentication.SpaPkce.csproj" />
   </ItemGroup>
 </Project>
