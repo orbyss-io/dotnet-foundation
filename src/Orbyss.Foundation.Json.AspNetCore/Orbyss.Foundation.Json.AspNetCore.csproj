@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><Description>Optional shell settings and HTTP integration for typed JSON profiles.</Description><PackageReadmeFile>README.md</PackageReadmeFile></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
+    <ProjectReference Include="../Orbyss.Foundation.Json/Orbyss.Foundation.Json.csproj" />
+  </ItemGroup>
+  <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
+</Project>

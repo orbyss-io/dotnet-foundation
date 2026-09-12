@@ -2,12 +2,15 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Orbyss.Foundation.Json;
 
 namespace Orbyss.Foundation.Web.Discovery;
 
 /// <summary>Loads a bounded, hash-checked public projection without serving arbitrary files.</summary>
 public sealed class FilePublicDocumentCatalog(string contentRoot, string outputDirectory) : IPublicDocumentCatalog
 {
+    /// <summary>Uses an immutable typed admission profile for the public manifest contract.</summary>
+    private static readonly JsonProfile ManifestProfile = new(new JsonProfileSettings { MaxBytes = 2_000_000 });
     /// <summary>Reads and validates the whole projection before any route is mapped.</summary>
     public IReadOnlyList<PublicDocument> ReadDocuments()
     {
@@ -18,13 +21,9 @@ public sealed class FilePublicDocumentCatalog(string contentRoot, string outputD
             throw new InvalidDataException("Public projection manifest is too large.");
         }
 
-        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-        {
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-            RespectNullableAnnotations = true,
-        };
-        var manifest = JsonSerializer.Deserialize<PublicationManifest>(System.IO.File.ReadAllBytes(manifestPath), options)
-            ?? throw new InvalidDataException("Public projection manifest is empty.");
+        PublicationManifest manifest;
+        try { manifest = ManifestProfile.Deserialize<PublicationManifest>(System.IO.File.ReadAllBytes(manifestPath)); }
+        catch (JsonProfileException error) { throw new InvalidDataException(error.Code); }
         if (manifest.Version != "1.0" || manifest.Resources.Count > 4096)
         {
             throw new InvalidDataException("Unsupported public projection version or resource count.");

@@ -11,6 +11,7 @@ and carries the architectural knowledge needed to select and compose them.
 - `Orbyss.Foundation.Authentication.*` — provider-neutral authentication and OAuth building blocks.
 - `Orbyss.Foundation.DomainEvents.*` — awaited in-process domain-event contracts and dispatch.
 - `Orbyss.Foundation.Identity.*` — provider-neutral identity administration plus opt-in adapters.
+- `Orbyss.Foundation.Json.*` — typed immutable JSON profiles and versioned canonicalization.
 - `Orbyss.Foundation.Mcp.*` — authenticated MCP transport composition.
 - `Orbyss.Foundation.Tasks.*` — shell-lifetime task contracts and execution.
 - `Orbyss.Foundation.Web.*` — web defaults, discovery, OpenAPI, and Problem Details features.
@@ -32,7 +33,14 @@ python tests/validate_dpop.py
 python tests/validate_jwks_rotation.py
 python tests/validate_domain_events.py
 python tests/validate_keycloak_admin.py
+python tests/validate_web_policies.py
+python tests/validate_json.py
+python tests/validate_hosted_pages.py
 ```
+
+Or run `python scripts/validate_foundation.py` after the Release build. Node 20 or newer is required
+for independent canonicalization vectors. The 0.2.0 release contains all three planned issues in one
+25-package version bump. See `docs/plans/` and the new package READMEs for adoption instructions.
 
 Stable tags must exactly match `VERSION`. The release workflow publishes the NuGet family through
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.

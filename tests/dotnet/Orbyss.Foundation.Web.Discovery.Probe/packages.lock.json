@@ -17,13 +17,21 @@
         "resolved": "2025.2.4",
         "contentHash": "TwbgxAkXxY+vNEhNVx/QXjJ4vqxmepOjsgRvvImQPbHkHMMb4W+ahL3laMsxXKtNT7iMy+E1B3xkqao2hf1n3A=="
       },
+      "orbyss.foundation.json": {
+        "type": "Project"
+      },
       "orbyss.foundation.web.discovery": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.1.0, )"
+          "Orbyss.Foundation.Json": "[0.1.0, )",
+          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.1.0, )",
+          "Orbyss.Foundation.WebDefaults": "[0.1.0, )"
         }
       },
       "orbyss.foundation.web.discovery.abstractions": {
+        "type": "Project"
+      },
+      "orbyss.foundation.webdefaults": {
         "type": "Project"
       },
       "CShells.Abstractions": {

@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <FoundationVersion>0.1.0</FoundationVersion>
+    <FoundationVersion>0.2.0</FoundationVersion>
     <Version>$(FoundationVersion)</Version>
     <PackageVersion>$(FoundationVersion)</PackageVersion>
     <TargetFramework>net10.0</TargetFramework>

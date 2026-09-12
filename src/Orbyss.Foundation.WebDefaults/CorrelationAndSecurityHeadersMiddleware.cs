@@ -18,13 +18,11 @@ internal sealed partial class CorrelationAndSecurityHeadersMiddleware(RequestDel
             ? supplied
             : Guid.NewGuid().ToString("N");
         context.TraceIdentifier = correlationId;
-        context.Response.Headers[HeaderName] = correlationId;
-        context.Response.Headers.XContentTypeOptions = "nosniff";
-        context.Response.Headers.XFrameOptions = "DENY";
-        context.Response.Headers["Referrer-Policy"] = "no-referrer";
-        context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
-        context.Response.Headers.ContentSecurityPolicy =
-            "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'";
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers[HeaderName] = correlationId;
+            return Task.CompletedTask;
+        });
 
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {

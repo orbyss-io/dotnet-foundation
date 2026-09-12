@@ -80,9 +80,9 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
             return Results.Challenge(
                 new AuthenticationProperties { RedirectUri = destination },
                 [OpenIdConnectDefaults.AuthenticationScheme]);
-        }).AllowAnonymous();
+        }).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
-        endpoints.MapGet("/bff/user", WriteUserAsync).AllowAnonymous();
+        endpoints.MapGet("/bff/user", WriteUserAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
         endpoints.MapGet("/bff/antiforgery", (HttpContext context, IAntiforgery antiforgery) =>
         {
@@ -93,11 +93,11 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                 formFieldName = AntiforgeryFormField,
                 requestToken = tokens.RequestToken
             });
-        }).AllowAnonymous();
+        }).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
-        endpoints.MapPost("/bff/logout", LogoutAsync).RequireAuthorization();
-        endpoints.MapGet("/bff/signed-out", () => Results.Ok(new { signedOut = true })).AllowAnonymous();
-        endpoints.MapGet(selected.AccessDeniedPath, WriteAccessDeniedAsync).AllowAnonymous();
+        endpoints.MapPost("/bff/logout", LogoutAsync).WithMetadata(new WebResponseMetadata(Private: true)).RequireAuthorization();
+        endpoints.MapGet("/bff/signed-out", () => Results.Ok(new { signedOut = true })).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        endpoints.MapGet(selected.AccessDeniedPath, WriteAccessDeniedAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
     }
 
     /// <summary>Configures the opaque server-backed session cookie.</summary>

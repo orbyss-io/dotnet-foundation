@@ -11,7 +11,10 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,6 +29,11 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Set up Node for independent canonicalization vectors
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+
       - name: Restore locked dependency graph
         run: dotnet restore Orbyss.Foundation.slnx --locked-mode --configfile NuGet.config
 
@@ -33,39 +41,20 @@ jobs:
         run: dotnet build Orbyss.Foundation.slnx -c Release --no-restore
 
       - name: Validate Foundation contracts
-        shell: bash
-        run: |
-          validators=(
-            validate_analyzer.py
-            validate_authentication_provider_boundary.py
-            validate_bff_cookie_options.py
-            validate_assurance.py
-            validate_client_credentials.py
-            validate_token_exchange.py
-            validate_downstream_api.py
-            validate_dpop.py
-            validate_jwks_rotation.py
-            validate_domain_events.py
-            validate_keycloak_admin.py
-          )
-          for validator in "${validators[@]}"; do
-            python "tests/$validator"
-          done
+        run: python scripts/validate_foundation.py
 
       - name: Pack Foundation packages
-        run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:PackageOutputPath="$PWD/artifacts/nuget"
+        run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build --output artifacts/nuget
 
       - name: Require the complete package family
-        shell: bash
-        run: |
-          shopt -s nullglob
-          packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 22 ]] || { echo "Expected 22 Foundation packages, found ${#packages[@]}." >&2; exit 1; }
-          python tests/validate_package_metadata.py --packages artifacts/nuget
+        run: python tests/validate_package_metadata.py --packages artifacts/nuget
+
+      - name: Verify packaged settings-only host consumption
+        run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
 
       - name: Upload packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: orbyss-foundation-${{ github.sha }}
+          name: orbyss-foundation-${{ github.sha }}-${{ runner.os }}
           path: artifacts/nuget/*.nupkg
           if-no-files-found: error

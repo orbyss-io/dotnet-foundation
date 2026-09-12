@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Orbyss.Foundation.WebDefaults;
 
 namespace Orbyss.Foundation.Web.Discovery;
 
@@ -32,6 +33,7 @@ public sealed class FoundationDiscoveryFeature(ShellSettings settings) : IWebShe
     {
         var documents = endpoints.ServiceProvider.GetRequiredService<IPublicDocumentCatalog>().ReadDocuments();
         var routes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var ownsPolicies = endpoints.ServiceProvider.GetService<WebResponsePolicyCatalog>() is not null;
         foreach (var document in documents)
         {
             FilePublicDocumentCatalog.ValidateRoute(document.Route);
@@ -47,14 +49,15 @@ public sealed class FoundationDiscoveryFeature(ShellSettings settings) : IWebShe
             var bytes = document.Content.ToArray();
             endpoints.MapMethods(document.Route, ["GET", "HEAD"], (HttpContext context) =>
             {
-                context.Response.Headers.XContentTypeOptions = "nosniff";
-                if (!document.Index)
+                if (!ownsPolicies) context.Response.Headers.XContentTypeOptions = "nosniff";
+                if (!ownsPolicies && !document.Index)
                 {
                     context.Response.Headers["X-Robots-Tag"] = "noindex";
                 }
 
                 return Results.Bytes(bytes, document.ContentType);
-            }).AllowAnonymous().ExcludeFromDescription();
+            }).WithMetadata(new WebResponseMetadata(Feature: "Orbyss.Foundation.Web.Discovery", NoIndex: !document.Index))
+                .AllowAnonymous().ExcludeFromDescription();
         }
     }
 }

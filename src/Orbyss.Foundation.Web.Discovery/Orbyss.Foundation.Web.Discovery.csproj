@@ -8,6 +8,8 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
     <ProjectReference Include="../Orbyss.Foundation.Web.Discovery.Abstractions/Orbyss.Foundation.Web.Discovery.Abstractions.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Json/Orbyss.Foundation.Json.csproj" />
   </ItemGroup>
   <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
 </Project>

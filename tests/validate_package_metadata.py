@@ -32,8 +32,8 @@ def main() -> int:
         for project in (ROOT / "src").glob("Orbyss.Foundation*/*.csproj")
         if project.stem != "Orbyss.Foundation.Host"
     }
-    if len(expected_ids) != 22:
-        raise AssertionError(f"Expected 22 Foundation package projects, found {len(expected_ids)}.")
+    if len(expected_ids) != 25:
+        raise AssertionError(f"Expected 25 Foundation package projects, found {len(expected_ids)}.")
 
     found: set[str] = set()
     for package in sorted(args.packages.glob("*.nupkg")):
@@ -61,7 +61,7 @@ def main() -> int:
 
     if found != expected_ids:
         raise AssertionError(f"Package set mismatch. Missing={sorted(expected_ids - found)}, extra={sorted(found - expected_ids)}")
-    print("Exact 22-package Orbyss Foundation NuGet metadata contract passed.")
+    print("Exact 25-package Orbyss Foundation NuGet metadata contract passed.")
     return 0
 
 

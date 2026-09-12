@@ -29,6 +29,11 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Set up Node for independent canonicalization vectors
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+
       - name: Verify release tag
         shell: bash
         run: |
@@ -41,18 +46,24 @@ jobs:
           dotnet build Orbyss.Foundation.slnx -c Release --no-restore
           dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:PackageOutputPath="$PWD/artifacts/nuget"
 
+      - name: Validate Foundation contracts before publication
+        run: python scripts/validate_foundation.py
+
       - name: Validate package family
         shell: bash
         run: |
           shopt -s nullglob
           packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 22 ]] || { echo "Expected 22 Foundation packages, found ${#packages[@]}." >&2; exit 1; }
+          [[ ${#packages[@]} -eq 25 ]] || { echo "Expected 25 Foundation packages, found ${#packages[@]}." >&2; exit 1; }
           for package in "${packages[@]}"; do
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done
           python tests/validate_package_metadata.py --packages artifacts/nuget
 
-      - name: Attest packages
+      - name: Verify packaged settings-only host consumption
+        run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
+
+      - name: Attest validated packages
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: artifacts/nuget/*.nupkg
@@ -89,7 +100,7 @@ jobs:
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
-          file: src/dotnet/Orbyss.Foundation.Host/Dockerfile
+          file: src/Orbyss.Foundation.Host/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: mode=max

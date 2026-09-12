@@ -14,12 +14,15 @@
     <Project Path="src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj" />
     <Project Path="src/Orbyss.Foundation.Identity.Admin.Abstractions/Orbyss.Foundation.Identity.Admin.Abstractions.csproj" />
     <Project Path="src/Orbyss.Foundation.Identity.Keycloak.Admin/Orbyss.Foundation.Identity.Keycloak.Admin.csproj" />
+    <Project Path="src/Orbyss.Foundation.Json.AspNetCore/Orbyss.Foundation.Json.AspNetCore.csproj" />
+    <Project Path="src/Orbyss.Foundation.Json/Orbyss.Foundation.Json.csproj" />
     <Project Path="src/Orbyss.Foundation.Mcp.AspNetCore/Orbyss.Foundation.Mcp.AspNetCore.csproj" />
     <Project Path="src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj" />
     <Project Path="src/Orbyss.Foundation.Tasks.Abstractions/Orbyss.Foundation.Tasks.Abstractions.csproj" />
     <Project Path="src/Orbyss.Foundation.Tasks/Orbyss.Foundation.Tasks.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.Discovery.Abstractions/Orbyss.Foundation.Web.Discovery.Abstractions.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
+    <Project Path="src/Orbyss.Foundation.Web.HostedPages/Orbyss.Foundation.Web.HostedPages.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.OpenApi/Orbyss.Foundation.Web.OpenApi.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
     <Project Path="src/Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
@@ -35,6 +38,9 @@
     <Project Path="tests/dotnet/Orbyss.Foundation.Authentication.TokenExchange.Probe/Orbyss.Foundation.Authentication.TokenExchange.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.DomainEvents.Probe/Orbyss.Foundation.DomainEvents.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Identity.Keycloak.Admin.Probe/Orbyss.Foundation.Identity.Keycloak.Admin.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Json.Probe/Orbyss.Foundation.Json.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Web.Discovery.Probe/Orbyss.Foundation.Web.Discovery.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Web.HostedPages.Probe/Orbyss.Foundation.Web.HostedPages.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.WebDefaults.Probe/Orbyss.Foundation.WebDefaults.Probe.csproj" />
   </Folder>
 </Solution>

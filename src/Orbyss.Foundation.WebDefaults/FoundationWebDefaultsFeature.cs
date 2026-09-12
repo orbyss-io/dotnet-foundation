@@ -30,6 +30,8 @@ public sealed class FoundationWebDefaultsFeature(ShellSettings settings) : IMidd
             settings.GetConfigurationRoot().GetSection("Foundation:Web"));
         services.AddSingleton<IValidateOptions<FoundationWebDefaultsOptions>, FoundationWebDefaultsOptionsValidator>();
         services.AddLocalization();
+        services.Configure<WebResponsePoliciesOptions>(settings.GetConfigurationRoot().GetSection(WebResponsePoliciesOptions.SectionName));
+        services.AddSingleton(provider => new WebResponsePolicyCatalog(provider.GetRequiredService<IOptions<WebResponsePoliciesOptions>>().Value));
         services.AddOptions<RequestLocalizationOptions>()
             .Configure<IOptions<FoundationWebDefaultsOptions>>((options, selected) =>
             {
@@ -44,6 +46,8 @@ public sealed class FoundationWebDefaultsFeature(ShellSettings settings) : IMidd
     /// <inheritdoc />
     public void UseMiddleware(IApplicationBuilder app, IHostEnvironment? environment)
     {
+        _ = app.ApplicationServices.GetRequiredService<WebResponsePolicyCatalog>();
+        app.UseMiddleware<WebResponsePoliciesMiddleware>();
         app.UseMiddleware<CorrelationAndSecurityHeadersMiddleware>();
         app.UseRequestLocalization();
         if (environment?.IsDevelopment() != true)

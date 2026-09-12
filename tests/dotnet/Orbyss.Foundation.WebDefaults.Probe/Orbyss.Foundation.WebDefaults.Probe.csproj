@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CShells.AspNetCore" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Json.AspNetCore/Orbyss.Foundation.Json.AspNetCore.csproj" />
+  </ItemGroup>
+</Project>
