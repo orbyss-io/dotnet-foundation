@@ -74,6 +74,16 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     public void MapEndpoints(IEndpointRouteBuilder endpoints, IHostEnvironment? environment)
     {
         var selected = endpoints.ServiceProvider.GetRequiredService<IOptions<FoundationWebOptions>>().Value;
+        // Shell selection happens before its authentication middleware. These exact routes
+        // bring protocol requests into the owning shell; the OIDC handler consumes them.
+        foreach (var path in new[] { selected.CallbackPath, selected.SignedOutCallbackPath, selected.RemoteSignOutPath })
+        {
+            endpoints.MapMethods(path, ["GET", "POST"], (HttpContext context, IAuthenticationErrorWriter errorWriter) =>
+                errorWriter.WriteAsync(context, StatusCodes.Status400BadRequest, "authentication_callback_invalid"))
+                .WithMetadata(new WebResponseMetadata(Private: true))
+                .AllowAnonymous()
+                .ExcludeFromDescription();
+        }
         endpoints.MapGet("/bff/login", (string? returnUrl) =>
         {
             var destination = IsLocalReturnUrl(returnUrl) ? returnUrl! : "/";
@@ -207,7 +217,7 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                             "OIDC remote authentication failed with stable code {AuthenticationErrorCode}.",
                             code);
                     context.HandleResponse();
-                    context.Response.Redirect($"{settings.AccessDeniedPath}?code={code}");
+                    context.Response.Redirect($"{context.Request.PathBase}{settings.AccessDeniedPath}?code={code}");
                     return Task.CompletedTask;
                 };
             });

@@ -11,6 +11,7 @@ using Orbyss.Foundation.Authentication.BffCookie;
 VerifyLocalHttpDevelopmentCookies();
 VerifyProductionCookies();
 OptionsBindingProbe.Run();
+await CallbackRoutingProbe.RunAsync();
 
 static void VerifyLocalHttpDevelopmentCookies()
 {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- Register shell-owned OIDC sign-in, signed-out and remote-sign-out callback routes in the BFF feature, preserving handler validation and private response policies.
+- Keep callback failure redirects inside prefixed shells and reject ambiguous or unsafe callback-route configuration.
+- Verify root/custom/prefixed callback routing and complete the real Keycloak browser flow through permissions, CSRF rejection and local logout with an unpublished candidate.
+
 ## 0.2.1
 
 - Replace fallback OIDC scopes when a shell explicitly selects scopes; retain documented defaults only on omission.

@@ -32,7 +32,7 @@ def main() -> int:
             f"stdout:\n{result.stdout}\n"
             f"stderr:\n{result.stderr}"
         )
-    print("BFF JSON configuration binding, exact scopes/locales, and local-HTTP/production cookie invariants passed.")
+    print("BFF configuration binding, real shell callback routing, exact scopes/locales, and local-HTTP/production cookie invariants passed.")
     return 0
 
 

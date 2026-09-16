@@ -64,7 +64,24 @@ internal static class OptionsBindingProbe
             }
             catch (OptionsValidationException) { }
         }
-        Console.WriteLine("JSON -> shell configuration -> registered options -> OIDC scopes and locales passed.");
+        foreach (var selection in new[]
+        {
+            "\"CallbackPath\":null", "\"CallbackPath\":\"//other.example/callback\"",
+            "\"CallbackPath\":\"/oidc/{value}\"", "\"CallbackPath\":\"/oidc/callback?x=1\"",
+            "\"CallbackPath\":\"/oidc/../callback\"", "\"CallbackPath\":\"/signin-oidc/\"",
+            "\"CallbackPath\":\"/bff/logout\"", "\"CallbackPath\":\"/signout-oidc\"",
+            "\"AccessDeniedPath\":\"/SIGNIN-OIDC\""
+        })
+        {
+            using var invalid = Provider(selection);
+            try
+            {
+                _ = invalid.GetRequiredService<IOptions<FoundationWebOptions>>().Value;
+                throw new Exception("Invalid protocol route accepted: " + selection);
+            }
+            catch (OptionsValidationException) { }
+        }
+        Console.WriteLine("JSON -> shell configuration -> registered options -> OIDC scopes, locales and protocol paths passed.");
     }
 
     private static void CheckScopes(ServiceProvider provider, string[] expected)
