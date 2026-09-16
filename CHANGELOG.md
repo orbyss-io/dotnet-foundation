@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- Replace fallback OIDC scopes when a shell explicitly selects scopes; retain documented defaults only on omission.
+- Reject empty, malformed, duplicate and invalid scope selections without silently requesting additional permissions.
+- Apply the same explicit-selection semantics to supported locales; add JSON-to-CShells-to-OIDC binding regressions.
+- Known limitation: the real BFF/Keycloak rehearsal reaches login but cannot route `/signin-oidc` into the shell. This separate callback-routing defect remains unresolved; this release does not establish end-to-end BFF interoperability.
+
 ## 0.2.0
 
 - Add immutable shell-local response security policies, deterministic endpoint/feature selection,

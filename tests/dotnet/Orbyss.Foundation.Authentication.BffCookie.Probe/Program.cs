@@ -10,6 +10,7 @@ using Orbyss.Foundation.Authentication.BffCookie;
 
 VerifyLocalHttpDevelopmentCookies();
 VerifyProductionCookies();
+OptionsBindingProbe.Run();
 
 static void VerifyLocalHttpDevelopmentCookies()
 {

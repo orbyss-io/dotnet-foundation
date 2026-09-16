@@ -9,14 +9,25 @@ internal sealed class FoundationWebDefaultsOptionsValidator : IValidateOptions<F
     public ValidateOptionsResult Validate(string? name, FoundationWebDefaultsOptions options)
     {
         var failures = new List<string>();
-        if (options.SupportedLocales.Length == 0
+        if (options.SupportedLocales is null || options.SupportedLocales.Length == 0
             || !options.SupportedLocales.Contains(options.DefaultLocale, StringComparer.OrdinalIgnoreCase))
         {
             failures.Add("Foundation:Web:SupportedLocales must contain Foundation:Web:DefaultLocale.");
         }
 
-        foreach (var locale in options.SupportedLocales)
+        if (options.SupportedLocales is not null
+            && options.SupportedLocales.Distinct(StringComparer.OrdinalIgnoreCase).Count() != options.SupportedLocales.Length)
         {
+            failures.Add("Foundation:Web:SupportedLocales must contain distinct locale names.");
+        }
+
+        foreach (var locale in options.SupportedLocales ?? [])
+        {
+            if (string.IsNullOrWhiteSpace(locale))
+            {
+                failures.Add("Foundation:Web:SupportedLocales must contain non-empty locale names.");
+                continue;
+            }
             try
             {
                 _ = System.Globalization.CultureInfo.GetCultureInfo(locale);

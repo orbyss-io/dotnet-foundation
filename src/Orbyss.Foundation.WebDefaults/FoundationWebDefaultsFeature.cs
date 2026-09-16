@@ -4,6 +4,7 @@ using CShells.AspNetCore.Features;
 using CShells.Features;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -26,8 +27,24 @@ public sealed class FoundationWebDefaultsFeature(ShellSettings settings) : IMidd
     /// <inheritdoc />
     public void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<FoundationWebDefaultsOptions>(
-            settings.GetConfigurationRoot().GetSection("Foundation:Web"));
+        var configuration = settings.GetConfigurationRoot().GetSection("Foundation:Web");
+        services.Configure<FoundationWebDefaultsOptions>(options =>
+        {
+            // Empty/null selections are present even when IConfiguration.Exists is false.
+            var selection = configuration.GetChildren().FirstOrDefault(child =>
+                child.Key.Equals(nameof(FoundationWebDefaultsOptions.SupportedLocales), StringComparison.OrdinalIgnoreCase));
+            if (selection is null) return;
+            var entries = selection.GetChildren().ToArray();
+            if (selection.Value is not null || entries.Length == 0
+                || entries.Where((entry, index) => entry.Key != index.ToString(CultureInfo.InvariantCulture)
+                    || entry.Value is null || entry.GetChildren().Any()).Any())
+            {
+                throw new OptionsValidationException(Options.DefaultName, typeof(FoundationWebDefaultsOptions),
+                    ["Foundation:Web:SupportedLocales must be a non-empty indexed array of locale names."]);
+            }
+            options.SupportedLocales = [];
+        });
+        services.Configure<FoundationWebDefaultsOptions>(configuration);
         services.AddSingleton<IValidateOptions<FoundationWebDefaultsOptions>, FoundationWebDefaultsOptionsValidator>();
         services.AddLocalization();
         services.Configure<WebResponsePoliciesOptions>(settings.GetConfigurationRoot().GetSection(WebResponsePoliciesOptions.SectionName));

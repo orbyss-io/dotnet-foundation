@@ -24,7 +24,7 @@ public sealed class FoundationWebOptions
     /// <summary>Gets or sets the protected API audience.</summary>
     public string Audience { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the scopes requested during interactive authentication.</summary>
+    /// <summary>Gets or sets the scopes requested during interactive authentication. Explicit shell configuration replaces these fallback defaults.</summary>
     public string[] Scopes { get; set; } = ["openid", "profile", "offline_access", "orbyss-foundation-api"];
 
     /// <summary>Gets or sets the provider claim containing normalized application roles.</summary>

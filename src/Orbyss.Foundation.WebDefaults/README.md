@@ -1,5 +1,12 @@
 # Orbyss.Foundation.WebDefaults
 
+`Foundation:Web:SupportedLocales` replaces the fallback locale list when explicitly configured.
+Omission retains `["en"]`; an explicit selection must be a non-empty indexed array of distinct,
+non-empty culture names and contain `DefaultLocale` (which itself defaults to `en`). Set both
+`DefaultLocale: "nl"` and `SupportedLocales: ["nl", "de"]` to enable only Dutch and German.
+Empty, null and malformed selections fail validation. Configuration-provider precedence applies
+before binding; recreate the shell to apply changes.
+
 An optional CShells middleware feature providing Orbyss Foundation's default correlation identifier,
 browser-security response headers, localization, and production HSTS behavior. Consumers can
 deactivate this feature and activate their own equivalent middleware feature.

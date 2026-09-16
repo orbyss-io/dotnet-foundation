@@ -9,6 +9,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="CShells.AspNetCore.Abstractions" />
+    <PackageReference Include="CShells.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />

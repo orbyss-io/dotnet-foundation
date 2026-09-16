@@ -67,9 +67,17 @@ internal sealed class FoundationWebOptionsValidator(
             }
         }
 
-        if (options.Scopes.Length == 0 || !options.Scopes.Contains("openid", StringComparer.Ordinal))
+        if (options.Scopes is null || options.Scopes.Length == 0 || !options.Scopes.Contains("openid", StringComparer.Ordinal))
         {
             failures.Add("Foundation:Web:Scopes must include openid.");
+        }
+
+        // RFC 6749 section 3.3: one non-empty ASCII scope-token per array entry.
+        if (options.Scopes is not null && (options.Scopes.Any(scope => string.IsNullOrEmpty(scope)
+                || scope.Any(character => character is < '!' or > '~' or '"' or '\\'))
+            || options.Scopes.Distinct(StringComparer.Ordinal).Count() != options.Scopes.Length))
+        {
+            failures.Add("Foundation:Web:Scopes must contain distinct valid OAuth scope tokens.");
         }
 
         if (options.DiscoveryTimeoutSeconds is < 1 or > 30)
