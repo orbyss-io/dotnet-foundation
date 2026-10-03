@@ -49,6 +49,9 @@ jobs:
       - name: Require the complete package family
         run: python tests/validate_package_metadata.py --packages artifacts/nuget
 
+      - name: Verify packed OpenAPI exporter admission and evidence
+        run: python tests/validate_openapi_exporter.py --packages artifacts/nuget
+
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
 

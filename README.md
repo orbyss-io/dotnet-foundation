@@ -36,6 +36,7 @@ python tests/validate_keycloak_admin.py
 python tests/validate_web_policies.py
 python tests/validate_json.py
 python tests/validate_hosted_pages.py
+python tests/validate_openapi_exporter.py
 ```
 
 Or run `python scripts/validate_foundation.py` after the Release build. Node 20 or newer is required

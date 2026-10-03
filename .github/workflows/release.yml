@@ -63,6 +63,9 @@ jobs:
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
 
+      - name: Verify packed OpenAPI exporter admission and evidence
+        run: python tests/validate_openapi_exporter.py --packages artifacts/nuget
+
       - name: Attest validated packages
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:

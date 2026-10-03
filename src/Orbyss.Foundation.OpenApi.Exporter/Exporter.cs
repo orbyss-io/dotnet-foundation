@@ -15,7 +15,10 @@ namespace Orbyss.Foundation.OpenApiExport;
 internal static class Exporter
 {
     /// <summary>Identifies the exact managed exporter contract implemented by this binary.</summary>
-    private const string ToolVersion = "0.9.9-preview.1";
+    private static string ToolVersion => typeof(Exporter).Assembly
+        .GetCustomAttributes<AssemblyMetadataAttribute>()
+        .Single(attribute => attribute.Key == "PackageVersion").Value
+        ?? throw new InvalidOperationException("exporter package version metadata is missing.");
 
     /// <summary>Runs one export and converts deterministic contract failures to PKO200 diagnostics.</summary>
     public static async Task<int> RunAsync(string[] args)

@@ -17,6 +17,7 @@ VALIDATORS = (
     "validate_web_policies.py",
     "validate_json.py",
     "validate_hosted_pages.py",
+    "validate_openapi_exporter.py",
 )
 
 def main():
