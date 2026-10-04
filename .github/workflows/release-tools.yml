@@ -1,0 +1,71 @@
+name: Release Foundation build tools
+
+on:
+  push:
+    tags: ["exporter-v*.*.*", "build-v*.*.*"]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  tools:
+    runs-on: ubuntu-latest
+    environment: nuget-production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - name: Validate independent release selection
+        run: python tests/validate_tool_release.py
+      - name: Select exact independent tool
+        id: selected
+        env:
+          TAG: ${{ github.ref_name }}
+        run: python scripts/tool_release.py plan --tag "$TAG" --github-output "$GITHUB_OUTPUT"
+      - name: Restore and pack only selected tool
+        env:
+          PROJECT: ${{ steps.selected.outputs.project }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          dotnet restore "$PROJECT" --locked-mode --configfile NuGet.config
+          dotnet pack "$PROJECT" -c Release --no-restore --output artifacts/nuget
+          python scripts/tool_release.py verify --tag "$TAG"
+      - name: Validate exact exporter and legacy Assurance
+        if: steps.selected.outputs.kind == 'exporter'
+        env:
+          PACKAGE: ${{ steps.selected.outputs.package_path }}
+        run: |
+          python tests/validate_openapi_exporter.py --packages artifacts/nuget
+          python tests/validate_legacy_assurance_export.py --package "$PACKAGE"
+      - name: Validate exact descriptor build package
+        if: steps.selected.outputs.kind == 'build'
+        env:
+          PACKAGE: ${{ steps.selected.outputs.package_path }}
+        run: python tests/validate_feature_build.py --package "$PACKAGE"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: tool-validation-${{ github.sha }}
+          path: artifacts/
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: artifacts/nuget/*.nupkg
+      - uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish only validated selected tool
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+          PACKAGE: ${{ steps.selected.outputs.package_path }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          python scripts/tool_release.py verify --tag "$TAG"
+          dotnet nuget push "$PACKAGE" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
+      - run: python scripts/verify_nuget_publication.py --packages artifacts/nuget --timeout-seconds 900

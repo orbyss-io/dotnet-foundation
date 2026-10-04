@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)/feature.json')">
+    <FoundationFeatureDescriptorSource>$(MSBuildProjectDirectory)/feature.json</FoundationFeatureDescriptorSource>
+    <FoundationBuildTaskAssembly>$(MSBuildThisFileDirectory)src/Orbyss.Foundation.Build/bin/$(Configuration)/net10.0/Orbyss.Foundation.Build.dll</FoundationBuildTaskAssembly>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)/feature.json')">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="src/Orbyss.Foundation.Build/buildTransitive/Orbyss.Foundation.Build.targets" />
+</Project>

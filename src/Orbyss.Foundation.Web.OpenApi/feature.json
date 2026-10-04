@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.OpenApi",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Web.OpenApi",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [
+        "/_orbyss-foundation/openapi/{documentName}.json"
+      ],
+      "dormant": true,
+      "composeForOpenApi": true,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "FoundationOpenApiFeature.cs": "12d6768816aacbaf7c71451e3745eb0316765835ee0a1be751f69c619fa90e98"
+  }
+}

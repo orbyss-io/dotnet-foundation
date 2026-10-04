@@ -35,6 +35,7 @@ internal sealed class PackageSet
         var assemblies = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
         var hashes = new Dictionary<string, string>(StringComparer.Ordinal);
         var packageIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var versions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var package in Directory.EnumerateFiles(directory, "*.nupkg").Order())
         {
             hashes[Path.GetFileName(package)] = Convert.ToHexStringLower(
@@ -44,31 +45,55 @@ internal sealed class PackageSet
                 item.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase))
                 ?? throw new InvalidOperationException(
                     $"staged package '{Path.GetFileName(package)}' must contain exactly one nuspec.");
+            string stagedPackageId;
             using (var nuspecStream = nuspec.Open())
             {
                 var document = XDocument.Load(nuspecStream);
                 var metadata = document.Descendants().Single(item => item.Name.LocalName == "metadata");
-                var stagedPackageId = metadata.Elements()
+                stagedPackageId = metadata.Elements()
                     .Single(item => item.Name.LocalName == "id").Value;
+                versions[stagedPackageId] = metadata.Elements().Single(item => item.Name.LocalName == "version").Value;
                 if (!packageIds.Add(stagedPackageId))
                     throw new InvalidOperationException(
                         $"multiple staged packages have package id '{stagedPackageId}'.");
             }
             var descriptorEntry = archive.GetEntry("orbyss-foundation/feature.json");
-            string? packageId = null;
-            string? identity = null;
-            string[] dependencies = [];
-            string[] routes = [];
+            var legacyEntry = archive.GetEntry("program-kit/feature.json");
+            if (descriptorEntry is not null && legacyEntry is not null)
+            {
+                using var canonical = descriptorEntry.Open();
+                using var legacy = legacyEntry.Open();
+                if (!SHA256.HashData(canonical).AsSpan().SequenceEqual(SHA256.HashData(legacy)))
+                    throw new InvalidOperationException("canonical and legacy feature descriptors disagree.");
+            }
+            descriptorEntry ??= legacyEntry;
+            var pending = new List<FeatureDescriptor>();
             if (descriptorEntry is not null)
             {
                 using var descriptorDocument = JsonDocument.Parse(descriptorEntry.Open());
                 var root = descriptorDocument.RootElement;
-                packageId = root.GetProperty("packageId").GetString();
-                identity = root.GetProperty("identity").GetString();
-                dependencies = root.GetProperty("featureDependencies").EnumerateArray()
-                    .Select(item => item.GetString()!).ToArray();
-                routes = root.GetProperty("routes").EnumerateArray()
-                    .Select(item => item.GetString()!).ToArray();
+                var schema = root.GetProperty("schemaVersion").GetInt32();
+                if (schema is not (1 or 2))
+                    throw new InvalidOperationException("unsupported feature descriptor schema.");
+                var packageId = root.GetProperty("packageId").GetString();
+                if (!string.Equals(packageId, stagedPackageId, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("feature descriptor packageId differs from the staged package.");
+                var entries = schema == 1 ? new[] { root } : root.GetProperty("features").EnumerateArray().ToArray();
+                foreach (var entry in entries)
+                {
+                    var identity = entry.GetProperty("identity").GetString();
+                    if (string.IsNullOrWhiteSpace(identity))
+                        throw new InvalidOperationException("feature identity is empty.");
+                    var dependencies = entry.GetProperty("featureDependencies").EnumerateArray().Select(item => item.GetString()!).ToArray();
+                    var routes = entry.GetProperty("routes").EnumerateArray().Select(item => item.GetString()!).ToArray();
+                    var compose = !entry.TryGetProperty("composeForOpenApi", out var flag) || flag.GetBoolean();
+                    var coverage = !entry.TryGetProperty("requiresContractCoverage", out var required) || required.GetBoolean();
+                    var prefix = entry.TryGetProperty("routePrefixConfigurationPath", out var configuration) ? configuration.GetString() : null;
+                    var suffixes = entry.TryGetProperty("routeSuffixes", out var suffix) ? suffix.EnumerateArray().Select(item => item.GetString()!).ToArray() : null;
+                    if (prefix is not null && (string.IsNullOrWhiteSpace(prefix) || suffixes is null || suffixes.Any(item => !item.StartsWith('/'))))
+                        throw new InvalidOperationException("invalid publisher configurable route metadata.");
+                    pending.Add(new FeatureDescriptor(identity, packageId!, packageId!, dependencies, routes, compose, coverage, prefix, suffixes));
+                }
             }
             var compatible = archive.Entries
                 .Where(item => item.FullName.StartsWith("lib/", StringComparison.OrdinalIgnoreCase) &&
@@ -92,22 +117,19 @@ internal sealed class PackageSet
                 }
                 assemblies[name] = content;
             }
-            if (identity is null || packageId is null)
-                continue;
-            if (!assemblies.ContainsKey(packageId))
-                throw new InvalidOperationException(
-                    $"feature package '{packageId}' has no lib/net10.0/{packageId}.dll assembly.");
-            if (!descriptors.TryAdd(
-                    identity,
-                    new FeatureDescriptor(identity, packageId, packageId, dependencies, routes)))
+            foreach (var descriptor in pending)
             {
-                throw new InvalidOperationException(
-                    $"multiple staged packages claim feature identity '{identity}'.");
+                if (!assemblies.ContainsKey(descriptor.PackageId))
+                    throw new InvalidOperationException($"feature package '{descriptor.PackageId}' has no compatible assembly.");
+                if (!descriptors.TryAdd(descriptor.Identity, descriptor))
+                    throw new InvalidOperationException($"multiple staged packages claim feature identity '{descriptor.Identity}'.");
             }
         }
         foreach (var (identity, definition) in BuiltInFeatures.Definitions)
         {
             if (!packageIds.Contains(definition.PackageId) || descriptors.ContainsKey(identity))
+                continue;
+            if (versions[definition.PackageId] is not ("0.2.2" or "0.2.3"))
                 continue;
             if (!assemblies.ContainsKey(definition.PackageId))
                 throw new InvalidOperationException(
@@ -119,7 +141,9 @@ internal sealed class PackageSet
                     definition.PackageId,
                     definition.PackageId,
                     definition.Dependencies,
-                    definition.Routes));
+                    definition.Routes,
+                    definition.ComposeForOpenApi,
+                    RequiresContractCoverage: false));
         }
         return new PackageSet(descriptors, assemblies, hashes);
     }

@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
+    <IsPackable Condition="'$(FoundationRuntimeOnly)' == 'true'">false</IsPackable>
+    <ExporterVersion>0.2.4</ExporterVersion>
+    <Version>$(ExporterVersion)</Version><PackageVersion>$(ExporterVersion)</PackageVersion>
     <OutputType>Exe</OutputType>
-    <IsPackable>true</IsPackable>
+    <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>orbyss-foundation-openapi-export</ToolCommandName>
     <PackageId>Orbyss.Foundation.OpenApi.Exporter</PackageId>

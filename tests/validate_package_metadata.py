@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import zipfile
 from pathlib import Path
 from xml.etree import ElementTree
@@ -30,10 +31,10 @@ def main() -> int:
     expected_ids = {
         project.stem
         for project in (ROOT / "src").glob("Orbyss.Foundation*/*.csproj")
-        if project.stem != "Orbyss.Foundation.Host"
+        if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build", "Orbyss.Foundation.OpenApi.Exporter"}
     }
-    if len(expected_ids) != 25:
-        raise AssertionError(f"Expected 25 Foundation package projects, found {len(expected_ids)}.")
+    if len(expected_ids) != 24:
+        raise AssertionError(f"Expected 24 Foundation package projects, found {len(expected_ids)}.")
 
     found: set[str] = set()
     for package in sorted(args.packages.glob("*.nupkg")):
@@ -49,19 +50,33 @@ def main() -> int:
         repository = child(metadata, "repository")
         if package_id not in expected_ids:
             raise AssertionError(f"Unexpected package ID: {package_id}")
-        if version != expected_version:
-            raise AssertionError(f"{package_id} has version {version}, expected {expected_version}.")
+        package_version = expected_version
+        if package_id == 'Orbyss.Foundation.OpenApi.Exporter':
+            project = ROOT / 'src' / package_id / (package_id + '.csproj')
+            package_version = ElementTree.parse(project).findtext('.//ExporterVersion') or expected_version
+        if version != package_version:
+            raise AssertionError(f"{package_id} has version {version}, expected {package_version}.")
         if repository.attrib.get("url") != EXPECTED_REPOSITORY:
             raise AssertionError(f"{package_id} has the wrong repository URL.")
         if not package_id.startswith("Orbyss.Foundation."):
             raise AssertionError(f"{package_id} is outside the Foundation namespace.")
         if b"ProgramKit" in nuspec:
             raise AssertionError(f"{package_id} still exposes a ProgramKit package identity.")
+        source = ROOT / 'src' / package_id / 'feature.json'
+        if source.is_file():
+            with zipfile.ZipFile(package) as archive:
+                assert 'orbyss-foundation/feature.json' in archive.namelist(), 'Publisher descriptor is missing'
+                assert 'program-kit/feature.json' not in archive.namelist(), 'New publishers must emit only canonical metadata'
+                descriptor = json.loads(archive.read('orbyss-foundation/feature.json'))
+                for key, expected in json.loads(source.read_text(encoding='utf-8')).items():
+                    assert descriptor.get(key) == expected, 'Packed publisher metadata differs: ' + key
+                assert descriptor['packageId'] == package_id
+                assert b'Orbyss.Foundation.Build' not in nuspec, 'Private build tooling leaked into runtime dependencies'
         found.add(package_id)
 
     if found != expected_ids:
         raise AssertionError(f"Package set mismatch. Missing={sorted(expected_ids - found)}, extra={sorted(found - expected_ids)}")
-    print("Exact 25-package Orbyss Foundation NuGet metadata contract passed.")
+    print("Exact 24-package Orbyss Foundation NuGet metadata contract passed.")
     return 0
 
 

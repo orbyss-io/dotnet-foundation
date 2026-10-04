@@ -50,7 +50,15 @@ internal static class Exporter
             await File.ReadAllTextAsync(options.Shells).ConfigureAwait(false));
         var shell = Shell.Read(shells.RootElement, contract.Shell);
         var packages = PackageSet.Load(options.Packages);
-        var descriptors = packages.FeatureDescriptors;
+        var hostConfiguration = new ConfigurationBuilder().AddJsonFile(options.HostSettings).Build();
+        var descriptors = packages.FeatureDescriptors.ToDictionary(item => item.Key, item =>
+        {
+            var descriptor = item.Value;
+            var prefix = descriptor.RoutePrefixConfigurationPath is null ? null : hostConfiguration[descriptor.RoutePrefixConfigurationPath];
+            if (prefix is null) return descriptor;
+            if (!prefix.StartsWith('/')) throw new InvalidOperationException("configured publisher route prefix must be absolute.");
+            return descriptor with { Routes = descriptor.RouteSuffixes!.Select(suffix => prefix.TrimEnd('/') + suffix).ToArray() };
+        }, StringComparer.Ordinal);
         var missing = shell.Features.Where(feature => !descriptors.ContainsKey(feature)).Order().ToArray();
         if (missing.Length > 0)
         {
@@ -75,8 +83,7 @@ internal static class Exporter
         }
         ValidateDependenciesAndRoutes(shell.Features, descriptors);
         var routeContributors = shell.Features.Where(feature =>
-                !BuiltInFeatures.Definitions.ContainsKey(feature) &&
-                descriptors.TryGetValue(feature, out var descriptor) && descriptor.Routes.Length > 0)
+                descriptors.TryGetValue(feature, out var descriptor) && descriptor.RequiresContractCoverage && descriptor.Routes.Length > 0)
             .ToHashSet(StringComparer.Ordinal);
         var uncovered = routeContributors.Except(contractFeatures).Order().ToArray();
         if (uncovered.Length > 0)
@@ -86,9 +93,7 @@ internal static class Exporter
                 string.Join(", ", uncovered));
         }
 
-        var composed = shell.Features.Where(feature =>
-                !BuiltInFeatures.Definitions.TryGetValue(feature, out var definition) ||
-                definition.ComposeForOpenApi)
+        var composed = shell.Features.Where(feature => descriptors[feature].ComposeForOpenApi)
             .ToHashSet(StringComparer.Ordinal);
         var ordered = TopologicalOrder(composed, shell.Features.ToHashSet(StringComparer.Ordinal), descriptors);
         using var resolver = new AssemblyResolver(packages.Assemblies);
@@ -193,7 +198,8 @@ internal static class Exporter
                 $"cannot inspect feature '{identity}': {details}", exception);
         }
         var candidates = types.Where(type =>
-                !type.IsAbstract && !type.IsInterface && typeof(IShellFeature).IsAssignableFrom(type))
+                !type.IsAbstract && !type.IsInterface && typeof(IShellFeature).IsAssignableFrom(type)
+                && type.GetCustomAttribute<ShellFeatureAttribute>()?.Name == identity)
             .ToArray();
         if (candidates.Length != 1)
         {

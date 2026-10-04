@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.ClientCredentials",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication.ClientCredentials",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "ClientCredentialsOptions.cs": "b19ebee8f18a6a43a14ee526f6ba839c3b64e499cd3fa9a5f620977b6d81dd4a",
+    "ClientCredentialsOptionsValidator.cs": "22a4b7dbe5042b68b8590c93aee93462016c3b6b7b92ac3877599ed91896ce22",
+    "ClientCredentialsRegistration.cs": "78a2d4f772e537e2cec059368274db11ac559980fe29b135136af46c7aade6ee",
+    "ClientCredentialsTokenProvider.cs": "1a40fd87e54ec51af42b0627c723371fd879e4f52b2ea9daf13eede2763cdd33",
+    "FoundationClientCredentialsFeature.cs": "539ca765d151ebb6c0a31ba7104ea7e5269f7bb4277276e581cb5b40f7fdf1dc",
+    "IClientCredentialsTokenProvider.cs": "b7d584d0b493f5933209ae155d1ade49113524040db82f6c305c843bd95787d9",
+    "OAuthAccessToken.cs": "9a0e8428561080296e32257e46a15c5b9f8b0ba5f4d446669683697266cfc841"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.ProblemDetails",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Web.ProblemDetails",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "FoundationProblemDetailsFeature.cs": "a6dda565aa133ef454cd8bf094a67d419ebdc8a18c3691cd9bf555d2382d7d65"
+  }
+}

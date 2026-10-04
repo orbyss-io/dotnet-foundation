@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.DownstreamApi",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication.DownstreamApi",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "DownstreamApiClient.cs": "6eebece3891da35edadfa19dc67fd2c65b0b28726bd307c12bc63f81a131e04e",
+    "DownstreamApiOptions.cs": "ca1f1c3be86d1a38c4668373d2b122d04b1e4960e1d4ea815291fd63eb15c237",
+    "DownstreamApiOptionsValidator.cs": "b10ab66b024e9e38f637968cb4dde2178274d8e50713549740acc6efe2917953",
+    "DownstreamApiRegistration.cs": "da3feaeea41ce553f1da2a6fd9daad694dc27c14cad6b3a9080cf1cd126cd7a9",
+    "FoundationDownstreamApiFeature.cs": "ee7844310af7977832d443dd9eb90364bdeecb3d368a60e989ea098c2bffb96b",
+    "HttpContextAccessTokenAccessor.cs": "720b43be403d5025cbcc26d7246c0f34c24f8a501becb56d32e81dc05b07e2c4",
+    "ICurrentAccessTokenAccessor.cs": "6deed5eee3bb8b2a1b327df887aacf5b2c2a031ef6d38aa421795419032cf2d2",
+    "IDownstreamApiClient.cs": "5eb6d62fb76ff0b1c835f9c027b3198ddea32dbfd14b7369f52f18df25dfb001"
+  }
+}

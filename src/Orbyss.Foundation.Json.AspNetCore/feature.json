@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Json.AspNetCore",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Json.AspNetCore",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "FoundationJsonFeature.cs": "10d9466818c0bcbefde70b88d881b4a9acec72e0974089e315df8eb19a5cff3f",
+    "FoundationJsonOptions.cs": "b8f75fdcde620603f6a9c0464ee164a39991c55ec9382a90c537bdaa2a68239b"
+  }
+}

@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj" />
     <Project Path="src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj" />
     <Project Path="src/Orbyss.Foundation.Authentication.Assurance/Orbyss.Foundation.Authentication.Assurance.csproj" />
     <Project Path="src/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />

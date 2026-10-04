@@ -45,3 +45,18 @@ for independent canonicalization vectors. The 0.2.0 release contains all three p
 
 Stable tags must exactly match `VERSION`. The release workflow publishes the NuGet family through
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.
+
+The exporter and `Orbyss.Foundation.Build` have independent versions. The runtime
+publication gate packs exactly 24 runtime/analyzer packages with
+`-p:FoundationRuntimeOnly=true`. An `exporter-v<version>` tag qualifies and publishes
+only the exporter; a `build-v<version>` tag qualifies and publishes only the descriptor
+build package. Both use the protected `release-tools.yml` workflow with exact source
+version and single-package checks. Advancing either tool never republishes the other
+or the runtime family. Configure NuGet trusted publishing for that workflow before
+its first publication; CI packing supplies no public availability authority.
+
+Publisher projects own canonical `orbyss-foundation/feature.json` descriptors.
+The build package verifies reviewed source bindings during packing. Its immutable
+legacy bridge covers descriptor-less Foundation 0.2.2 and 0.2.3 packages only.
+Changing metadata in a runtime package requires a new immutable runtime release;
+never replace an already published package at the existing `VERSION`.
