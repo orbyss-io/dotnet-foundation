@@ -23,9 +23,9 @@
       "orbyss.foundation.web.discovery": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.1.0, )",
-          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.1.0, )",
-          "Orbyss.Foundation.WebDefaults": "[0.1.0, )"
+          "Orbyss.Foundation.Json": "[0.2.4, )",
+          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.2.4, )",
+          "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
         }
       },
       "orbyss.foundation.web.discovery.abstractions": {

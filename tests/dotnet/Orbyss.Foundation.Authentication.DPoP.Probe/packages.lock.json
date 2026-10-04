@@ -94,15 +94,15 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.11, )",
-          "Orbyss.Foundation.Authentication.SpaPkce": "[0.1.0, )"
+          "Orbyss.Foundation.Authentication.SpaPkce": "[0.2.4, )"
         }
       },
       "orbyss.foundation.authentication.spapkce": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.11, )",
-          "Orbyss.Foundation.Authentication": "[0.1.0, )",
-          "Orbyss.Foundation.WebDefaults": "[0.1.0, )"
+          "Orbyss.Foundation.Authentication": "[0.2.4, )",
+          "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
         }
       },
       "orbyss.foundation.webdefaults": {
