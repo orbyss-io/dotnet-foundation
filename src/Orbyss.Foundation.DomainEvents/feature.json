@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.DomainEvents",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.DomainEvents",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "DefaultDomainEventPublisher.cs": "7112d46c5322f305cd34779c8e76232c5523f0c3279f62f24186e36220b5a8d1",
+    "DomainEventDispatchOptions.cs": "7ab008d4ed30e6b46fc58c14f321412e2dd1e995a7c1fb72db8c9ad0b0cfc9bb",
+    "DomainEventDispatchState.cs": "22aa5cd42584dd806c414b84e0c651d56decbe584a606e07d218c7b15be3473a",
+    "FoundationDomainEventServiceCollectionExtensions.cs": "a2af30ed07b507c8644e395e410686218d22e84067d8b5906575a0c8d3038d87",
+    "FoundationDomainEventsFeature.cs": "00439a59482fc18f9cc2c408faf7be5db762b4012a3b74f180df1ad4713e4316"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.Discovery",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Web.Discovery",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false,
+      "dynamicRoutesFromConfiguration": true
+    }
+  ],
+  "sourceSha256": {
+    "DiscoveryOptions.cs": "b4b412263d527c5fe49f4b131ac0ccab4205704f8fd5bcef929b30dc0cb0f2df",
+    "FilePublicDocumentCatalog.cs": "eeb099b623d5abeeb1f4bf548f7c29b355e2097b4b8aefc6a3689599095ad03b",
+    "FoundationDiscoveryFeature.cs": "ef974aef9b7022b8baf0861063f3bfa734d961284871d3b509a9275e32ea58d1",
+    "PublicationManifest.cs": "056f9cbf79cc0471aadb44f3d1eb5d75cca9b10ea6541bbca10864f10d4baa5c",
+    "PublicationResource.cs": "6136b5f6177846b70c2a9d1fb886ecacbc3ede96f111d26d2c96cf4cb4da58c3"
+  }
+}

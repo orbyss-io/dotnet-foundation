@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "owner": "https://github.com/orbyss-io/dotnet-foundation",
+  "packageVersions": [
+    "0.2.2",
+    "0.2.3"
+  ],
+  "purpose": "Immutable compatibility snapshot for descriptor-less historical runtime packages. New publisher packages must supply canonical metadata.",
+  "features": {
+    "Orbyss.Foundation.Authentication": "Orbyss.Foundation.Authentication",
+    "Orbyss.Foundation.Authentication.Assurance": "Orbyss.Foundation.Authentication.Assurance",
+    "Orbyss.Foundation.Authentication.BffCookie": "Orbyss.Foundation.Authentication.BffCookie",
+    "Orbyss.Foundation.Authentication.ClientCredentials": "Orbyss.Foundation.Authentication.ClientCredentials",
+    "Orbyss.Foundation.Authentication.DownstreamApi": "Orbyss.Foundation.Authentication.DownstreamApi",
+    "Orbyss.Foundation.Authentication.DPoP": "Orbyss.Foundation.Authentication.DPoP",
+    "Orbyss.Foundation.Authentication.SpaPkce": "Orbyss.Foundation.Authentication.SpaPkce",
+    "Orbyss.Foundation.Authentication.TokenExchange": "Orbyss.Foundation.Authentication.TokenExchange",
+    "Orbyss.Foundation.DomainEvents": "Orbyss.Foundation.DomainEvents",
+    "FoundationTasks": "Orbyss.Foundation.Tasks",
+    "Orbyss.Foundation.WebDefaults": "Orbyss.Foundation.WebDefaults",
+    "Orbyss.Foundation.Web.OpenApi": "Orbyss.Foundation.Web.OpenApi",
+    "Orbyss.Foundation.Web.ProblemDetails": "Orbyss.Foundation.Web.ProblemDetails"
+  },
+  "privateRuntimeDependencies": {
+    "Orbyss.Foundation.Authentication.BffCookie": [
+      {
+        "packageId": "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "minimumVersion": "10.0.11"
+      },
+      {
+        "packageId": "Microsoft.Bcl.Cryptography",
+        "minimumVersion": "10.0.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Abstractions",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.JsonWebTokens",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Logging",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Protocols",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Tokens",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "System.IdentityModel.Tokens.Jwt",
+        "minimumVersion": "8.19.2"
+      }
+    ],
+    "Orbyss.Foundation.Authentication.SpaPkce": [
+      {
+        "packageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "minimumVersion": "10.0.11"
+      },
+      {
+        "packageId": "Microsoft.Bcl.Cryptography",
+        "minimumVersion": "10.0.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Abstractions",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.JsonWebTokens",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Logging",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Protocols",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Tokens",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "System.IdentityModel.Tokens.Jwt",
+        "minimumVersion": "8.19.2"
+      }
+    ],
+    "Orbyss.Foundation.Authentication.DPoP": [
+      {
+        "packageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+        "minimumVersion": "10.0.11"
+      },
+      {
+        "packageId": "Microsoft.Bcl.Cryptography",
+        "minimumVersion": "10.0.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Abstractions",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.JsonWebTokens",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Logging",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Protocols",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "Microsoft.IdentityModel.Tokens",
+        "minimumVersion": "8.19.2"
+      },
+      {
+        "packageId": "System.IdentityModel.Tokens.Jwt",
+        "minimumVersion": "8.19.2"
+      }
+    ],
+    "Orbyss.Foundation.Web.OpenApi": [
+      {
+        "packageId": "Microsoft.AspNetCore.OpenApi",
+        "minimumVersion": "10.0.11"
+      },
+      {
+        "packageId": "Microsoft.OpenApi",
+        "minimumVersion": "2.7.5"
+      }
+    ]
+  }
+}

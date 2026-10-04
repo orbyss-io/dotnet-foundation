@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.SpaPkce",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication.SpaPkce",
+      "featureDependencies": [
+        "Orbyss.Foundation.Authentication",
+        "Orbyss.Foundation.WebDefaults"
+      ],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false,
+      "dynamicRoutesFromConfiguration": true
+    }
+  ],
+  "sourceSha256": {
+    "FoundationSpaPkceFeature.cs": "85cbe060e0151753bab3eb18798dbadea55f2a0b863ae3610ecc1316a48b8ef7",
+    "SpaPkceOptionsValidator.cs": "b8962d0fec5376c809aac568c42926da7a9f4c85cd8f1cb2c954a7d9fd14fd71",
+    "SpaPkceProfileMarker.cs": "1775cbae96726bc22498ba8e4737669cf058b4c0ff2cd0db94432edc5f968ec0"
+  }
+}

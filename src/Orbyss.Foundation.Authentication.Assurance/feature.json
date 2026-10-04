@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.Assurance",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication.Assurance",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "AssuranceAuthorizationHandler.cs": "6751604c12245c60aee88bc26f6cb2dedeb13b816bbf6a6725dd6593346a8ed8",
+    "AssuranceEvaluation.cs": "03fbc49068f21bc5c462bd1a41529c1a09ff3285c07c2071b22832b63b3408d0",
+    "AssuranceEvaluator.cs": "88931a1330e4823e3e249742e884a7fbdd472c26faecf379759b6a22f21c0c24",
+    "AssuranceOptions.cs": "7af7bc939e1fb22925ed4f2d78b6a40b87cdb1aee8be5d6790288199fa88fb0a",
+    "AssuranceOptionsValidator.cs": "20da0f953379bde3c81f6047c40ea8a4a386850925f507a4d7b95d33815dfd63",
+    "AssurancePolicy.cs": "275b4b9f01587a922e5ed2461fc27432b34e7593e33cb7fb67bedd8542ea2071",
+    "AssurancePolicyNames.cs": "e9081e5a429688d48f75eedf249af25dc43d12d6984c5869a56c0ce90187466f",
+    "AssuranceRequirement.cs": "ebb567c7c7a0c03b1fe6ccdcbd670a9cfa28ef77f5f325c8582c2ac680643d40",
+    "FoundationAssuranceFeature.cs": "25a42e51624912e4f4aa968d9ba125addb72e115396ac100ac5b278c36cf69d5",
+    "IAssuranceEvaluator.cs": "bd6d8f50e90eca2420f0e7cec12b386fbc65fb41ff9b3cc84dffe676548ce59d"
+  }
+}

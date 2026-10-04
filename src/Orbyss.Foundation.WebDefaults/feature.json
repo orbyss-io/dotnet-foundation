@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.WebDefaults",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.WebDefaults",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "CorrelationAndSecurityHeadersMiddleware.cs": "1f53e2c0e0650b649d5296df3e3f2d31f94ea0b8b14cb25fed8d83534b800150",
+    "FoundationWebDefaultsFeature.cs": "113313707f353ea3100822d5b07c8f515cbf38060462d43e034140d89b449f10",
+    "FoundationWebDefaultsOptions.cs": "104cd06d7440c3c26914d7cbffb51a34084898b7bce09eb2808da81692c94450",
+    "FoundationWebDefaultsOptionsValidator.cs": "9bc58c697dcc37daac0aad65353a77054e2bc618aca3cbf49768dafc3d35abc7",
+    "WebResponseMetadata.cs": "261b0c3ff52794dec1eabf524ec83725d0d415b21294686c42dc9fc4b8397ae4",
+    "WebResponsePoliciesMiddleware.cs": "f713bc35fba4b03fcba94407e0fbfe5d0be49ac3d63e86291dbe3aa74e1ea840",
+    "WebResponsePoliciesOptions.cs": "6812cdd90a47581e4487cd1d04350207804585e9b665aff9be3d3afa9b40e7a0",
+    "WebResponsePolicy.cs": "a4a1f446cbb5a2dd6037bba5649f42427af80194feadb2f32c4094d47f2643c1",
+    "WebResponsePolicyCatalog.cs": "50d148698f0167aba22c46af5da4a6e193d3dd453688251e0082df02af3a6806",
+    "WebResponsePolicyOptions.cs": "077cbff4b433469a0f60d636f73d65a26cd8686ac76259e0b1da973492a10976"
+  }
+}

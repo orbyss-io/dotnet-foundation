@@ -6,4 +6,8 @@ internal sealed record FeatureDescriptor(
     string PackageId,
     string AssemblyName,
     string[] Dependencies,
-    string[] Routes);
+    string[] Routes,
+    bool ComposeForOpenApi = true,
+    bool RequiresContractCoverage = true,
+    string? RoutePrefixConfigurationPath = null,
+    string[]? RouteSuffixes = null);

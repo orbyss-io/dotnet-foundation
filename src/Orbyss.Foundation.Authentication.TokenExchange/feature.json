@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.TokenExchange",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication.TokenExchange",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "FoundationTokenExchangeFeature.cs": "0e9a36fe79df7ae98d3e48579a2ba1fd623f78c78fd4d0aa5bdff6e888c32202",
+    "ITokenExchangeService.cs": "00cab2e4100e07129d47d85938958d10d982a2460cd61e08884b3ac7dd8a2f8c",
+    "TokenExchangeOptions.cs": "92a61da16435cb9c4c88e24f636bfebf78d4f436182c49dc0cff31397a769b15",
+    "TokenExchangeOptionsValidator.cs": "ed62ceafbb08b8e77da08070bf4ab2124b8e18d8d391e86163e1ade9b59923b7",
+    "TokenExchangeRegistration.cs": "6ca7f579c582404661c4c78f4dc94b0bf1c261457c5951755d399c5d7ad1be1d",
+    "TokenExchangeRequest.cs": "d2b5c61d6a563f1725567fb9280d1edc82f83d5fc76211eaa4344a52f489f470",
+    "TokenExchangeResult.cs": "bd30fdf96437c253e43203bac0eb0797a2d2cf874fdaa17aff73fd7177be42dd",
+    "TokenExchangeService.cs": "7a4a42be8fd0001eee2f459f158428effe53c81d455072b392598460bf3276e3"
+  }
+}

@@ -49,6 +49,7 @@ def create_feature(work: Path) -> Path:
     fixture.mkdir()
     # Keep this generated project independent of repository build/analyzer injection.
     (work / "Directory.Build.props").write_text("<Project />\n", encoding="utf-8")
+    (work / "Directory.Build.targets").write_text("<Project />\n", encoding="utf-8")
     (work / "Directory.Packages.props").write_text("<Project />\n", encoding="utf-8")
     versions = {item.attrib["Include"]: item.attrib["Version"] for item in
                 ElementTree.parse(ROOT / "Directory.Packages.props").iter("PackageVersion")}
@@ -153,7 +154,7 @@ def main() -> None:
     work = Path(tempfile.mkdtemp(prefix="validation-", dir=artifacts))
     print(f"Packed exporter logs and evidence: {work}", flush=True)
     closure = create_feature(work)
-    release_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    release_version = ElementTree.parse(ROOT / f'src/{TOOL_ID}/{TOOL_ID}.csproj').findtext('.//ExporterVersion') or (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     results = []
     if args.packages:
         results.append(check_tool(args.packages.resolve() / f"{TOOL_ID}.{release_version}.nupkg", work, closure))

@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Validate independent tool release boundaries
+        run: python tests/validate_tool_release.py
+
       - name: Set up .NET
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
@@ -44,13 +47,23 @@ jobs:
         run: python scripts/validate_foundation.py
 
       - name: Pack Foundation packages
-        run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build --output artifacts/nuget
+        run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:FoundationRuntimeOnly=true --output artifacts/nuget
 
       - name: Require the complete package family
         run: python tests/validate_package_metadata.py --packages artifacts/nuget
 
       - name: Verify packed OpenAPI exporter admission and evidence
-        run: python tests/validate_openapi_exporter.py --packages artifacts/nuget
+        run: python tests/validate_openapi_exporter.py
+
+      - name: Pack independently released Foundation tools
+        run: |
+          dotnet pack src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj -c Release --no-restore --output artifacts/tools
+          dotnet pack src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj -c Release --no-restore --output artifacts/tools
+
+      - name: Verify installed descriptor build package and legacy Assurance export
+        run: |
+          python tests/validate_feature_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.1.0.nupkg
+          python tests/validate_legacy_assurance_export.py --package artifacts/tools/Orbyss.Foundation.OpenApi.Exporter.0.2.4.nupkg
 
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget

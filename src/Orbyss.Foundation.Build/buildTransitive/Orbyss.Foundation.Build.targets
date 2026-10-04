@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <FoundationBuildTaskAssembly Condition="'$(FoundationBuildTaskAssembly)' == ''">$(MSBuildThisFileDirectory)../tasks/net10.0/Orbyss.Foundation.Build.dll</FoundationBuildTaskAssembly>
+  </PropertyGroup>
+  <UsingTask TaskName="Orbyss.Foundation.Build.EmitFeatureDescriptor" AssemblyFile="$(FoundationBuildTaskAssembly)" />
+  <PropertyGroup>
+    <FoundationFeatureDescriptor>$(IntermediateOutputPath)orbyss-foundation/feature.json</FoundationFeatureDescriptor>
+    <FoundationComposeForOpenApi Condition="'$(FoundationComposeForOpenApi)' == ''">true</FoundationComposeForOpenApi>
+    <FoundationFeatureDormant Condition="'$(FoundationFeatureDormant)' == ''">false</FoundationFeatureDormant>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(FoundationFeatureIdentity)' != '' or '$(FoundationFeatureDescriptorSource)' != ''">
+    <None Include="$(FoundationFeatureDescriptor)" Pack="true" PackagePath="orbyss-foundation/feature.json" Visible="false" />
+  </ItemGroup>
+  <Target Name="FoundationEmitFeatureDescriptor" BeforeTargets="GenerateNuspec" Condition="'$(FoundationFeatureIdentity)' != '' or '$(FoundationFeatureDescriptorSource)' != ''">
+    <Orbyss.Foundation.Build.EmitFeatureDescriptor OutputFile="$(FoundationFeatureDescriptor)" Identity="$(FoundationFeatureIdentity)" PackageId="$(PackageId)"
+      FeatureDependencies="$(FoundationFeatureDependencies)" RuntimeDependencies="$(FoundationRuntimeDependencies)" Routes="$(FoundationFeatureRoutes)"
+      DescriptorSource="$(FoundationFeatureDescriptorSource)" AssetsFile="$(ProjectAssetsFile)"
+      ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
+      Dormant="$(FoundationFeatureDormant)" ComposeForOpenApi="$(FoundationComposeForOpenApi)" />
+  </Target>
+</Project>

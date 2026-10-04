@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "DefaultAuthenticationErrorWriter.cs": "9f011d2222bb9f7615fa902dcf13c12541cb259832a28db8ec31c585c5f08090",
+    "FoundationAuthenticationFeature.cs": "3aafe90aabad98a4330a84feca2ca8fdb40fcec4c4697e6302fd13a26498ec19",
+    "FoundationWebOptions.cs": "d5cea8dde1008f58c300b02037447322332a5582303d34ddf4ce8f01fb51fa07",
+    "FoundationWebOptionsValidator.cs": "d2ceb8ce5309ca8da51b0e61c339abb7cf101a510a2f99c0d7d5862232345deb",
+    "IAuthenticationErrorWriter.cs": "d965483f0a1c5c817a0fc3415fc93d93e7bad83b32177750d840f143b9584b6a",
+    "IFoundationAuthenticationProfile.cs": "b365e3944d9e1065953cbc32d66032d9895db65d38097f700d6dd3dd94eceedc",
+    "PermissionClaimsTransformation.cs": "a087697b47b4d59ada7ebe1442930232867d23671ebe58eafb2cae83aaa0c837",
+    "PermissionPolicyProvider.cs": "25221ec37fc4d9e2aaf4bbdb28cc736fd0392a3bbb37e528b1c7142335a9f07a"
+  }
+}

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <BuildToolsVersion>0.1.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
+    <Description>Publisher-owned feature descriptor production for Foundation-compatible packages.</Description>
+    <IncludeBuildOutput>false</IncludeBuildOutput><SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
+    <IsPackable Condition="'$(FoundationRuntimeOnly)' == 'true'">false</IsPackable>
+    <!-- Build task assemblies intentionally have no consumer lib/ reference. -->
+    <NoWarn>$(NoWarn);NU5100</NoWarn><PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Build.Framework"><HintPath>$(MSBuildBinPath)/Microsoft.Build.Framework.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Microsoft.Build.Utilities.Core"><HintPath>$(MSBuildBinPath)/Microsoft.Build.Utilities.Core.dll</HintPath><Private>false</Private></Reference>
+    <None Include="buildTransitive/Orbyss.Foundation.Build.targets" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="tasks/net10.0/" />
+    <None Include="feature.schema.json" Pack="true" PackagePath="schemas/" />
+    <None Include="legacy-feature-bridge.json" Pack="true" PackagePath="compatibility/" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

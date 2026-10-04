@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Foundation package feature descriptor",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "packageId"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "identity": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+    },
+    "packageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "featureDependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "runtimeDependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "routes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^/"
+      }
+    },
+    "dormant": {
+      "type": "boolean"
+    },
+    "composeForOpenApi": {
+      "type": "boolean"
+    },
+    "requiresContractCoverage": {
+      "type": "boolean"
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/feature"
+      }
+    },
+    "sourceSha256": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "hostProvidedDependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "packageId",
+          "minimumVersion"
+        ],
+        "properties": {
+          "packageId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minimumVersion": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "identity",
+          "featureDependencies",
+          "routes"
+        ],
+        "not": {
+          "required": [
+            "features"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 2
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "features"
+        ],
+        "not": {
+          "required": [
+            "identity"
+          ]
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "names": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "routes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^/"
+      }
+    },
+    "feature": {
+      "type": "object",
+      "required": [
+        "identity",
+        "featureDependencies",
+        "routes"
+      ],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+        },
+        "featureDependencies": {
+          "$ref": "#/$defs/names"
+        },
+        "runtimeDependencies": {
+          "$ref": "#/$defs/names"
+        },
+        "routes": {
+          "$ref": "#/$defs/routes"
+        },
+        "dormant": {
+          "type": "boolean"
+        },
+        "composeForOpenApi": {
+          "type": "boolean"
+        },
+        "requiresContractCoverage": {
+          "type": "boolean"
+        },
+        "routePrefixConfigurationPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "routeSuffixes": {
+          "$ref": "#/$defs/routes"
+        },
+        "dynamicRoutesFromConfiguration": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "dependentRequired": {
+        "routePrefixConfigurationPath": [
+          "routeSuffixes"
+        ],
+        "routeSuffixes": [
+          "routePrefixConfigurationPath"
+        ]
+      }
+    }
+  }
+}

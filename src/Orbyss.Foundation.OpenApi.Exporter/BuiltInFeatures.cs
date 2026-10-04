@@ -9,6 +9,8 @@ internal static class BuiltInFeatures
         {
             ["Orbyss.Foundation.Authentication"] =
                 new("Orbyss.Foundation.Authentication", [], [], false),
+            ["Orbyss.Foundation.Authentication.Assurance"] =
+                new("Orbyss.Foundation.Authentication.Assurance", [], [], false),
             ["Orbyss.Foundation.Authentication.BffCookie"] =
                 new(
                     "Orbyss.Foundation.Authentication.BffCookie",

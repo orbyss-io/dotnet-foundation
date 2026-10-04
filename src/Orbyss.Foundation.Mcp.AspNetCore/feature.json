@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Mcp.AspNetCore",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Mcp.AspNetCore",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false,
+      "dynamicRoutesFromConfiguration": true
+    }
+  ],
+  "sourceSha256": {
+    "FoundationMcpFeature.cs": "09164ea5356f68ce50d3012ba60958c806e12cc08e368646274413002449a4f3",
+    "FoundationMcpWebOptions.cs": "acc15d4a3e044e358175a33582478df95dabcf30955bcf88ddc1ba426644f3ed"
+  }
+}

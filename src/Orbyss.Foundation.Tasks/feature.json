@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Tasks",
+  "features": [
+    {
+      "identity": "FoundationTasks",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "FoundationTasksFeature.cs": "01af38acc33258065adf2cd5e4f5f635f84d4a53010c3346dca94523ca1e7eb7",
+    "IShellTaskManager.cs": "71b0724a8702282d5264c5484db8628f16d380161011daaf276fedcd6e3ac13b",
+    "ShellTaskManager.cs": "6a2da1de31f19692195890f85ae1a4b7471fc07f275a5e9fad1750e3c0ad8b6f",
+    "StartShellTasksInitializer.cs": "12a7305fe61675ee8ecbec582ca7332fc809444688c2759e35f3f5f9b2ad0dbb",
+    "StopShellTasksTerminator.cs": "d09be2447cb5edb75402b14f1471f640369bbf512b558fb0af93c1d9e9d6ca85"
+  }
+}

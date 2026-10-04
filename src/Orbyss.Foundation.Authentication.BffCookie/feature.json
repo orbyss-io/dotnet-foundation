@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.BffCookie",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Authentication.BffCookie",
+      "featureDependencies": [
+        "Orbyss.Foundation.Authentication",
+        "Orbyss.Foundation.WebDefaults"
+      ],
+      "runtimeDependencies": [],
+      "routes": [
+        "/bff/antiforgery",
+        "/bff/login",
+        "/bff/logout",
+        "/bff/signed-out",
+        "/bff/user"
+      ],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false,
+      "dynamicRoutesFromConfiguration": true
+    }
+  ],
+  "sourceSha256": {
+    "AntiforgeryMiddleware.cs": "5410785f15c26d52ee117ad7642c0f265e7b76fd3569cc8e916f7486df3b498d",
+    "BffCookieOptionsValidator.cs": "771cf46c1cca7d8297809a40ec0adf3f9f0c6aa3cb2bb6e8c89e05770a0d598b",
+    "BffCookieProfileMarker.cs": "65cad9fabf6e8cd9ea43d3b8009275b65c618ceba4175ae4433e138deaf9d5b8",
+    "DistributedTicketStore.cs": "84e481ce948c4f0b985034f0f3f8c25a948335347a269399e0f2ac0824dbbec8",
+    "FoundationBffCookieFeature.cs": "09a38ad09f9b2d50cd545055e2961ff4dfc74e99a7ddc3c744d501d4d974bff1"
+  }
+}
