@@ -39,7 +39,7 @@
       "orbyss.foundation.json.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.1.0, )"
+          "Orbyss.Foundation.Json": "[0.2.4, )"
         }
       },
       "orbyss.foundation.web.problemdetails": {

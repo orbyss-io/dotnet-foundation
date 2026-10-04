@@ -111,8 +111,8 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.OpenIdConnect": "[10.0.11, )",
-          "Orbyss.Foundation.Authentication": "[0.2.0, )",
-          "Orbyss.Foundation.WebDefaults": "[0.2.0, )"
+          "Orbyss.Foundation.Authentication": "[0.2.4, )",
+          "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
         }
       },
       "orbyss.foundation.webdefaults": {
