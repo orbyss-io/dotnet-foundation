@@ -70,6 +70,22 @@ jobs:
       - name: Verify packaged public contracts through Host and PostgreSQL
         run: python tests/run_contract_package_qualification.py
 
+      - name: Preserve qualification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: foundation-release-qualification-${{ github.sha }}
+          path: |
+            artifacts/**/*.log
+            artifacts/**/result.json
+            artifacts/**/results.json
+            artifacts/**/inputs.json
+            artifacts/**/observations.json
+            artifacts/**/provenance.json
+            artifacts/**/cancellation.json
+            artifacts/**/descriptor-validation.json
+          if-no-files-found: warn
+
       - name: Attest validated packages
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:

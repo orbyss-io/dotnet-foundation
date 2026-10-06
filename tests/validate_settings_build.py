@@ -2,6 +2,7 @@
 import argparse,copy,hashlib,json,os,tempfile,zipfile
 from pathlib import Path
 import validate_openapi_exporter as fixture
+import validate_settings_no_build
 
 def sha(text): return hashlib.sha256(text.replace('\r\n','\n').encode()).hexdigest()
 def main():
@@ -218,5 +219,6 @@ public static class Startup {
     fixture.run(command,work,work/'partial.log',env=environment)
     assert json.loads(emitted.read_text())['contracts'][0]['complete'] is False
     (work/'results.json').write_text(json.dumps(dict(package=str(package),packageSha256=hashlib.sha256(package.read_bytes()).hexdigest(),rejected=[n for n,_ in invalid]+list(source_cases),publisherNeverStarted=True,changedDefaultDerived=True,outputsPreserved=True,binMutationRejected=True,constantDefaultDerived=True,conditionalFeatureCompiledDefault=9,conditionalMetadataRejected=True,skipCompilerRejected=True,designTimeRejected=True,directTargetCompiles=True,limitsRejected=limits,expansionRejected=expansions,assemblySizeRejected=True),indent=2)+'\n')
+    validate_settings_no_build.qualify(package)
     print(f'Installed settings task: source-derived defaults, secret omission, independent multi-feature descriptor, {len(invalid)+len(source_cases)} rejection cases and output preservation passed. Evidence: {work}/results.json')
 if __name__=='__main__':main()

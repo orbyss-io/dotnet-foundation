@@ -75,6 +75,13 @@ Body and header ceilings are independent from decoded JSON budgets and reverse-p
 Chunked framing can consume transport bytes in addition to decoded JSON bytes. Shell configuration
 does not change process-global Kestrel limits. Qualify supported framing/proxy settings together.
 
+Build0.2.0 provides a separate publisher-owned settings metadata companion. Its first owner
+declaration describes the code-constructed `JsonProfileSettings` type, derived from source defaults
+and bound to the final packed assembly. It does not claim coverage of shell `Foundation:Json`,
+Host transport, authentication, PostgreSQL, CShells or Nuplane settings. Those effective deployment
+settings still require their owner-specific validation and acceptance tests. Metadata export never
+executes publisher initialization or starts storage.
+
 ## Independent persistence units and deadlines
 
 Keep EF entities, mappings, migrations and configuration in the provider assembly. Its context derives

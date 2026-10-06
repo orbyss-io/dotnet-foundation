@@ -34,7 +34,15 @@
       PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
       CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(ReferencePathWithRefAssemblies)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" />
   </Target>
+  <!-- Pack does not run compilation when NoBuild is true. Resolve its compiler-reference inventory
+       in a native evaluation that also refuses to build project references. -->
+  <Target Name="FoundationResolveSettingsMetadataReferences" DependsOnTargets="FindReferenceAssembliesForReferences"
+      Returns="@(ReferencePathWithRefAssemblies)" Condition="'$(FoundationSettingsMetadataSource)' != ''" />
   <Target Name="FoundationEmitSettingsMetadata" BeforeTargets="GenerateNuspec" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="FoundationResolveSettingsMetadataReferences"
+        Properties="BuildProjectReferences=false" BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="_FoundationSettingsPackReferences" />
+    </MSBuild>
     <PropertyGroup>
       <FoundationSettingsDesignTime>false</FoundationSettingsDesignTime>
       <FoundationSettingsDesignTime Condition="'$(DesignTimeBuild)' == 'true'">true</FoundationSettingsDesignTime>
@@ -43,6 +51,6 @@
     </PropertyGroup>
     <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
       PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
-      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(ReferencePathWithRefAssemblies)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" PackedFiles="@(_BuildOutputInPackage)" ValidateOnly="true" />
+      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(_FoundationSettingsPackReferences)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" PackedFiles="@(_BuildOutputInPackage)" ValidateOnly="true" />
   </Target>
 </Project>

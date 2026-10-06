@@ -3,6 +3,7 @@
     <BuildToolsVersion>0.2.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
     <Description>Publisher-owned feature descriptor production for Foundation-compatible packages.</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput><SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' == 'true'">false</IsPackable>
     <!-- Build task assemblies intentionally have no consumer lib/ reference. -->
