@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <BuildToolsVersion>0.1.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
+    <BuildToolsVersion>0.2.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
     <Description>Publisher-owned feature descriptor production for Foundation-compatible packages.</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput><SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
@@ -13,6 +13,13 @@
     <Reference Include="Microsoft.Build.Utilities.Core"><HintPath>$(MSBuildBinPath)/Microsoft.Build.Utilities.Core.dll</HintPath><Private>false</Private></Reference>
     <None Include="buildTransitive/Orbyss.Foundation.Build.targets" Pack="true" PackagePath="buildTransitive/" />
     <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="tasks/net10.0/" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" GeneratePathProperty="true" />
+    <None Include="$(PkgMicrosoft_CodeAnalysis_CSharp)/ThirdPartyNotices.rtf" Pack="true" PackagePath="notices/Roslyn-ThirdPartyNotices.rtf" />
+    <None Include="Roslyn-LICENSE.txt" Pack="true" PackagePath="notices/" />
+    <None Include="$(OutputPath)Microsoft.CodeAnalysis.dll" Pack="true" PackagePath="tasks/net10.0/" />
+    <None Include="$(OutputPath)Microsoft.CodeAnalysis.CSharp.dll" Pack="true" PackagePath="tasks/net10.0/" />
+    <None Include="settings.schema.json" Pack="true" PackagePath="schemas/" />
+    <None Include="settings-source.schema.json" Pack="true" PackagePath="schemas/" />
     <None Include="feature.schema.json" Pack="true" PackagePath="schemas/" />
     <None Include="legacy-feature-bridge.json" Pack="true" PackagePath="compatibility/" />
     <None Include="README.md" Pack="true" PackagePath="/" />

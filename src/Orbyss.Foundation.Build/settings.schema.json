@@ -1,0 +1,187 @@
+{
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "packageId",
+    "packageVersion",
+    "sourceSha256",
+    "contracts",
+    "assembly"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "packageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceSha256": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "owner",
+          "scope",
+          "complete",
+          "sources",
+          "settings",
+          "semanticConstraints"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "sources": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "required",
+                "secret",
+                "constraints",
+                "binding",
+                "precedence",
+                "reload",
+                "description",
+                "type"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "secret": {
+                  "type": "boolean"
+                },
+                "constraints": {
+                  "type": "object"
+                },
+                "binding": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "precedence": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1
+                },
+                "reload": {
+                  "enum": [
+                    "restart",
+                    "reload",
+                    "immutable"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "enum": [
+                    "string",
+                    "integer",
+                    "number",
+                    "boolean",
+                    "array"
+                  ]
+                },
+                "default": {}
+              },
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "secret": {
+                        "const": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "not": {
+                      "required": [
+                        "default"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "semanticConstraints": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "assembly": {
+      "type": "object",
+      "required": [
+        "name",
+        "sha256"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+\\.dll$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orbyss.io/foundation/settings.schema.json"
+}

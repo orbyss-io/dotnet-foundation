@@ -47,7 +47,9 @@ jobs:
         if: steps.selected.outputs.kind == 'build'
         env:
           PACKAGE: ${{ steps.selected.outputs.package_path }}
-        run: python tests/validate_feature_build.py --package "$PACKAGE"
+        run: |
+          python tests/validate_feature_build.py --package "$PACKAGE"
+          python tests/validate_settings_build.py --package "$PACKAGE"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:

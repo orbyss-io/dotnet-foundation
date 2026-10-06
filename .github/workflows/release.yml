@@ -59,6 +59,7 @@ jobs:
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done
           python tests/validate_package_metadata.py --packages artifacts/nuget
+          python tests/validate_settings_owner.py
 
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
