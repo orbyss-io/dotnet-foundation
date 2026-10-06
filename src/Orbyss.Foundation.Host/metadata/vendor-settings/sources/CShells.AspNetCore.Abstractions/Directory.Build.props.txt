@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Include logo for NuGet packages -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)branding\logo.png" Pack="true" PackagePath="\" Link="logo.png" />
+  </ItemGroup>
+
+  <!-- 
+    README.md inclusion is handled per-project:
+    - src/Directory.Build.props includes project-specific README.md files
+    - Projects without their own README.md will need to create one
+  -->
+</Project>

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.Discovery",
+  "sourceSha256": {
+    "DiscoveryOptions.cs": "b4b412263d527c5fe49f4b131ac0ccab4205704f8fd5bcef929b30dc0cb0f2df",
+    "FilePublicDocumentCatalog.cs": "eeb099b623d5abeeb1f4bf548f7c29b355e2097b4b8aefc6a3689599095ad03b",
+    "FoundationDiscoveryFeature.cs": "ef974aef9b7022b8baf0861063f3bfa734d961284871d3b509a9275e32ea58d1",
+    "PublicationManifest.cs": "056f9cbf79cc0471aadb44f3d1eb5d75cca9b10ea6541bbca10864f10d4baa5c",
+    "PublicationResource.cs": "6136b5f6177846b70c2a9d1fb886ecacbc3ede96f111d26d2c96cf4cb4da58c3"
+  },
+  "contracts": [
+    {
+      "scope": "web-discovery",
+      "typeName": "Orbyss.Foundation.Web.Discovery.DiscoveryOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "OutputDirectory",
+          "path": "Foundation:Web:Discovery:OutputDirectory",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:Web:Discovery to DiscoveryOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported OutputDirectory value owned by DiscoveryOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "OutputDirectory is relative to application content root and must resolve within it. Native publication/asset admission validates the files when selected at runtime. Metadata export reads only source."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Web.Discovery"
+        ],
+        "configuration": [
+          "Foundation:Web:Discovery"
+        ]
+      }
+    }
+  ],
+  "imports": []
+}

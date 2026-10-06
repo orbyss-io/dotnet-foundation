@@ -11,6 +11,10 @@ permissions:
 
 jobs:
   validate:
+    env:
+      # Reused Windows MSBuild nodes retain loaded publisher-task DLLs between probes.
+      MSBUILDDISABLENODEREUSE: "1"
+      DOTNET_CLI_USE_MSBUILD_SERVER: "0"
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -55,8 +59,14 @@ jobs:
       - name: Pack Foundation packages
         run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:FoundationRuntimeOnly=true --output artifacts/nuget
 
+      - name: Verify native no-build Host metadata publication
+        run: python tests/validate_host_settings_publish.py
+
       - name: Require the complete package family
-        run: python tests/validate_package_metadata.py --packages artifacts/nuget
+        run: |
+          python tests/validate_package_metadata.py --packages artifacts/nuget
+          python tests/validate_settings_authentication_owner.py --packages artifacts/nuget
+          python tests/validate_settings_owners.py --packages artifacts/nuget
 
       - name: Verify packaged public contracts through Host and PostgreSQL
         if: runner.os == 'Linux'
@@ -72,8 +82,9 @@ jobs:
 
       - name: Verify installed descriptor build package and legacy Assurance export
         run: |
-          python tests/validate_feature_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.2.0.nupkg
-          python tests/validate_settings_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.2.0.nupkg
+          python tests/validate_feature_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.3.0.nupkg
+          python tests/validate_settings_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.3.0.nupkg
+          python tests/validate_settings_graph.py --package artifacts/tools/Orbyss.Foundation.Build.0.3.0.nupkg
           python tests/validate_settings_owner.py
           python tests/validate_legacy_assurance_export.py --package artifacts/tools/Orbyss.Foundation.OpenApi.Exporter.0.2.4.nupkg
 

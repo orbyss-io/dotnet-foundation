@@ -29,10 +29,16 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
     [Required] public string CompiledAssembly { get; set; } = "";
     /// <summary>Gets or sets whether packing must reuse the successfully compiled metadata.</summary>
     public bool ValidateOnly { get; set; }
+    /// <summary>Gets or sets explicit compiled-payload validation for a non-NuGet producer such as the neutral Host.</summary>
+    public bool ValidateCompiledAssemblyOnly { get; set; }
     /// <summary>Gets or sets the compiler language version.</summary>
     public string LangVersion { get; set; } = "default";
     /// <summary>Gets or sets the resolved compiler references used for constant binding.</summary>
     public ITaskItem[] ReferenceFiles { get; set; } = [];
+    /// <summary>Gets or sets native resolved implementation references, distinct from compiler reference assemblies.</summary>
+    public ITaskItem[] ImplementationReferenceFiles { get; set; } = [];
+    /// <summary>Gets or sets independently emitted dependency settings contracts used by source graph defaults.</summary>
+    public ITaskItem[] DependencyMetadataFiles { get; set; } = [];
     /// <summary>Gets or sets the actual NuGet build-output files when validating packing.</summary>
     public ITaskItem[] PackedFiles { get; set; } = [];
     /// <summary>Gets or sets whether the compiler was explicitly disabled.</summary>
@@ -43,7 +49,7 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
     public override bool Execute()
     {
         try { Emit(); return true; }
-        catch (Exception error) when (error is IOException or InvalidDataException or JsonException or InvalidOperationException or ArgumentException or NotSupportedException)
+        catch (Exception error) when (error is IOException or InvalidDataException or JsonException or InvalidOperationException or ArgumentException or NotSupportedException or OverflowException)
         {
             Log.LogError($"PKSM001 invalid publisher settings metadata: {error.Message}");
             return false;
@@ -55,11 +61,15 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
     {
         Require(!DesignTimeCompilation, "Design-time compilation cannot authorize compiled settings metadata.");
         Require(!CompilerExecutionSkipped, "SkipCompilerExecution cannot authorize compiled settings metadata.");
+        Require(!ValidateCompiledAssemblyOnly || ValidateOnly, "Compiled-only validation cannot emit or refresh provenance.");
         Require(new FileInfo(DeclarationSource).Length <= 1_048_576, "Settings declaration exceeds 1 MiB limit.");
         Require(SourceFiles.Length <= 512 && ReferenceFiles.Length <= 512, "Settings compiler inventory exceeds 512-item limit.");
         var declaration = DescriptorContract.Read(File.ReadAllText(DeclarationSource));
-        Keys(declaration, ["schemaVersion", "packageId", "sourceSha256", "contracts"]);
-        Require(declaration["schemaVersion"]?.GetValue<int>() == 1 && Text(declaration["packageId"]) == PackageId,
+        var schemaVersion = declaration["schemaVersion"]?.GetValue<int>();
+        Require(schemaVersion is 1 or 2, "Unsupported settings source schema.");
+        Keys(declaration, schemaVersion == 1 ? ["schemaVersion", "packageId", "sourceSha256", "contracts"]
+            : ["schemaVersion", "packageId", "sourceSha256", "contracts", "imports"]);
+        Require(Text(declaration["packageId"]) == PackageId,
             "Settings declaration schema/package mismatch.");
         Require(!string.IsNullOrWhiteSpace(PackageVersion), "Package version is required.");
         var hashes = declaration["sourceSha256"] as JsonObject ?? throw new InvalidDataException("sourceSha256 is required.");
@@ -111,9 +121,13 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
         var contracts = declaration["contracts"] as JsonArray ?? throw new InvalidDataException("contracts is required.");
         Require(contracts.Count is > 0 and <= 32, "Settings contracts require 1 to 32 explicitly scoped entries.");
         var outputContracts = new JsonArray();
-        var outputEnvelope = new JsonObject { ["schemaVersion"] = 1, ["packageId"] = PackageId, ["packageVersion"] = PackageVersion,
+        var graph = schemaVersion == 2 ? new SourceSettingsDefaults(compilation, contracts,
+            declaration["imports"] as JsonArray ?? throw new InvalidDataException("imports must be an array."),
+            DependencyMetadataFiles, ImplementationReferenceFiles) : null;
+        var outputEnvelope = new JsonObject { ["schemaVersion"] = schemaVersion, ["packageId"] = PackageId, ["packageVersion"] = PackageVersion,
             ["sourceSha256"] = hashes.DeepClone(), ["contracts"] = outputContracts,
             ["assembly"] = new JsonObject { ["name"] = Path.GetFileName(CompiledAssembly), ["sha256"] = AssemblyHash(CompiledAssembly) } };
+        if (graph is not null) outputEnvelope["imports"] = graph.Imports;
         // One fixed buffer, reused for admission and final encoding. Account each setting before retaining another.
         var buffer = new BoundedJsonBuffer();
         var remaining = 2_097_151 - Encode(outputEnvelope, buffer, 2_097_151, indented: false);
@@ -122,38 +136,53 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
         foreach (var node in contracts)
         {
             var contract = node as JsonObject ?? throw new InvalidDataException("Contract must be an object.");
-            Keys(contract, ["scope", "typeName", "complete", "settings", "semanticConstraints"]);
+            Keys(contract, schemaVersion == 1 ? ["scope", "typeName", "complete", "settings", "semanticConstraints"]
+                : ["scope", "typeName", "complete", "settings", "semanticConstraints", "appliesTo"]);
             var scope = Text(contract["scope"]);
             Require(scopes.Add(scope), "Duplicate contract scope.");
             var typeName = Text(contract["typeName"]);
             var candidates = sources.Values.SelectMany(root => root.DescendantNodes().OfType<ClassDeclarationSyntax>())
                 .Where(type => QualifiedName(type) == typeName).ToArray();
-            Require(candidates.Length == 1 && candidates[0].BaseList is null && !candidates[0].Modifiers.Any(SyntaxKind.PartialKeyword),
+            var importedType = candidates.Length == 0 && graph?.HasImportedType(typeName) == true;
+            Require(importedType || candidates.Length == 1 && candidates[0].BaseList is null && !candidates[0].Modifiers.Any(SyntaxKind.PartialKeyword),
                 "Settings type must be one non-inherited, non-partial class in the bound inventory.");
-            var type = candidates[0];
-            Require(!type.Ancestors().OfType<TypeDeclarationSyntax>().Any() && type.TypeParameterList is null,
+            var type = importedType ? null : candidates[0];
+            Require(type is null || !type.Ancestors().OfType<TypeDeclarationSyntax>().Any() && type.TypeParameterList is null,
                 "Nested and generic settings classes are unsupported.");
-            Require(!type.Members.OfType<FieldDeclarationSyntax>().Any(field => field.Modifiers.Any(SyntaxKind.PublicKeyword) && !field.Modifiers.Any(SyntaxKind.StaticKeyword)),
+            Require(type is null || !type.Members.OfType<FieldDeclarationSyntax>().Any(field => field.Modifiers.Any(SyntaxKind.PublicKeyword)
+                && !field.Modifiers.Any(SyntaxKind.StaticKeyword) && !(schemaVersion == 2 && field.Modifiers.Any(SyntaxKind.ConstKeyword))),
                 "Public settings fields require a qualified owning exporter.");
-            Require(type.ParameterList is null && !type.Members.OfType<ConstructorDeclarationSyntax>().Any(), "Constructed settings defaults require an owning exporter; no code is executed.");
-            var properties = type.Members.OfType<PropertyDeclarationSyntax>()
+            Require(type is null || type.ParameterList is null && !type.Members.OfType<ConstructorDeclarationSyntax>().Any(), "Constructed settings defaults require an owning exporter; no code is executed.");
+            var properties = type?.Members.OfType<PropertyDeclarationSyntax>()
                 .Where(property => property.Modifiers.Any(SyntaxKind.PublicKeyword) && !property.Modifiers.Any(SyntaxKind.StaticKeyword)).ToDictionary(property => property.Identifier.ValueText);
+            var importedProperties = importedType ? graph!.ImportedProperties(typeName) : null;
+            IEnumerable<string> propertyNames = importedType ? importedProperties!.Keys : properties!.Keys;
             var settings = contract["settings"] as JsonArray ?? throw new InvalidDataException("settings is required.");
             Require(settings.Count <= 256, "Settings contract exceeds 256-setting limit.");
             var complete = Boolean(contract["complete"]);
             var declared = new HashSet<string>(StringComparer.Ordinal);
             var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var outputSettings = new JsonArray();
-            var outputContract = new JsonObject { ["schemaVersion"] = 1, ["owner"] = PackageId, ["scope"] = scope,
+            var outputContract = new JsonObject { ["schemaVersion"] = schemaVersion, ["owner"] = PackageId, ["scope"] = scope,
                 ["complete"] = complete, ["sources"] = hashes.DeepClone(), ["settings"] = outputSettings,
                 ["semanticConstraints"] = contract["semanticConstraints"]!.DeepClone() };
+            if (schemaVersion == 2)
+            {
+                var applicability = contract["appliesTo"] as JsonObject ?? throw new InvalidDataException("appliesTo is required for contract2.");
+                Keys(applicability, ["kind", "features", "configuration"]);
+                Require(Text(applicability["kind"]) is "shell" or "host" or "code", "Unknown settings applicability kind.");
+                Strings(applicability["features"], nonempty: false);
+                Strings(applicability["configuration"], nonempty: false);
+                outputContract["appliesTo"] = applicability.DeepClone();
+                outputContract["typeName"] = typeName;
+            }
             Admit(outputContract);
             foreach (var settingNode in settings)
             {
                 var setting = settingNode as JsonObject ?? throw new InvalidDataException("Setting must be an object.");
                 Keys(setting, ["property", "path", "required", "secret", "constraints", "binding", "precedence", "reload", "description"]);
                 var name = Text(setting["property"]);
-                Require(declared.Add(name) && properties.ContainsKey(name), "Duplicate or unknown settings property.");
+                Require(declared.Add(name) && propertyNames.Contains(name), "Duplicate or unknown settings property.");
                 Require(paths.Add(Text(setting["path"])), "Duplicate configuration path.");
                 _ = Boolean(setting["required"]);
                 var secret = Boolean(setting["secret"]);
@@ -163,32 +192,45 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
                 var constraints = setting["constraints"] as JsonObject ?? throw new InvalidDataException("constraints must be an object.");
                 try { _ = Encode(constraints, buffer, 16_384, indented: false); }
                 catch (InvalidDataException error) { throw new InvalidDataException("Setting constraints exceed 16 KiB limit.", error); }
-                Require(!secret || !constraints.Any(item => item.Key is "default" or "example" or "examples" or "enum" or "const"), "Secret settings cannot contain values or examples.");
-                var property = properties[name];
-                Require(property.AccessorList is not null && property.AccessorList.Accessors.All(accessor => accessor.Body is null && accessor.ExpressionBody is null),
+                SettingsMetadataSafety.Check(constraints, secret);
+                var property = importedType ? null : properties![name];
+                Require(property is null || property.AccessorList is not null && property.AccessorList.Accessors.All(accessor => accessor.Body is null && accessor.ExpressionBody is null),
                     "Computed settings require an owning exporter; no code is executed.");
-                var kind = Kind(property.Type);
+                var kind = importedType ? graph!.ImportedKind(importedProperties![name]) : graph?.Kind(property!) ?? Kind(property!.Type);
                 var output = (JsonObject)setting.DeepClone();
                 output.Remove("property"); output["type"] = kind;
-                if (!secret) output["default"] = Default(property.Initializer?.Value, kind, compilation.GetSemanticModel(property.SyntaxTree));
+                if (graph is not null)
+                {
+                    var nullable = importedType ? graph.ImportedNullable(importedProperties![name]) : graph.IsNullable(property!);
+                    Require(!constraints.ContainsKey("nullable") || Boolean(constraints["nullable"]) == nullable,
+                        "Nullable declaration differs from the compiler-resolved source type.");
+                    if (nullable) output["constraints"]!["nullable"] = true;
+                }
+                if (!secret) output["default"] = importedType ? graph!.ImportedDefault(typeName, name) : graph is null
+                    ? Default(property!.Initializer?.Value, kind, compilation.GetSemanticModel(property.SyntaxTree))
+                    : graph.Read(property!);
                 Admit(output);
                 outputSettings.Add(output);
             }
-            Require(!complete || declared.SetEquals(properties.Keys), "Complete type contract must cover every public instance property.");
+            Require(!complete || declared.SetEquals(propertyNames), "Complete type contract must cover every public instance property.");
             Strings(contract["semanticConstraints"], nonempty: false);
             outputContracts.Add(outputContract);
         }
+        graph?.VerifyImportsUsed();
         var length = Encode(outputEnvelope, buffer, 2_097_151, indented: true);
         var payload = buffer.GetBytes(length);
         if (ValidateOnly)
         {
-            var expectedName = Path.GetFileName(CompiledAssembly);
-            var packed = PackedFiles.Where(item => Path.GetFileName(item.GetMetadata("TargetPath")) == expectedName).ToArray();
-            Require(packed.Length == 1, "Settings must bind exactly one actual NuGet assembly output.");
-            var packedPath = packed[0].GetMetadata("FinalOutputPath");
-            if (string.IsNullOrWhiteSpace(packedPath)) packedPath = packed[0].ItemSpec;
-            Require(AssemblyHash(packedPath) == outputEnvelope["assembly"]!["sha256"]!.GetValue<string>(),
-                "NuGet assembly output differs from the bound final assembly; rebuild before packing.");
+            if (!ValidateCompiledAssemblyOnly)
+            {
+                var expectedName = Path.GetFileName(CompiledAssembly);
+                var packed = PackedFiles.Where(item => Path.GetFileName(item.GetMetadata("TargetPath")) == expectedName).ToArray();
+                Require(packed.Length == 1, "Settings must bind exactly one actual NuGet assembly output.");
+                var packedPath = packed[0].GetMetadata("FinalOutputPath");
+                if (string.IsNullOrWhiteSpace(packedPath)) packedPath = packed[0].ItemSpec;
+                Require(AssemblyHash(packedPath) == outputEnvelope["assembly"]!["sha256"]!.GetValue<string>(),
+                    "NuGet assembly output differs from the bound final assembly; rebuild before packing.");
+            }
             Require(File.Exists(OutputFile) && new FileInfo(OutputFile).Length <= 2_097_152 && File.ReadAllBytes(OutputFile).AsSpan().SequenceEqual(payload),
                 "Compiled settings metadata differs; rebuild the publisher before packing. --no-build cannot refresh provenance.");
             return;

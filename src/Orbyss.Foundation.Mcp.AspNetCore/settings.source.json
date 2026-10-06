@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Mcp.AspNetCore",
+  "sourceSha256": {
+    "FoundationMcpFeature.cs": "09164ea5356f68ce50d3012ba60958c806e12cc08e368646274413002449a4f3",
+    "FoundationMcpWebOptions.cs": "acc15d4a3e044e358175a33582478df95dabcf30955bcf88ddc1ba426644f3ed"
+  },
+  "contracts": [
+    {
+      "scope": "mcp-transport",
+      "typeName": "Orbyss.Foundation.Mcp.AspNetCore.FoundationMcpWebOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Route",
+          "path": "Foundation:Mcp:Route",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minLength": 2,
+            "maxLength": 128
+          },
+          "binding": "Shell configuration binds Foundation:Mcp to FoundationMcpWebOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Route value owned by FoundationMcpWebOptions."
+        },
+        {
+          "property": "Policy",
+          "path": "Foundation:Mcp:Policy",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:Mcp to FoundationMcpWebOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Policy value owned by FoundationMcpWebOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "Route must be a fixed absolute path without trailing slash, double-slash, braces, query or fragment.",
+        "Policy null or whitespace uses native default authorization; a nonempty value selects an application-registered named policy. Stateless transport always remains authenticated."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Mcp.AspNetCore"
+        ],
+        "configuration": [
+          "Foundation:Mcp"
+        ]
+      }
+    }
+  ],
+  "imports": []
+}

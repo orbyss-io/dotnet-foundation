@@ -48,6 +48,10 @@ and retains existing package names. See [contracts adoption](docs/foundation-con
 for identity, bounded JSON, persistence, canonical-byte and migration guidance. Packaged conformance
 also runs through the actual Host and a disposable PostgreSQL target before publication.
 
+The Host build requires Python 3 for its offline native settings integration producer.
+Use `FoundationMetadataPython` to select an explicit interpreter when necessary. Python is
+build tooling; the published Host executes no settings exporter at startup.
+
 Stable tags must exactly match `VERSION`. The release workflow publishes the NuGet family through
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.
 
@@ -66,7 +70,17 @@ legacy bridge covers descriptor-less Foundation 0.2.2 and 0.2.3 packages only.
 Changing metadata in a runtime package requires a new immutable runtime release;
 never replace an already published package at the existing `VERSION`.
 
-Build0.2.0 additionally emits source-bound, bounded `orbyss-foundation/settings.json` metadata.
-The first declaration covers only `JsonProfileSettings`; it does not describe effective Host,
-authentication, PostgreSQL, CShells, Nuplane or Json.AspNetCore configuration. Its metadata and
-the existing feature descriptor have separate schemas and authority.
+Published Build0.2.0 introduced source-bound, bounded `orbyss-foundation/settings.json`
+metadata for the named `JsonProfileSettings` scope. Its schema1 meaning remains unchanged.
+The additive schema2 producer covers real nullable/container settings, named dependency
+imports, secrets and applicability to selected features/configuration. Defaults derive from
+owning source and compiled dependency metadata without loading publisher assemblies or
+running initializers. See the [Build package](src/Orbyss.Foundation.Build/README.md).
+
+The Host assembles transport, boot, CShells and Nuplane settings into
+`.orbyss-foundation/host-settings.json`. The native integration scopes bind the exact selected
+vendor archives, DLLs, source commits and metadata-only source snapshots. They describe the
+Host's real native binding behavior; they do not claim vendor publisher emission or derive
+defaults from sample configuration. No-build publication revalidates typed metadata and
+source/assembly provenance without refreshing it. Feature descriptors remain the activation
+authority, and settings metadata does not initialize applications, storage or identity clients.

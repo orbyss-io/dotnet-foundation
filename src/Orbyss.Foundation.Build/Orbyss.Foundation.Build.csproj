@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <BuildToolsVersion>0.2.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
-    <Description>Publisher-owned feature descriptor production for Foundation-compatible packages.</Description>
+    <BuildToolsVersion>0.3.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
+    <Description>Publisher-owned feature descriptors and source-bound settings metadata for Foundation-compatible packages.</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput><SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
@@ -21,6 +21,8 @@
     <None Include="$(OutputPath)Microsoft.CodeAnalysis.CSharp.dll" Pack="true" PackagePath="tasks/net10.0/" />
     <None Include="settings.schema.json" Pack="true" PackagePath="schemas/" />
     <None Include="settings-source.schema.json" Pack="true" PackagePath="schemas/" />
+    <None Include="settings-v2.schema.json" Pack="true" PackagePath="schemas/" />
+    <None Include="settings-source-v2.schema.json" Pack="true" PackagePath="schemas/" />
     <None Include="feature.schema.json" Pack="true" PackagePath="schemas/" />
     <None Include="legacy-feature-bridge.json" Pack="true" PackagePath="compatibility/" />
     <None Include="README.md" Pack="true" PackagePath="/" />

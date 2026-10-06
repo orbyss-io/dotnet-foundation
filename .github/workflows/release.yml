@@ -52,6 +52,9 @@ jobs:
       - name: Capture the built portable Host for package and image qualification
         run: dotnet publish src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj -c Release --no-build --no-restore -p:UseAppHost=false -o artifacts/host-runtime
 
+      - name: Verify native no-build Host metadata publication
+        run: python tests/validate_host_settings_publish.py
+
       - name: Validate package family
         shell: bash
         run: |
@@ -63,6 +66,8 @@ jobs:
           done
           python tests/validate_package_metadata.py --packages artifacts/nuget
           python tests/validate_settings_owner.py
+          python tests/validate_settings_authentication_owner.py --packages artifacts/nuget
+          python tests/validate_settings_owners.py --packages artifacts/nuget
 
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget --host artifacts/host-runtime/Orbyss.Foundation.Host.dll
@@ -74,7 +79,7 @@ jobs:
         run: python tests/run_contract_package_qualification.py --host artifacts/host-runtime/Orbyss.Foundation.Host.dll
 
       - name: Verify the exact qualified image payload
-        run: python tests/validate_host_release_payload.py --payload artifacts/host-runtime --qualification-root artifacts/contract-package-consumption --packages artifacts/nuget
+        run: python tests/validate_host_release_payload.py --payload artifacts/host-runtime --qualification-root artifacts/contract-package-consumption
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3

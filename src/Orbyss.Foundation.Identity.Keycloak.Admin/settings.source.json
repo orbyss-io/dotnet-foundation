@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Identity.Keycloak.Admin",
+  "sourceSha256": {
+    "AccessToken.cs": "db60a49e117563004308b90b3c2e813646bee498c272123ef4abbbfc6a0b6f17",
+    "FoundationKeycloakAccessAdminFeature.cs": "3e391b928df58fb8908eda8e92104ebfee15265aae037257953c8aa2b1559b06",
+    "FoundationKeycloakApplicationsAdminFeature.cs": "959843e1e958a59a6c941934652907bdc88f4b519eb0e77870be55cd30acef8e",
+    "FoundationKeycloakAuthenticationFlowsAdminFeature.cs": "09afdca20186ecc2551726ae5869ed5952d56b87326d9df70e0f09b02cb89bb6",
+    "FoundationKeycloakEnrollmentAdminFeature.cs": "59eba8097f17ef73c8345fe5e75e073f9436cd91fc7ac75e35f9c0e7d9d7ade6",
+    "FoundationKeycloakIdentityProvidersAdminFeature.cs": "dd196f10a14a15a1a33807e77c42868916640793e4dcd7c08a786d16bbb8fccb",
+    "FoundationKeycloakOrganizationsAdminFeature.cs": "aa390916118caf1326fc00d430a81428781f5c0f0c63a0882057a561262c20d7",
+    "FoundationKeycloakRealmOperationsFeature.cs": "a951918ac7f7711803d1a91c3d01e632ab505a69138915f818408715e5f0adc7",
+    "FoundationKeycloakScopesAdminFeature.cs": "003986e34804c3d6a69beb91771d4aa5d7101fcc66236af728af878d24b7d58a",
+    "FoundationKeycloakSessionsAdminFeature.cs": "80117a94e22d3c32134a3d5aa0908d6ed62522e81d0a860f75be53753232e154",
+    "FoundationKeycloakUsersAdminFeature.cs": "8fd9e8877c8cd4e04ed1eba1f6a7409291235c2d03391b3698b24c41f2be769e",
+    "IKeycloakAuthenticationFlowAdministration.cs": "381ed770db5709065a5eb3722b892279305175d8ebeea18ceb5ec6892c49b954",
+    "IKeycloakIdentityProviderAdministration.cs": "126c61c9157a5feb7dcc0d11a7d872b76673b5bf132298fa996aed3b5f472359",
+    "IKeycloakOrganizationAdministration.cs": "f2bd15d6f483040f1938466337ab0d03a8d06b2b2b81db11c9b4e8b61375ea8b",
+    "IKeycloakRealmOperations.cs": "3c48dab2a9ed1c97d2d16959555985b3440ba5c4ae44a2b8efbd3537ddb5eeb7",
+    "KeycloakAccessAdministration.cs": "ce9a716d48b4806010cab1cf9404c9b5ecd16d3bf0201447cad3641ff070fe09",
+    "KeycloakAdminComposition.cs": "98f7af2972eb7f6eddb887e4a48fbcb3027fb03f6ad7b36dda1d0f7f8feeb1c1",
+    "KeycloakAdminOptions.cs": "763ec3fb0e007e6aa21040fb04b614b85da4dd393a91581fcc3033be898791b8",
+    "KeycloakAdminOptionsValidator.cs": "3306d9ebfc9e668e9e5e58cdffb27fb4b70a6cc62b3632585b9dfaf140707400",
+    "KeycloakAdminTransport.cs": "11eeb8a428355d70b958c998d5deaa42692e0c61c04142e1896d39f0b9d9c94d",
+    "KeycloakApplicationsAdministration.cs": "0f2c69987b658a94b1282b4e04547fe24f77023b53c119b9d7aa3f19fb90e432",
+    "KeycloakAuthenticationFlowAdministration.cs": "4ea033d75bf15ba2afe88737e33d523e6bbd00525f761fcceda5790da482eb44",
+    "KeycloakEnrollmentAdministration.cs": "da9331cfb9f7cb05108b2cabee83d8da04dc6c8d3ea104603e93c07bd1ecd163",
+    "KeycloakIdentityProviderAdministration.cs": "ed8b47ce80d5ca4a3066afb28a4bbd99836ae9abaa43853e92080d5af5298274",
+    "KeycloakJson.cs": "4003017fedba8a4e292e71ab580c8471ca8033c01dd0e876d75fdf3a62aaaaa4",
+    "KeycloakOrganizationAdministration.cs": "81ba07a641aba84269a4d0e569fa8d5ac7a5beabd4150a84889b41d024af3391",
+    "KeycloakRealmOperations.cs": "36636e9038e3c47f69485c98fe0a12f3e6681340b462740e2cb4036762a2bf07",
+    "KeycloakScopesAdministration.cs": "96d61d98233c1e1380c4726e533b477d4130f86cd2f74c7c42ff5f9dbde5b371",
+    "KeycloakSessionsAdministration.cs": "3f090f260ced4e75b50bc3b6585866e3fd4e2ce53754faeea5f8953a286f9d6f",
+    "KeycloakUsersAdministration.cs": "e5ca2d6744781cf5a3b040a775e3a9ee3913bf42e7e5857e1fcd3dc8dbda74c6"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "keycloak-admin",
+      "typeName": "Orbyss.Foundation.Identity.Keycloak.Admin.KeycloakAdminOptions",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Access",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Applications",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.AuthenticationFlows",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Enrollment",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.IdentityProviders",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Organizations",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.RealmOperations",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Scopes",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Sessions",
+          "Orbyss.Foundation.Identity.Keycloak.Admin.Users"
+        ],
+        "configuration": [
+          "Foundation:Identity:Keycloak:Admin"
+        ]
+      },
+      "settings": [
+        {
+          "property": "ServerUrl",
+          "path": "Foundation:Identity:Keycloak:Admin:ServerUrl",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "format": "uri"
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the externally reachable Keycloak server base URL."
+        },
+        {
+          "property": "Realm",
+          "path": "Foundation:Identity:Keycloak:Admin:Realm",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the target realm whose resources are administered."
+        },
+        {
+          "property": "AdminRealm",
+          "path": "Foundation:Identity:Keycloak:Admin:AdminRealm",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the realm that authenticates the service-account client."
+        },
+        {
+          "property": "ClientId",
+          "path": "Foundation:Identity:Keycloak:Admin:ClientId",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the confidential service-account client identifier."
+        },
+        {
+          "property": "ClientSecret",
+          "path": "Foundation:Identity:Keycloak:Admin:ClientSecret",
+          "required": true,
+          "secret": true,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the confidential service-account client secret."
+        },
+        {
+          "property": "AllowHttpForLocalDevelopment",
+          "path": "Foundation:Identity:Keycloak:Admin:AllowHttpForLocalDevelopment",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether loopback HTTP is allowed in the Development environment."
+        },
+        {
+          "property": "TimeoutSeconds",
+          "path": "Foundation:Identity:Keycloak:Admin:TimeoutSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 120
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the bounded HTTP operation timeout in seconds."
+        },
+        {
+          "property": "RefreshBeforeExpirySeconds",
+          "path": "Foundation:Identity:Keycloak:Admin:RefreshBeforeExpirySeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 0,
+            "maximum": 300
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets how early a cached service-account token is refreshed."
+        }
+      ],
+      "semanticConstraints": [
+        "ServerUrl must be absolute HTTPS without query/fragment; loopback HTTP requires Development and the explicit override.",
+        "Realm, AdminRealm and client credentials must be nonblank. Secret values and samples are excluded from export.",
+        "The Admin API client is not created, authenticated or contacted during settings export."
+      ]
+    }
+  ]
+}

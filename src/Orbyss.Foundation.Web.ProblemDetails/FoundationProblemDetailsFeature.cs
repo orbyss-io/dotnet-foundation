@@ -12,7 +12,7 @@ namespace Orbyss.Foundation.Web.ProblemDetails;
 [ShellFeature(
     name: "Orbyss.Foundation.Web.ProblemDetails",
     DisplayName = "Orbyss Foundation Problem Details",
-    Description = "Provides a replaceable default exception and status-code response format.")]
+    Description = "Composes native exception dispatch and Foundation's bounded Problem Details representation.")]
 public sealed class FoundationProblemDetailsFeature : IMiddlewareShellFeature
 {
     /// <inheritdoc />

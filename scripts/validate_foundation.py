@@ -24,6 +24,9 @@ VALIDATORS = (
     "validate_hosted_pages.py",
     "validate_openapi_exporter.py",
     "validate_host_release_payload.py",
+    "validate_host_settings_assembly.py",
+    "validate_host_settings_owner.py",
+    "validate_host_vendor_settings.py",
 )
 
 def main():

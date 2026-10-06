@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Json.AspNetCore",
+  "sourceSha256": {
+    "FoundationJsonEndpointExtensions.cs": "2b051b476ec7266e3ac4d2c59575cf4d76d8cfee83489563160afb214b75fcfb",
+    "FoundationJsonFeature.cs": "e6a75dbc079576ad477a57dd58b3a1dffceba4f572b293f653ff7d29e7dc1e0c",
+    "FoundationJsonOptions.cs": "ac87eee0ae1958fe20c17a73c27b2da0a914b87e5a80ee0368253c8e36d82559",
+    "FoundationJsonRequestExceptionHandler.cs": "49c01e2ec35783ca4a86e2c96e3b18f78783326f72f3d75f285183994c8d6c0a",
+    "FoundationJsonResponseExceptionHandler.cs": "c9a8fb095d17f574dd01f9e1cc25c6e425b1e5bf796a077427e582ade85dbe44",
+    "FoundationJsonServiceCollectionExtensions.cs": "589a4b2caf5247bc5fa744c0229abfac5bdf370ee4315d5947765cd0495a5ba3",
+    "IJsonContractMetadata.cs": "3f298dbdc166f07191b84ed717d5740f4c2ccbe23dbfc184eec764f6549846e6",
+    "IJsonProfileResult.cs": "d6842a0e6efc65588ba23640b9fb96922b3dd7fa1b0fe34f5dcad4b87f4dd197",
+    "IJsonRequestReader.cs": "556f48fe694968b8ddd306bcc1ddc407c057e96287390703586f172c93c61309",
+    "IJsonResponseFactory.cs": "8af0ff5ac8fedab9fa4d7400f9ba816a21fefad03c94cec72ab31c801775caa6",
+    "JsonAdmissionPipeReader.cs": "6871febf985e8b2a74637e8cae4cfd87eff5a3c584afde82a66a91cb481915d3",
+    "JsonAdmissionPipeWriter.cs": "efbe91d6b132253a6f49a8288b5b3f1a2c15cc50a36e1b41406eec2ae8130c50",
+    "JsonAdmissionRequestBodyPipeFeature.cs": "50a18586b234d2ef6d46cf9a9717816ba3b7bc443f79173caa23c9572ccbc9e0",
+    "JsonAdmissionResponseBodyFeature.cs": "4c2e6f06372824f376e823418b9c7674669bcf86dcb84dfa9f79d29c28d493fa",
+    "JsonAdmissionResult.cs": "f1ad6dadce5f93eb3c7460acfb026ed232b27da3bc571dcc8b09a080ac1eaef1",
+    "JsonAdmissionState.cs": "44216a09ccfa325bcd7fedca3cdf31bea9aee83353a3b0abcd2206156340f5f1",
+    "JsonAdmissionStream.cs": "cc1bc4c6c32d3084471110b32802cc52fe97ce4ac529abfe77332ace2f9857ab",
+    "JsonContractDirection.cs": "abff4b897a0f0a1e64a471b87bd7d782ea87e70badea2564f13334ab55057613",
+    "JsonContractMetadata.cs": "d65bbeb3a39e6f4f46ace1b172935c10d5fdfe26d6a7584f1897163e07b4c8cd",
+    "JsonContractOperationTransformer.cs": "2e0da06b2847c8e2b5e6959a27363bd05a0677d6b5414d41ab0173ff1158f0db",
+    "JsonPageOptions.cs": "c8096fc696471f9e4670a4ad115f5e25cf6e1d815a5666a8ab199497be09014d",
+    "JsonProfileResult.cs": "cf770b3a3dd90d9aa909d31df7da3afc8e25f662a7ef7d1140f319e7de37764f",
+    "JsonRequestReader.cs": "c76387551f72a50bb84c5bd6f5cf94e6a41e09456c3ad839e23736080a5cc351",
+    "JsonResponseFactory.cs": "4dd8451ea4ce163f30f519274d837628847fdb6bb532efc2b7f83fa9b9ff4de7"
+  },
+  "contracts": [
+    {
+      "scope": "json-aspnetcore",
+      "typeName": "Orbyss.Foundation.Json.AspNetCore.FoundationJsonOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Profiles",
+          "path": "Foundation:Json:Profiles",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minProperties": 1,
+            "maxProperties": 128
+          },
+          "binding": "Shell configuration binds Foundation:Json to FoundationJsonOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Profiles value owned by FoundationJsonOptions."
+        },
+        {
+          "property": "Paging",
+          "path": "Foundation:Json:Paging",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "type": "object"
+          },
+          "binding": "Shell configuration binds Foundation:Json to FoundationJsonOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Paging value owned by FoundationJsonOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "The native configuration binder merges named profile keys into source defaults and binds Paging; it does not replace dictionaries as a whole.",
+        "Profile values are validated by the owning JsonProfile constructor and selected IJsonProfileExtension registry. Unknown profiles, duplicate typed contracts, incompatible requirements and invalid paging fail before serving.",
+        "Extensions name code registrations; metadata export does not initialize application/storage/identity services."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Json.AspNetCore"
+        ],
+        "configuration": [
+          "Foundation:Json"
+        ]
+      }
+    },
+    {
+      "scope": "json-configured-profile",
+      "typeName": "Orbyss.Foundation.Json.JsonProfileSettings",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Preset",
+          "path": "Foundation:Json:Profiles:{profileName}:Preset",
+          "required": false,
+          "secret": false,
+          "constraints": { "enum": ["strict-request", "tolerant-response"] },
+          "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
+          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "reload": "restart",
+          "description": "Fixed admission preset of one configured or custom named profile."
+        },
+        {
+          "property": "MaxBytes",
+          "path": "Foundation:Json:Profiles:{profileName}:MaxBytes",
+          "required": false,
+          "secret": false,
+          "constraints": { "minimum": 1, "maximum": 16777216 },
+          "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
+          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "reload": "restart",
+          "description": "Maximum encoded bytes of one configured or custom named profile."
+        },
+        {
+          "property": "MaxDepth",
+          "path": "Foundation:Json:Profiles:{profileName}:MaxDepth",
+          "required": false,
+          "secret": false,
+          "constraints": { "minimum": 1, "maximum": 64 },
+          "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
+          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "reload": "restart",
+          "description": "Maximum nesting depth of one configured or custom named profile."
+        },
+        {
+          "property": "Extensions",
+          "path": "Foundation:Json:Profiles:{profileName}:Extensions",
+          "required": false,
+          "secret": false,
+          "constraints": { "uniqueItems": true },
+          "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
+          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "reload": "restart",
+          "description": "Explicit registered extension identities for one configured or custom named profile."
+        }
+      ],
+      "semanticConstraints": [
+        "Imported defaults describe a newly constructed JsonProfileSettings value. The parent Profiles default graph describes the source overrides of the four built-in named profiles.",
+        "JsonProfile rejects invalid presets and bounds; extension identities must be non-null, distinct and registered by code with at most one selected resolver.",
+        "The required problem-response profile is projected into FoundationProblemResponseOptions at shell activation: MaxBytes must be at least512, MaxDepth at least3 and Preset must be tolerant-response. Generic profile bounds still apply; other names do not inherit these problem-response restrictions.",
+        "The native dictionary binder merges named keys rather than replacing the profile registry; profile requirements and stateless extension admission are validated before serving."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": ["Orbyss.Foundation.Json.AspNetCore"],
+        "configuration": ["Foundation:Json:Profiles"]
+      }
+    },
+    {
+      "scope": "json-paging",
+      "typeName": "Orbyss.Foundation.Json.AspNetCore.JsonPageOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "DefaultSize",
+          "path": "Foundation:Json:Paging:DefaultSize",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1
+          },
+          "binding": "Shell configuration binds Foundation:Json:Paging to JsonPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported DefaultSize value owned by JsonPageOptions."
+        },
+        {
+          "property": "MaximumSize",
+          "path": "Foundation:Json:Paging:MaximumSize",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "binding": "Shell configuration binds Foundation:Json:Paging to JsonPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported MaximumSize value owned by JsonPageOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "DefaultSize must be positive; MaximumSize must be at least DefaultSize and no greater than10000. Both count and independently configured response bytes apply."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Json.AspNetCore"
+        ],
+        "configuration": [
+          "Foundation:Json:Paging"
+        ]
+      }
+    }
+  ],
+  "imports": [
+    {
+      "typeName": "Orbyss.Foundation.Json.JsonProfileSettings",
+      "packageId": "Orbyss.Foundation.Json",
+      "scope": "json-profile"
+    }
+  ]
+}

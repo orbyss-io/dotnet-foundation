@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication",
+  "sourceSha256": {
+    "DefaultAuthenticationErrorWriter.cs": "9d4446c89d6889bb5040f875c0ba17ade1a9b4d020bc3927259f6855093b38cd",
+    "FoundationAuthenticationFeature.cs": "f0f062b346b50030e9865a5e7518bdf2aadd9135a43aaf2279e732b85f955592",
+    "FoundationWebOptions.cs": "d5cea8dde1008f58c300b02037447322332a5582303d34ddf4ce8f01fb51fa07",
+    "FoundationWebOptionsValidator.cs": "c28ed0bc9751ae2c4ad8a1eee2bc9bb01901dc858a9b6b2f818d80a1d6c54e9c",
+    "IAuthenticationErrorWriter.cs": "d965483f0a1c5c817a0fc3415fc93d93e7bad83b32177750d840f143b9584b6a",
+    "IFoundationAuthenticationProfile.cs": "b365e3944d9e1065953cbc32d66032d9895db65d38097f700d6dd3dd94eceedc",
+    "IValidatedAccountIdentityReader.cs": "3f550b0b5f7fe7f9a333d6ab01c7a9d46a09a56d778532f89c6715ee4c42ff46",
+    "PermissionClaimsTransformation.cs": "a087697b47b4d59ada7ebe1442930232867d23671ebe58eafb2cae83aaa0c837",
+    "PermissionPolicyProvider.cs": "25221ec37fc4d9e2aaf4bbdb28cc736fd0392a3bbb37e528b1c7142335a9f07a",
+    "ValidatedAccountIdentityReader.cs": "58a2c474b99d30963c9e040868455e7347e654d7aff0428c8a61e7bc0e00c4e8"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "web",
+      "typeName": "Orbyss.Foundation.Authentication.FoundationWebOptions",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication"
+        ],
+        "configuration": [
+          "Foundation:Web:Authority",
+          "Foundation:Web:BackchannelAuthority",
+          "Foundation:Web:ClientId",
+          "Foundation:Web:ClientSecret",
+          "Foundation:Web:Audience",
+          "Foundation:Web:Scopes",
+          "Foundation:Web:RoleClaim",
+          "Foundation:Web:PermissionClaim",
+          "Foundation:Web:RolePermissions",
+          "Foundation:Web:ScopePermissions",
+          "Foundation:Web:AllowedOrigins",
+          "Foundation:Web:CallbackPath",
+          "Foundation:Web:SignedOutCallbackPath",
+          "Foundation:Web:RemoteSignOutPath",
+          "Foundation:Web:AccessDeniedPath",
+          "Foundation:Web:CookieName",
+          "Foundation:Web:DiscoveryTimeoutSeconds",
+          "Foundation:Web:RemoteAuthenticationTimeoutSeconds",
+          "Foundation:Web:SessionIdleMinutes",
+          "Foundation:Web:SessionAbsoluteMinutes",
+          "Foundation:Web:AllowHttpForLocalDevelopment"
+        ]
+      },
+      "settings": [
+        {
+          "property": "Authority",
+          "path": "Foundation:Web:Authority",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "format": "uri"
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the OIDC issuer authority."
+        },
+        {
+          "property": "BackchannelAuthority",
+          "path": "Foundation:Web:BackchannelAuthority",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "BackchannelAuthority"
+        },
+        {
+          "property": "ClientId",
+          "path": "Foundation:Web:ClientId",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the registered OAuth client identifier."
+        },
+        {
+          "property": "ClientSecret",
+          "path": "Foundation:Web:ClientSecret",
+          "required": false,
+          "secret": true,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the confidential BFF client secret."
+        },
+        {
+          "property": "Audience",
+          "path": "Foundation:Web:Audience",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the protected API audience."
+        },
+        {
+          "property": "Scopes",
+          "path": "Foundation:Web:Scopes",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\x21\\x23-\\x5B\\x5D-\\x7E]+$"
+            }
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the scopes requested during interactive authentication. Explicit shell configuration replaces these fallback defaults."
+        },
+        {
+          "property": "RoleClaim",
+          "path": "Foundation:Web:RoleClaim",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the provider claim containing normalized application roles."
+        },
+        {
+          "property": "PermissionClaim",
+          "path": "Foundation:Web:PermissionClaim",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the canonical claim containing application permission identities."
+        },
+        {
+          "property": "RolePermissions",
+          "path": "Foundation:Web:RolePermissions",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets provider-role to canonical application-permission mappings."
+        },
+        {
+          "property": "ScopePermissions",
+          "path": "Foundation:Web:ScopePermissions",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets provider-scope to canonical application-permission mappings."
+        },
+        {
+          "property": "AllowedOrigins",
+          "path": "Foundation:Web:AllowedOrigins",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the exact origins permitted by the direct SPA profile."
+        },
+        {
+          "property": "CallbackPath",
+          "path": "Foundation:Web:CallbackPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the local OIDC authorization callback path."
+        },
+        {
+          "property": "SignedOutCallbackPath",
+          "path": "Foundation:Web:SignedOutCallbackPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the local callback path used after provider logout."
+        },
+        {
+          "property": "RemoteSignOutPath",
+          "path": "Foundation:Web:RemoteSignOutPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the path receiving provider-initiated logout notifications."
+        },
+        {
+          "property": "AccessDeniedPath",
+          "path": "Foundation:Web:AccessDeniedPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the interactive access-denied path."
+        },
+        {
+          "property": "CookieName",
+          "path": "Foundation:Web:CookieName",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the host-only encrypted session cookie name."
+        },
+        {
+          "property": "DiscoveryTimeoutSeconds",
+          "path": "Foundation:Web:DiscoveryTimeoutSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 30
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the discovery and JWKS readiness budget in seconds."
+        },
+        {
+          "property": "RemoteAuthenticationTimeoutSeconds",
+          "path": "Foundation:Web:RemoteAuthenticationTimeoutSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the maximum duration of an interactive remote authentication operation."
+        },
+        {
+          "property": "SessionIdleMinutes",
+          "path": "Foundation:Web:SessionIdleMinutes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the sliding server session idle lifetime in minutes."
+        },
+        {
+          "property": "SessionAbsoluteMinutes",
+          "path": "Foundation:Web:SessionAbsoluteMinutes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the non-extendable server session lifetime in minutes."
+        },
+        {
+          "property": "AllowHttpForLocalDevelopment",
+          "path": "Foundation:Web:AllowHttpForLocalDevelopment",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether loopback/container HTTP is accepted during local development."
+        }
+      ],
+      "semanticConstraints": [
+        "Exactly one distinct authentication profile must be active in this shell.",
+        "Authority must be absolute HTTPS; loopback HTTP is accepted only in Development with AllowHttpForLocalDevelopment.",
+        "Nonempty BackchannelAuthority must be absolute HTTPS without query/fragment; Development plus AllowHttpForLocalDevelopment also permits HTTP for container backchannels.",
+        "Explicit Scopes configuration must be a nonempty consecutively indexed scalar array including openid. The feature clears typed fallback scopes before native binding of that explicit selection; absent Scopes retains typed defaults.",
+        "RoleClaim and PermissionClaim must not use either reserved validated issuer/subject projection name, ignoring case.",
+        "Permission mappings require nonempty provider keys and nonempty permission arrays with nonblank items; dictionary keys are ordinal.",
+        "SessionAbsoluteMinutes must not be shorter than SessionIdleMinutes.",
+        "BFF-cookie and SPA-PKCE add independently owned profile validation; their metadata must accompany the selected profile.",
+        "Export describes supported inputs; it does not contact discovery/identity services or expose configured secrets."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.HostedPages",
+  "sourceSha256": {
+    "AdmittedHostedRevision.cs": "f82eac4f42d8354bfc38517027dfb980f7fd2f576f260516c6d1a9a4cc7c8bb5",
+    "FoundationHostedPagesFeature.cs": "a065bdd295399c1ef0b092c50e92dc95f7b9a4b83ddb2a6f58427c44b7e673b9",
+    "HostedAssetAdmission.cs": "bf0899130f1380befbdc0f36b30e40725a53e144889b56c7fc40bbdd9b4f0160",
+    "HostedAssetDescriptor.cs": "76e2a21c960803e3c096ad34cba17d5026d0f9c863d5ee8ef1668e9a5ee7a596",
+    "HostedBrandLocale.cs": "6f6618812a06b83a9f51a388160ef4161c17842f6954187725e31f2b7a1bb737",
+    "HostedPageCatalog.cs": "7b42ba832d6e0b5b439eb23acdf1eb63bd242dc068e2ac7077ab78a204f1e4e6",
+    "HostedPageManifest.cs": "7ab1bacb031f69da18e943d01bf9ae213db1e7ed5ac15f4323e5b2c20af5fa00",
+    "HostedPageOptions.cs": "0c2a53dd33a3a870cbd4caa0cbc75792bff4f18e23fb34263a8941d34cdbe284",
+    "HostedPageRendering.cs": "4fa65a04fb199bd1f7987732dc48ea82db16aa5038b8cd83f3c9b838c82922da",
+    "HostedPageRevision.cs": "7e49ce263999d840eaba79542d9d16117e1df546a9f2b8657062ed70c57cb6f7",
+    "HostedViteChunk.cs": "c2abdb654125efc3fb6b15f82bc81413805e33410c2e2f78c1aa5cb46f31a844",
+    "IHostedAssetSource.cs": "2ecd704b528cb3a093462fc6e1eea001f3140c5b29a1dac15211f9220a194edd",
+    "LocalHostedAssetSource.cs": "e317ed0274ab74944ed700b94af890d194b3a16c6410e31ec137213a47db7847",
+    "PngAdmission.cs": "6760670f76612f94355b2b68141ca2e035178a7b21fa266da613616bf3bd0dd7"
+  },
+  "contracts": [
+    {
+      "scope": "hosted-pages",
+      "typeName": "Orbyss.Foundation.Web.HostedPages.HostedPageOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Root",
+          "path": "Foundation:HostedPages:Root",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:HostedPages to HostedPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Root value owned by HostedPageOptions."
+        },
+        {
+          "property": "Manifest",
+          "path": "Foundation:HostedPages:Manifest",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:HostedPages to HostedPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Manifest value owned by HostedPageOptions."
+        },
+        {
+          "property": "ManifestSha256",
+          "path": "Foundation:HostedPages:ManifestSha256",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "binding": "Shell configuration binds Foundation:HostedPages to HostedPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ManifestSha256 value owned by HostedPageOptions."
+        },
+        {
+          "property": "CurrentRevision",
+          "path": "Foundation:HostedPages:CurrentRevision",
+          "required": true,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:HostedPages to HostedPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported CurrentRevision value owned by HostedPageOptions."
+        },
+        {
+          "property": "PagePath",
+          "path": "Foundation:HostedPages:PagePath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:HostedPages to HostedPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported PagePath value owned by HostedPageOptions."
+        },
+        {
+          "property": "MaxTotalBytes",
+          "path": "Foundation:HostedPages:MaxTotalBytes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 128000000
+          },
+          "binding": "Shell configuration binds Foundation:HostedPages to HostedPageOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported MaxTotalBytes value owned by HostedPageOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "Root and Manifest must resolve to admitted contained local read-only paths; symlinks and traversal reject.",
+        "Exact manifest SHA256, current revision and runtime publication/asset identities must agree before endpoint registration. Metadata export does not read deployment assets.",
+        "PagePath must be a fixed local absolute route; source validators govern safe manifest and aggregate retained byte admission."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Web.HostedPages"
+        ],
+        "configuration": [
+          "Foundation:HostedPages"
+        ]
+      }
+    }
+  ],
+  "imports": []
+}

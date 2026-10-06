@@ -2,19 +2,64 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <Description>Application-neutral Nuplane, CShells, and secure web runtime host for Orbyss Foundation applications.</Description>
+    <FoundationMetadataPython Condition="'$(FoundationMetadataPython)' == ''">python</FoundationMetadataPython>
+    <FoundationMetadataDotnet Condition="'$(FoundationMetadataDotnet)' == ''">$(DOTNET_HOST_PATH)</FoundationMetadataDotnet>
+    <FoundationHostMetadataScript>$(MSBuildThisFileDirectory)../../scripts/emit_host_vendor_settings.py</FoundationHostMetadataScript>
+    <FoundationHostMetadataAssembler>$(MSBuildThisFileDirectory)../../scripts/assemble_host_settings_metadata.py</FoundationHostMetadataAssembler>
+    <FoundationHostNativeMetadata>$(TargetDir).orbyss-foundation/host-native.settings.json</FoundationHostNativeMetadata>
+    <FoundationHostCompleteMetadata>$(TargetDir).orbyss-foundation/host-settings.json</FoundationHostCompleteMetadata>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
     <PackageReference Include="CShells.AspNetCore" />
     <PackageReference Include="Nuplane" />
     <PackageReference Include="Nuplane.Loading" />
     <PackageReference Include="Nuplane.Sources.Directory" />
   </ItemGroup>
   <ItemGroup>
+    <Content Remove="metadata/**/*;settings.source.json" />
     <Content Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Update="hostsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Update="shells.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include=".orbyss-foundation\web-profile.shells.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('.orbyss-foundation\web-profile.shells.json')" />
     <Folder Include="packages\" />
   </ItemGroup>
+  <Target Name="FoundationGenerateHostSettingsIntegration" AfterTargets="FoundationCompileSettingsMetadata">
+    <PropertyGroup>
+      <FoundationHostNativeMetadata>$(TargetDir).orbyss-foundation/host-native.settings.json</FoundationHostNativeMetadata>
+      <FoundationHostCompleteMetadata>$(TargetDir).orbyss-foundation/host-settings.json</FoundationHostCompleteMetadata>
+    </PropertyGroup>
+    <Error Condition="'$(FoundationMetadataDotnet)' == ''" Text="Host settings export requires the native dotnet host path; set FoundationMetadataDotnet when building outside the dotnet CLI." />
+    <Exec Command="&quot;$(FoundationMetadataPython)&quot; &quot;$(FoundationHostMetadataScript)&quot; --assets &quot;$(ProjectAssetsFile)&quot; --host-output &quot;$(TargetDir).&quot; --output &quot;$(FoundationHostNativeMetadata)&quot; --version &quot;$(PackageVersion)&quot; --build-task-assembly &quot;$(FoundationBuildTaskAssembly)&quot; --dotnet &quot;$(FoundationMetadataDotnet)&quot;" />
+    <Exec Command="&quot;$(FoundationMetadataPython)&quot; &quot;$(FoundationHostMetadataAssembler)&quot; --transport &quot;$(FoundationSettingsMetadata)&quot; --vendor &quot;$(FoundationHostNativeMetadata)&quot; --host-output &quot;$(TargetDir).&quot; --output &quot;$(FoundationHostCompleteMetadata)&quot; --version &quot;$(PackageVersion)&quot;" />
+  </Target>
+  <Target Name="FoundationValidateHostCompiledSettingsMetadata">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="FoundationResolveSettingsMetadataReferences"
+        Properties="BuildProjectReferences=false" BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="_FoundationHostSettingsReferences" />
+    </MSBuild>
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="FoundationResolveSettingsMetadataImplementationReferences"
+        Properties="BuildProjectReferences=false" BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="_FoundationHostSettingsImplementationReferences" />
+    </MSBuild>
+    <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
+      PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
+      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(_FoundationHostSettingsReferences)"
+      ImplementationReferenceFiles="@(_FoundationHostSettingsImplementationReferences)" DependencyMetadataFiles="@(FoundationSettingsMetadataDependency)"
+      ValidateOnly="true" ValidateCompiledAssemblyOnly="true" />
+  </Target>
+  <Target Name="FoundationValidateHostSettingsForPublish" BeforeTargets="ComputeFilesToPublish" DependsOnTargets="FoundationValidateHostCompiledSettingsMetadata">
+    <PropertyGroup>
+      <FoundationHostNativeMetadata>$(TargetDir).orbyss-foundation/host-native.settings.json</FoundationHostNativeMetadata>
+      <FoundationHostCompleteMetadata>$(TargetDir).orbyss-foundation/host-settings.json</FoundationHostCompleteMetadata>
+    </PropertyGroup>
+    <Exec Command="&quot;$(FoundationMetadataPython)&quot; &quot;$(FoundationHostMetadataScript)&quot; --assets &quot;$(ProjectAssetsFile)&quot; --host-output &quot;$(TargetDir).&quot; --output &quot;$(FoundationHostNativeMetadata)&quot; --version &quot;$(PackageVersion)&quot; --build-task-assembly &quot;$(FoundationBuildTaskAssembly)&quot; --dotnet &quot;$(FoundationMetadataDotnet)&quot; --validate-only" />
+    <Exec Command="&quot;$(FoundationMetadataPython)&quot; &quot;$(FoundationHostMetadataAssembler)&quot; --transport &quot;$(FoundationSettingsMetadata)&quot; --vendor &quot;$(FoundationHostNativeMetadata)&quot; --host-output &quot;$(TargetDir).&quot; --output &quot;$(FoundationHostCompleteMetadata)&quot; --version &quot;$(PackageVersion)&quot; --validate-only" />
+    <ItemGroup>
+      <_FoundationHostMetadataPayload Include="$(TargetDir).orbyss-foundation/**/*" />
+      <ResolvedFileToPublish Include="@(_FoundationHostMetadataPayload)">
+        <RelativePath>.orbyss-foundation/%(_FoundationHostMetadataPayload.RecursiveDir)%(_FoundationHostMetadataPayload.Filename)%(_FoundationHostMetadataPayload.Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 </Project>

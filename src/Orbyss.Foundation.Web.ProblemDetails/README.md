@@ -12,13 +12,15 @@ Enrichers may localize safe text and fields while preserving code and status. Th
 `HttpContext.RequestServices`; singleton native exception handlers capture no scoped contributions.
 
 `UseFoundationProblemStatusCodePages()` composes native ASP.NET empty-status handling without
-activating exception handlers. The managed Host selects this bounded fallback for routing failures
-that have no shell owner, including native 404 and 405. Selected requests retain their shell's DI
-policy and budgets; already written responses are preserved. No-shell failures use the Host's default
-64 KiB profile and have no shell-specific contribution. The Host shares the representation, Core,
-Json and collection assembly identities with loaded modules and exposes the optional feature for
-normal shell selection. These Host-provided archives remain deployment inputs but must not also be
-loaded as independent package roots. The native writer marks admitted problems `Cache-Control: no-store`.
+activating exception handlers. The managed Host uses native ASP.NET status-code pages and registers
+no global problem writer. Requests selecting Foundation mechanisms retain their shell's bounded DI
+policy and budgets; unowned failures use ASP.NET's native text fallback. Explicit `WebRouting:Path`
+selects prefix fallback ownership, and an empty path opts into root fallback. With no Foundation
+mechanism selected, an application can register its own native `IProblemDetailsService` or register
+a custom writer before `AddProblemDetails` without removing Host defaults. The Host shares only
+the two CShells contract assemblies; this package loads and discovers its optional feature through
+the normal native catalog. Already written responses are preserved. The native Foundation writer
+marks admitted problems `Cache-Control: no-store`.
 
 All paths use `code`, canonical `correlationId`, compatibility alias `traceId` and a bounded
 `fieldErrors` array. Both correlation fields have the same admitted request identifier. Existing
@@ -34,6 +36,11 @@ the closed diagnostic array/object shape. Application profile resolvers/extensio
 internal envelope; its fixed closed encoder consumes the admitted preset and byte/depth limits.
 Oversized/invalid server output becomes a safe 500 envelope of at most 512 bytes through a fixed
 nonrecursive fallback. Cancellation propagates and committed output cannot be replaced.
+
+Selecting Authentication, Json.AspNetCore or this feature deliberately selects the bounded closed
+Foundation representation. Application `IProblemDetailsEnricher` contributions and a replacement
+`IProblemRepresentationPolicy` must preserve its validated shape and failure identity. Arbitrary
+custom writer formats are not a bypass of selected typed JSON budgets.
 
 The optional feature uses native ordered `IExceptionHandler` dispatch for `BadHttpRequestException`
 and native fallback for unknown defects. An arbitrary `ArgumentException` remains 500. Native handled

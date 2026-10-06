@@ -32,16 +32,25 @@
     </PropertyGroup>
     <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
       PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
-      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(ReferencePathWithRefAssemblies)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" />
+      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(ReferencePathWithRefAssemblies)" ImplementationReferenceFiles="@(ReferencePath)" DependencyMetadataFiles="@(FoundationSettingsMetadataDependency)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" />
   </Target>
   <!-- Pack does not run compilation when NoBuild is true. Resolve its compiler-reference inventory
        in a native evaluation that also refuses to build project references. -->
   <Target Name="FoundationResolveSettingsMetadataReferences" DependsOnTargets="FindReferenceAssembliesForReferences"
       Returns="@(ReferencePathWithRefAssemblies)" Condition="'$(FoundationSettingsMetadataSource)' != ''" />
-  <Target Name="FoundationEmitSettingsMetadata" BeforeTargets="GenerateNuspec" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+  <Target Name="FoundationResolveSettingsMetadataImplementationReferences" DependsOnTargets="FindReferenceAssembliesForReferences"
+      Returns="@(ReferencePath)" Condition="'$(FoundationSettingsMetadataSource)' != ''" />
+  <!-- Global using Compile items are normally supplied before compilation. No-build packing
+       still needs that exact SDK compiler context, without invoking Compile or project builds. -->
+  <Target Name="FoundationEmitSettingsMetadata" BeforeTargets="GenerateNuspec" DependsOnTargets="GenerateGlobalUsings"
+      Condition="'$(FoundationSettingsMetadataSource)' != '' and '$(IsPackable)' != 'false'">
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="FoundationResolveSettingsMetadataReferences"
         Properties="BuildProjectReferences=false" BuildInParallel="false">
       <Output TaskParameter="TargetOutputs" ItemName="_FoundationSettingsPackReferences" />
+    </MSBuild>
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="FoundationResolveSettingsMetadataImplementationReferences"
+        Properties="BuildProjectReferences=false" BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="_FoundationSettingsPackImplementationReferences" />
     </MSBuild>
     <PropertyGroup>
       <FoundationSettingsDesignTime>false</FoundationSettingsDesignTime>
@@ -51,6 +60,6 @@
     </PropertyGroup>
     <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
       PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
-      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(_FoundationSettingsPackReferences)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" PackedFiles="@(_BuildOutputInPackage)" ValidateOnly="true" />
+      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(_FoundationSettingsPackReferences)" ImplementationReferenceFiles="@(_FoundationSettingsPackImplementationReferences)" DependencyMetadataFiles="@(FoundationSettingsMetadataDependency)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" PackedFiles="@(_BuildOutputInPackage)" ValidateOnly="true" />
   </Target>
 </Project>

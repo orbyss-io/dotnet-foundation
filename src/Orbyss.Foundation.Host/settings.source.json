@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Host",
+  "sourceSha256": {
+    "Diagnostics/FoundationRequestDiagnosticConstants.cs": "5af617c572571e482817af0eaa8094097066ce03363cae443f15ab9ca6fb2f25",
+    "Diagnostics/FoundationRequestDiagnosticLogger.cs": "573885ff6fef8517d7da3233734a558acfb18aea5b6f96372b1f3d37faf4741d",
+    "Diagnostics/FoundationRequestDiagnosticLoggerFactory.cs": "24dfc4a31933434c74785e9e9bcf315282f78582045d564b5cc2d05a609005a3",
+    "Diagnostics/FoundationRequestDiagnosticRedactionExtensions.cs": "da9e4ff8ed0b5b5a0326716c423c7b3f67abc92a1e3073d4c512bbc3fb9fd3a0",
+    "Diagnostics/FoundationRequestDiagnosticRedactionRegistration.cs": "2aec2fb08271ba111c7f652697c5f655811d0ed00a27c2c5f82c36ae8314887e",
+    "Feed/NuplaneAssemblyProvider.cs": "e1b3deac9f5279e31974f7693f6f77c793dc07d831e8311b1f70fcbb410b762e",
+    "Program.cs": "4d1fff2d302b0632d41e8e4b3e323464b6b886e1fd7db2a772fb5631cd0dcee6",
+    "Shells/EagerShellActivationHostedService.cs": "365cee121a2245e06f169d61c1d754e68a4e04516ae99402e48f16461ce31e04",
+    "Shells/FoundationBootOptions.cs": "5e1a1845c43f5c0f103d141edf3b39e6bad780a17a34ef0cd325c2ab521a7186",
+    "Transport/FoundationTransportOptions.cs": "4d3cf053174973aeacd9418fe6088fac59cec7f568aaa5f17696206b986430fb"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "host-transport",
+      "typeName": "Orbyss.Foundation.Host.Transport.FoundationTransportOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "MaxRequestBodyBytes",
+          "path": "Foundation:Transport:MaxRequestBodyBytes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 1073741824
+          },
+          "binding": "Native Get<FoundationTransportOptions> binds Foundation:Transport at process startup; Apply validates and sets native Kestrel limits.",
+          "precedence": [
+            "typed property initializer",
+            "WebApplication default configuration",
+            "hostsettings.json",
+            ".orbyss-foundation/web-profile.shells.json",
+            "shells.json",
+            "environment variables",
+            "command-line arguments"
+          ],
+          "reload": "restart",
+          "description": "Encoded process transport ceiling in bytes; independent of typed JSON admission."
+        },
+        {
+          "property": "MaxRequestHeadersBytes",
+          "path": "Foundation:Transport:MaxRequestHeadersBytes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1024,
+            "maximum": 1048576
+          },
+          "binding": "Native Get<FoundationTransportOptions> binds Foundation:Transport at process startup; Apply validates and sets native Kestrel limits.",
+          "precedence": [
+            "typed property initializer",
+            "WebApplication default configuration",
+            "hostsettings.json",
+            ".orbyss-foundation/web-profile.shells.json",
+            "shells.json",
+            "environment variables",
+            "command-line arguments"
+          ],
+          "reload": "restart",
+          "description": "Encoded process transport ceiling in bytes; independent of typed JSON admission."
+        }
+      ],
+      "appliesTo": {
+        "kind": "host",
+        "features": [],
+        "configuration": []
+      },
+      "semanticConstraints": [
+        "Host binds Foundation:Transport once before Kestrel startup and applies limits before accepting requests.",
+        "Transport limits are process-wide and independent of decoded JSON/shell response budgets and reverse-proxy settings.",
+        "Configuration precedence: native WebApplication defaults, optional hostsettings.json, optional web-profile.shells.json, required shells.json, environment variables, command-line arguments.",
+        "All three explicitly added JSON files use reloadOnChange:false; changing transport settings requires process restart."
+      ]
+    },
+    {
+      "scope": "host-boot",
+      "typeName": "Orbyss.Foundation.Host.Shells.FoundationBootOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "EagerShellActivation",
+          "path": "Foundation:Boot:EagerShellActivation",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Native Get<FoundationBootOptions> binds Foundation:Boot when the startup hosted service begins.",
+          "precedence": [
+            "typed property initializer",
+            "WebApplication default configuration",
+            "hostsettings.json",
+            ".orbyss-foundation/web-profile.shells.json",
+            "shells.json",
+            "environment variables",
+            "command-line arguments"
+          ],
+          "reload": "restart",
+          "description": "Startup shell activation policy; does not register or select application features."
+        },
+        {
+          "property": "FailOnShellActivationError",
+          "path": "Foundation:Boot:FailOnShellActivationError",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Native Get<FoundationBootOptions> binds Foundation:Boot when the startup hosted service begins.",
+          "precedence": [
+            "typed property initializer",
+            "WebApplication default configuration",
+            "hostsettings.json",
+            ".orbyss-foundation/web-profile.shells.json",
+            "shells.json",
+            "environment variables",
+            "command-line arguments"
+          ],
+          "reload": "restart",
+          "description": "Startup shell activation policy; does not register or select application features."
+        }
+      ],
+      "appliesTo": {
+        "kind": "host",
+        "features": [],
+        "configuration": []
+      },
+      "semanticConstraints": [
+        "Host binds Foundation:Boot once during its hosted startup service, before listening.",
+        "EagerShellActivation=false skips eager checks/activation; later native lazy shell activation remains available.",
+        "FailOnShellActivationError=false catches ordinary activation errors, logs them and permits later lazy activation; caller cancellation is never swallowed.",
+        "Required feature identity/catalog and absent-shell errors still fail eager startup before activation; the flag does not suppress those configuration errors.",
+        "Changing this startup-only policy requires restarting the Host."
+      ]
+    }
+  ]
+}

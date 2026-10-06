@@ -15,16 +15,16 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
-SHARED_FOUNDATION = (
-    "Orbyss.Foundation.Web.ProblemDetails", "Orbyss.Foundation.Web.ProblemDetails.Core",
-    "Orbyss.Foundation.Json", "Orbyss.Foundation.Collections.Core",
-)
+SHARED_HOST = {
+    "CShells.Abstractions": "0.0.29-preview.147",
+    "CShells.AspNetCore.Abstractions": "0.0.29-preview.147",
+}
 REQUIRED_FILES = {
     "Orbyss.Foundation.Host.dll", "Orbyss.Foundation.Host.deps.json",
     "Orbyss.Foundation.Host.runtimeconfig.json", "appsettings.json", "shells.json",
-    *(identity + ".dll" for identity in SHARED_FOUNDATION),
+    *(identity + ".dll" for identity in SHARED_HOST),
 }
-F6_FLAGS = ("actualHost", "actualNugetPackages", "actualPostgreSql", "twoShells")
+F6_FLAGS = ("actualHost", "actualNugetPackages", "actualPostgreSql", "twoShells", "neutralHost", "actualCustomProblemComposition")
 
 
 def require(condition: bool, message: str) -> None:
@@ -53,6 +53,8 @@ def is_link(path: Path) -> bool:
 def runtime_path(relative: str) -> bool:
     name = PurePosixPath(relative)
     return (name.parts[0] == "runtimes" and len(name.parts) > 1) or (
+        name.parts[:2] == (".orbyss-foundation", "settings-sources") and len(name.parts) > 2
+        and relative.casefold().endswith(".txt")) or (
         name.parts[0] == ".orbyss-foundation" and len(name.parts) == 2
         and relative.casefold().endswith(".json")) or (
         len(name.parts) == 1 and relative.casefold().endswith((".dll", ".json")))
@@ -137,7 +139,7 @@ def verify_archives(packages: Path, version: str, inputs: dict, inventory: dict[
         require(name.casefold() not in by_name, "Duplicate qualified archive identity.")
         by_name[name.casefold()] = digest
     found = {}
-    required = {identity.casefold(): identity for identity in SHARED_FOUNDATION}
+    required = {identity.casefold(): identity for identity in SHARED_HOST}
     for archive_path in sorted(packages.glob("*.nupkg")):
         require(not is_link(archive_path), "Runtime archive must not be a link.")
         with zipfile.ZipFile(archive_path) as archive:
@@ -150,11 +152,11 @@ def verify_archives(packages: Path, version: str, inputs: dict, inventory: dict[
             key = identity.text.casefold()
             if key not in required:
                 continue
-            require(key not in found, "Duplicate shared Foundation package: " + identity.text)
-            require(package_version.text == version, "Shared Foundation package version differs from F6.")
+            require(key not in found, "Duplicate shared Host package: " + identity.text)
+            require(package_version.text == SHARED_HOST[required[key]], "Shared Host package version differs from F6.")
             archive_hash = sha256(archive_path)
             require(by_name.get(archive_path.name.casefold()) == archive_hash,
-                    "Shared Foundation archive bytes differ from qualified F6 inputs: " + archive_path.name)
+                    "Shared Host archive bytes differ from qualified F6 inputs: " + archive_path.name)
             member = "lib/net10.0/" + required[key] + ".dll"
             members = [entry for entry in archive.infolist() if entry.filename == member]
             require(len(members) == 1 and members[0].file_size <= 256 * 1024 * 1024,
@@ -164,11 +166,11 @@ def verify_archives(packages: Path, version: str, inputs: dict, inventory: dict[
                 for block in iter(lambda: stream.read(1024 * 1024), b""):
                     digest.update(block)
             require(digest.hexdigest() == inventory[required[key] + ".dll"],
-                    "Shared Foundation DLL differs between Host and qualified archive: " + required[key])
-            found[key] = {"identity": required[key], "version": version,
+                    "Shared Host DLL differs between Host and qualified archive: " + required[key])
+            found[key] = {"identity": required[key], "version": package_version.text,
                           "archive": archive_path.name, "archiveSha256": archive_hash,
                           "assemblySha256": digest.hexdigest()}
-    require(found.keys() == required.keys(), "Runtime feed omits a required shared Foundation package.")
+    require(found.keys() == required.keys(), "Runtime feed omits a required shared Host package.")
     return [found[key] for key in sorted(found)]
 
 
@@ -180,13 +182,16 @@ def validate(payload: Path, inputs_path: Path, version: str | None, packages: Pa
             + repr(sorted(expected.keys() - actual.keys())) + "; extra=" + repr(sorted(actual.keys() - expected.keys())))
     changed = [relative for relative in sorted(expected) if actual[relative] != expected[relative]]
     require(not changed, "Runtime payload bytes differ from F6: " + repr(changed))
-    bindings = verify_archives(packages, selected, inputs, expected) if packages else []
+    require(not any(PurePosixPath(name).name.casefold().startswith("orbyss.foundation.") and name.casefold().endswith(".dll")
+                    and name != "Orbyss.Foundation.Host.dll" for name in actual),
+            "Neutral Host cannot provide Foundation feature runtime assemblies.")
+    bindings = verify_archives(packages or inputs_path.parent / "feed", selected, inputs, expected)
     # PDB/XML/apphost output is explicitly not covered by this runtime inventory.
     return {"status": "passed", "version": selected, "qualificationInputs": str(inputs_path.resolve()),
             "qualificationInputsSha256": sha256(inputs_path),
             "qualificationResultSha256": sha256(inputs_path.parent / "result.json"),
             "payload": str(payload.resolve()), "hostRuntimeFiles": actual,
-            "sharedFoundationPackageBindings": bindings, "ancillaryFilesOutsideRuntimeInventory": ancillary,
+            "sharedHostPackageBindings": bindings, "ancillaryFilesOutsideRuntimeInventory": ancillary,
             "imageQualificationClaimed": False}
 
 
@@ -196,19 +201,22 @@ def fake_fixture(root: Path, version: str = "0.3.0-fixture.1") -> tuple[Path, Pa
         directory.mkdir(parents=True)
     for relative in sorted(REQUIRED_FILES | {"Native.Loader.dll", "runtimes/linux-x64/native/loader.so",
             "hostsettings.json", "shells.json", "Host.staticwebassets.endpoints.json",
-            ".orbyss-foundation/web-profile.shells.json"}):
+            ".orbyss-foundation/web-profile.shells.json", ".orbyss-foundation/host-settings.json",
+            ".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt"}):
         path = payload / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(("fake fixture " + relative).encode())
     hashes = {}
-    for identity in SHARED_FOUNDATION:
-        package = packages / (identity + "." + version + ".nupkg")
+    for identity, package_version in SHARED_HOST.items():
+        package = packages / (identity + "." + package_version + ".nupkg")
         with zipfile.ZipFile(package, "w") as archive:
             archive.writestr(identity + ".nuspec", "<package><metadata><id>" + identity
-                + "</id><version>" + version + "</version></metadata></package>")
+                + "</id><version>" + package_version + "</version></metadata></package>")
             archive.write(payload / (identity + ".dll"), "lib/net10.0/" + identity + ".dll")
         hashes[package.name] = sha256(package)
     inputs = {"version": version, "hostRuntimeFiles": payload_inventory(payload)[0], "packages": hashes}
+    require(".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt" in inputs["hostRuntimeFiles"],
+            "Host metadata sources must be bound runtime inputs.")
     (evidence / "inputs.json").write_text(json.dumps(inputs), encoding="utf-8")
     (evidence / "result.json").write_text(json.dumps({"status": "passed", "version": version,
         **{flag: True for flag in F6_FLAGS}}), encoding="utf-8")
@@ -247,6 +255,9 @@ def self_test(root: Path) -> dict:
     case("changed-hostsettings", lambda p, i, n: (p / "hostsettings.json").write_bytes(b"{}"), "bytes differ")
     case("changed-shells", lambda p, i, n: (p / "shells.json").write_bytes(b"{}"), "bytes differ")
     case("changed-profile-settings", lambda p, i, n: (p / ".orbyss-foundation/web-profile.shells.json").write_bytes(b"{}"), "bytes differ")
+    case("changed-owner-source", lambda p, i, n: (p / ".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt").write_bytes(b"changed source"), "bytes differ")
+    case("missing-owner-source", lambda p, i, n: (p / ".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt").unlink(), "file set differs")
+    case("extra-owner-source", lambda p, i, n: (p / ".orbyss-foundation/settings-sources/host/Transport/Extra.cs.txt").write_bytes(b"unqualified source"), "file set differs")
     case("extra-root-settings", lambda p, i, n: (p / "Unqualified.json").write_bytes(b"{}"), "file set differs")
     case("missing-staticwebassets", lambda p, i, n: (p / "Host.staticwebassets.endpoints.json").unlink(), "file set differs")
     case("extra-profile-settings", lambda p, i, n: (p / ".orbyss-foundation/unqualified.json").write_bytes(b"{}"), "file set differs")
@@ -254,6 +265,20 @@ def self_test(root: Path) -> dict:
     case("failed-qualification", lambda p, i, n: change_json(i.parent / "result.json", "status", "failed"), "passed actual")
     case("version-mismatch", lambda p, i, n: change_json(i.parent / "result.json", "version", "0.3.0-stale"), "version mismatch")
     case("synthetic-not-actual", lambda p, i, n: change_json(i.parent / "result.json", "actualPostgreSql", False), "passed actual")
+    case("non-neutral-qualification", lambda p, i, n: change_json(i.parent / "result.json", "neutralHost", False), "passed actual")
+    def coupled_host(p, i, n):
+        (p / "Orbyss.Foundation.Json.dll").write_bytes(b"unselected Foundation feature")
+        document = read_json(i)
+        document["hostRuntimeFiles"] = payload_inventory(p)[0]
+        i.write_text(json.dumps(document), encoding="utf-8")
+    case("rehashed-host-feature-coupling", coupled_host, "cannot provide Foundation feature")
+    def nested_coupling(p, i, n):
+        path = p / "runtimes/linux-x64/native/ORBYSS.FOUNDATION.EXECUTION.DLL"
+        path.write_bytes(b"unselected native-path Foundation feature")
+        document = read_json(i)
+        document["hostRuntimeFiles"] = payload_inventory(p)[0]
+        i.write_text(json.dumps(document), encoding="utf-8")
+    case("rehashed-case-varied-native-feature-coupling", nested_coupling, "cannot provide Foundation feature")
     case("unbound-inventory", lambda p, i, n: change_json(i, "hostRuntimeFiles", {}), "complete Host runtime")
     def missing_required_shells(p, i, n):
         (p / "shells.json").unlink()
@@ -275,11 +300,11 @@ def self_test(root: Path) -> dict:
             archive.writestr("changed-metadata.txt", "unqualified")
     case("unqualified-archive-bytes", changed_archive, "archive bytes differ")
     def changed_bound_dll(p, i, n):
-        identity = SHARED_FOUNDATION[0]
-        package = n / (identity + ".0.3.0-fixture.1.nupkg")
+        identity = next(iter(SHARED_HOST))
+        package = n / (identity + "." + SHARED_HOST[identity] + ".nupkg")
         with zipfile.ZipFile(package, "w") as archive:
             archive.writestr(identity + ".nuspec", "<package><metadata><id>" + identity
-                + "</id><version>0.3.0-fixture.1</version></metadata></package>")
+                + "</id><version>" + SHARED_HOST[identity] + "</version></metadata></package>")
             archive.writestr("lib/net10.0/" + identity + ".dll", b"different assembly")
         document = read_json(i)
         document["packages"][package.name] = sha256(package)
@@ -294,8 +319,8 @@ def self_test(root: Path) -> dict:
         i.write_text(json.dumps(document), encoding="utf-8")
     case("ambiguous-manifest-case", alias, "case-insensitive Host runtime identity")
     def wrong_package(p, i, n, selected_version="0.3.0-stale", framework="net10.0"):
-        identity = SHARED_FOUNDATION[0]
-        package = n / (identity + ".0.3.0-fixture.1.nupkg")
+        identity = next(iter(SHARED_HOST))
+        package = n / (identity + "." + SHARED_HOST[identity] + ".nupkg")
         with zipfile.ZipFile(package, "w") as archive:
             archive.writestr(identity + ".nuspec", "<package><metadata><id>" + identity
                 + "</id><version>" + selected_version + "</version></metadata></package>")
@@ -305,7 +330,7 @@ def self_test(root: Path) -> dict:
         i.write_text(json.dumps(document), encoding="utf-8")
     case("wrong-shared-package-version", wrong_package, "package version differs")
     case("wrong-shared-target-framework", lambda p, i, n: wrong_package(p, i, n,
-        selected_version="0.3.0-fixture.1", framework="net9.0"), "one finite shared net10.0 assembly")
+        selected_version=next(iter(SHARED_HOST.values())), framework="net9.0"), "one finite shared net10.0 assembly")
     # Exercise the actual CI CLI without --version, not only a helper receiving explicit versions.
     repository = Path(__file__).resolve().parents[1]
     default_version = (repository / "VERSION").read_text(encoding="utf-8").strip()
@@ -326,7 +351,7 @@ def main() -> None:
     selection.add_argument("--qualification-inputs", type=Path)
     selection.add_argument("--qualification-root", type=Path)
     parser.add_argument("--version", help="Exact version; qualification-root defaults to repository VERSION.")
-    parser.add_argument("--packages", type=Path, help="Compare shared DLLs to the hash-bound runtime archives.")
+    parser.add_argument("--packages", type=Path, help="Complete F6 feed; defaults to the retained feed adjacent to its passed inputs.")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     repository = Path(__file__).resolve().parents[1]

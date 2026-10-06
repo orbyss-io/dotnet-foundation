@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.ClientCredentials",
+  "sourceSha256": {
+    "ClientCredentialsOptions.cs": "b19ebee8f18a6a43a14ee526f6ba839c3b64e499cd3fa9a5f620977b6d81dd4a",
+    "ClientCredentialsOptionsValidator.cs": "22a4b7dbe5042b68b8590c93aee93462016c3b6b7b92ac3877599ed91896ce22",
+    "ClientCredentialsRegistration.cs": "78a2d4f772e537e2cec059368274db11ac559980fe29b135136af46c7aade6ee",
+    "ClientCredentialsTokenProvider.cs": "1a40fd87e54ec51af42b0627c723371fd879e4f52b2ea9daf13eede2763cdd33",
+    "FoundationClientCredentialsFeature.cs": "539ca765d151ebb6c0a31ba7104ea7e5269f7bb4277276e581cb5b40f7fdf1dc",
+    "IClientCredentialsTokenProvider.cs": "b7d584d0b493f5933209ae155d1ade49113524040db82f6c305c843bd95787d9",
+    "OAuthAccessToken.cs": "9a0e8428561080296e32257e46a15c5b9f8b0ba5f4d446669683697266cfc841"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "client-credentials",
+      "typeName": "Orbyss.Foundation.Authentication.ClientCredentials.ClientCredentialsOptions",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication.ClientCredentials"
+        ],
+        "configuration": [
+          "Foundation:Authentication:ClientCredentials"
+        ]
+      },
+      "settings": [
+        {
+          "property": "Registrations",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minProperties": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets registrations keyed by the application-owned token-source name."
+        }
+      ],
+      "semanticConstraints": [
+        "Endpoints/base addresses must be absolute HTTPS without query/fragment. Loopback HTTP is accepted only in Development with the explicit development override.",
+        "Named registration keys must not be blank and are compared ordinally.",
+        "Required string settings must not be empty or whitespace.",
+        "Configuration is metadata only; token clients and downstream requests are never initialized or executed by export.",
+        "Each scope is a nonblank individual OAuth scope value without whitespace; this validator does not require uniqueness."
+      ]
+    },
+    {
+      "scope": "client-credentials-registration",
+      "typeName": "Orbyss.Foundation.Authentication.ClientCredentials.ClientCredentialsRegistration",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication.ClientCredentials"
+        ],
+        "configuration": [
+          "Foundation:Authentication:ClientCredentials"
+        ]
+      },
+      "settings": [
+        {
+          "property": "TokenEndpoint",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:TokenEndpoint",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "format": "uri"
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the absolute OAuth token endpoint."
+        },
+        {
+          "property": "ClientId",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:ClientId",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the OAuth client identifier."
+        },
+        {
+          "property": "ClientSecret",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:ClientSecret",
+          "required": true,
+          "secret": true,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the OAuth client secret supplied by a deployment secret provider."
+        },
+        {
+          "property": "ClientAuthenticationMethod",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:ClientAuthenticationMethod",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "client_secret_basic",
+              "client_secret_post"
+            ]
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets `client_secret_basic` or `client_secret_post`."
+        },
+        {
+          "property": "Scopes",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:Scopes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "items": {
+              "type": "string",
+              "pattern": "^\\S+$"
+            }
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the exact scopes requested for the machine identity."
+        },
+        {
+          "property": "RefreshBeforeExpirySeconds",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:RefreshBeforeExpirySeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 0,
+            "maximum": 300
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets how early a cached token is refreshed, in seconds."
+        },
+        {
+          "property": "TimeoutSeconds",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:TimeoutSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 60
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the token-endpoint request timeout, in seconds."
+        },
+        {
+          "property": "AllowHttpForLocalDevelopment",
+          "path": "Foundation:Authentication:ClientCredentials:Registrations:*:AllowHttpForLocalDevelopment",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether loopback HTTP is accepted during local development."
+        }
+      ],
+      "semanticConstraints": [
+        "Endpoints/base addresses must be absolute HTTPS without query/fragment. Loopback HTTP is accepted only in Development with the explicit development override.",
+        "Named registration keys must not be blank and are compared ordinally.",
+        "Required string settings must not be empty or whitespace.",
+        "Configuration is metadata only; token clients and downstream requests are never initialized or executed by export.",
+        "Each scope is a nonblank individual OAuth scope value without whitespace; this validator does not require uniqueness."
+      ]
+    }
+  ]
+}

@@ -17,4 +17,7 @@
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
+  <ItemGroup>
+    <FoundationSettingsMetadataDependency Include="../Orbyss.Foundation.Authentication/obj/$(Configuration)/$(TargetFramework)/orbyss-foundation/settings.json" />
+  </ItemGroup>
 </Project>

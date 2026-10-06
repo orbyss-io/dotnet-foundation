@@ -1,0 +1,422 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.SpaPkce",
+  "sourceSha256": {
+    "FoundationSpaPkceFeature.cs": "85cbe060e0151753bab3eb18798dbadea55f2a0b863ae3610ecc1316a48b8ef7",
+    "SpaPkceOptionsValidator.cs": "b8962d0fec5376c809aac568c42926da7a9f4c85cd8f1cb2c954a7d9fd14fd71",
+    "SpaPkceProfileMarker.cs": "1775cbae96726bc22498ba8e4737669cf058b4c0ff2cd0db94432edc5f968ec0"
+  },
+  "imports": [
+    {
+      "typeName": "Orbyss.Foundation.Authentication.FoundationWebOptions",
+      "packageId": "Orbyss.Foundation.Authentication",
+      "scope": "web"
+    }
+  ],
+  "contracts": [
+    {
+      "scope": "spa-pkce",
+      "typeName": "Orbyss.Foundation.Authentication.FoundationWebOptions",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication.SpaPkce"
+        ],
+        "configuration": []
+      },
+      "settings": [
+        {
+          "property": "Authority",
+          "path": "Foundation:Web:Authority",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "format": "uri"
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the OIDC issuer authority."
+        },
+        {
+          "property": "BackchannelAuthority",
+          "path": "Foundation:Web:BackchannelAuthority",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "BackchannelAuthority"
+        },
+        {
+          "property": "ClientId",
+          "path": "Foundation:Web:ClientId",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the registered OAuth client identifier."
+        },
+        {
+          "property": "ClientSecret",
+          "path": "Foundation:Web:ClientSecret",
+          "required": false,
+          "secret": true,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the confidential BFF client secret."
+        },
+        {
+          "property": "Audience",
+          "path": "Foundation:Web:Audience",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the protected API audience."
+        },
+        {
+          "property": "Scopes",
+          "path": "Foundation:Web:Scopes",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\x21\\x23-\\x5B\\x5D-\\x7E]+$"
+            }
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the scopes requested during interactive authentication. Explicit shell configuration replaces these fallback defaults."
+        },
+        {
+          "property": "RoleClaim",
+          "path": "Foundation:Web:RoleClaim",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the provider claim containing normalized application roles."
+        },
+        {
+          "property": "PermissionClaim",
+          "path": "Foundation:Web:PermissionClaim",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the canonical claim containing application permission identities."
+        },
+        {
+          "property": "RolePermissions",
+          "path": "Foundation:Web:RolePermissions",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets provider-role to canonical application-permission mappings."
+        },
+        {
+          "property": "ScopePermissions",
+          "path": "Foundation:Web:ScopePermissions",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets provider-scope to canonical application-permission mappings."
+        },
+        {
+          "property": "AllowedOrigins",
+          "path": "Foundation:Web:AllowedOrigins",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the exact origins permitted by the direct SPA profile."
+        },
+        {
+          "property": "CallbackPath",
+          "path": "Foundation:Web:CallbackPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the local OIDC authorization callback path."
+        },
+        {
+          "property": "SignedOutCallbackPath",
+          "path": "Foundation:Web:SignedOutCallbackPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the local callback path used after provider logout."
+        },
+        {
+          "property": "RemoteSignOutPath",
+          "path": "Foundation:Web:RemoteSignOutPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the path receiving provider-initiated logout notifications."
+        },
+        {
+          "property": "AccessDeniedPath",
+          "path": "Foundation:Web:AccessDeniedPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the interactive access-denied path."
+        },
+        {
+          "property": "CookieName",
+          "path": "Foundation:Web:CookieName",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the host-only encrypted session cookie name."
+        },
+        {
+          "property": "DiscoveryTimeoutSeconds",
+          "path": "Foundation:Web:DiscoveryTimeoutSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1,
+            "maximum": 30
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the discovery and JWKS readiness budget in seconds."
+        },
+        {
+          "property": "RemoteAuthenticationTimeoutSeconds",
+          "path": "Foundation:Web:RemoteAuthenticationTimeoutSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the maximum duration of an interactive remote authentication operation."
+        },
+        {
+          "property": "SessionIdleMinutes",
+          "path": "Foundation:Web:SessionIdleMinutes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the sliding server session idle lifetime in minutes."
+        },
+        {
+          "property": "SessionAbsoluteMinutes",
+          "path": "Foundation:Web:SessionAbsoluteMinutes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 1
+          },
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the non-extendable server session lifetime in minutes."
+        },
+        {
+          "property": "AllowHttpForLocalDevelopment",
+          "path": "Foundation:Web:AllowHttpForLocalDevelopment",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether loopback/container HTTP is accepted during local development."
+        }
+      ],
+      "semanticConstraints": [
+        "ClientSecret must be empty for the public SPA-PKCE profile; a configured secret is rejected and no secret values are emitted.",
+        "AllowedOrigins must contain at least one exact absolute origin with root path and no wildcard, query or fragment.",
+        "The supported SPA-PKCE structural schema complements this publisher-owned profile contract; it does not replace common authentication validation.",
+        "Export never creates a WebApplication, initializes bearer handlers or contacts discovery/identity services."
+      ]
+    }
+  ]
+}

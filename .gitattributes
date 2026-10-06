@@ -1,3 +1,5 @@
 * text=auto eol=lf
 *.zip binary
 
+# Exact upstream snapshots are provenance inputs, including original whitespace.
+src/Orbyss.Foundation.Host/metadata/vendor-settings/sources/** -text -whitespace
