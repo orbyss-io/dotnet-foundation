@@ -23,14 +23,26 @@
   <ItemGroup Condition="'$(FoundationSettingsMetadataSource)' != ''">
     <None Include="$(FoundationSettingsMetadata)" Pack="true" PackagePath="orbyss-foundation/settings.json" Visible="false" />
   </ItemGroup>
-  <Target Name="FoundationCompileSettingsMetadata" AfterTargets="CoreCompile" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+  <Target Name="FoundationCompileSettingsMetadata" AfterTargets="Build" DependsOnTargets="Compile;CopyFilesToOutputDirectory" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+    <PropertyGroup>
+      <FoundationSettingsDesignTime>false</FoundationSettingsDesignTime>
+      <FoundationSettingsDesignTime Condition="'$(DesignTimeBuild)' == 'true'">true</FoundationSettingsDesignTime>
+      <FoundationSettingsCompilerSkipped>false</FoundationSettingsCompilerSkipped>
+      <FoundationSettingsCompilerSkipped Condition="'$(SkipCompilerExecution)' == 'true'">true</FoundationSettingsCompilerSkipped>
+    </PropertyGroup>
     <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
       PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
-      CompiledAssembly="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" />
+      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(ReferencePathWithRefAssemblies)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" />
   </Target>
   <Target Name="FoundationEmitSettingsMetadata" BeforeTargets="GenerateNuspec" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+    <PropertyGroup>
+      <FoundationSettingsDesignTime>false</FoundationSettingsDesignTime>
+      <FoundationSettingsDesignTime Condition="'$(DesignTimeBuild)' == 'true'">true</FoundationSettingsDesignTime>
+      <FoundationSettingsCompilerSkipped>false</FoundationSettingsCompilerSkipped>
+      <FoundationSettingsCompilerSkipped Condition="'$(SkipCompilerExecution)' == 'true'">true</FoundationSettingsCompilerSkipped>
+    </PropertyGroup>
     <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
       PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
-      CompiledAssembly="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" ValidateOnly="true" />
+      CompiledAssembly="$(TargetPath)" LangVersion="$(LangVersion)" ReferenceFiles="@(ReferencePathWithRefAssemblies)" CompilerExecutionSkipped="$(FoundationSettingsCompilerSkipped)" DesignTimeCompilation="$(FoundationSettingsDesignTime)" PackedFiles="@(_BuildOutputInPackage)" ValidateOnly="true" />
   </Target>
 </Project>

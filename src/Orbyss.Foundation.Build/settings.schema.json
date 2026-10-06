@@ -26,7 +26,8 @@
       "additionalProperties": {
         "type": "string",
         "pattern": "^[a-f0-9]{64}$"
-      }
+      },
+      "maxProperties": 512
     },
     "contracts": {
       "type": "array",
@@ -48,11 +49,13 @@
           },
           "owner": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 4096
           },
           "scope": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 4096
           },
           "complete": {
             "type": "boolean"
@@ -63,7 +66,8 @@
             "additionalProperties": {
               "type": "string",
               "pattern": "^[a-f0-9]{64}$"
-            }
+            },
+            "maxProperties": 512
           },
           "settings": {
             "type": "array",
@@ -83,7 +87,8 @@
               "properties": {
                 "path": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 },
                 "required": {
                   "type": "boolean"
@@ -96,16 +101,19 @@
                 },
                 "binding": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 },
                 "precedence": {
                   "type": "array",
                   "uniqueItems": true,
                   "items": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 4096
                   },
-                  "minItems": 1
+                  "minItems": 1,
+                  "maxItems": 128
                 },
                 "reload": {
                   "enum": [
@@ -116,7 +124,8 @@
                 },
                 "description": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 },
                 "type": {
                   "enum": [
@@ -127,7 +136,26 @@
                     "array"
                   ]
                 },
-                "default": {}
+                "default": {
+                  "allOf": [
+                    {
+                      "if": {
+                        "type": "string"
+                      },
+                      "then": {
+                        "maxLength": 16384
+                      }
+                    },
+                    {
+                      "if": {
+                        "type": "array"
+                      },
+                      "then": {
+                        "maxItems": 256
+                      }
+                    }
+                  ]
+                }
               },
               "additionalProperties": false,
               "allOf": [
@@ -148,19 +176,23 @@
                   }
                 }
               ]
-            }
+            },
+            "maxItems": 256
           },
           "semanticConstraints": {
             "type": "array",
             "uniqueItems": true,
             "items": {
               "type": "string",
-              "minLength": 1
-            }
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "maxItems": 128
           }
         },
         "additionalProperties": false
-      }
+      },
+      "maxItems": 32
     },
     "assembly": {
       "type": "object",
