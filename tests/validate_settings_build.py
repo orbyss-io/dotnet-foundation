@@ -175,6 +175,35 @@ public static class Startup {
         assert 'PKSM001' in output and 'limit' in output,name
         assert packed.read_bytes()==limit_pack and emitted.read_bytes()==limit_metadata,name
         limits.append(name)
+    # Bounded source/declarations can expand into >1 GiB JSON through reused const values.
+    # The encoder admits each setting before another, with one non-growing 2 MiB buffer.
+    expanded_array='['+','.join('D.V' for _ in range(256))+']'
+    expansions=[]
+    for name,extra_count in [('expanded-single-array',0),('expanded-many-properties',252)]:
+        extra=''.join(f' public string[] Extra{n} {{ get; set; }} = {expanded_array};\n' for n in range(extra_count))
+        text=source.replace('["one", "two"]',expanded_array).replace(' public int Limit',extra+' public int Limit')
+        text+='public static class D { public const string V = "'+('x'*16384)+'"; }\n'
+        assert len(text.encode())<1_048_576
+        (work/'Options.cs').write_text(text,encoding='utf-8',newline='\n')
+        value=copy.deepcopy(metadata);value['sourceSha256']['Options.cs']=sha(text)
+        value['contracts'][0]['settings'] += [fields('Extra'+str(n)) for n in range(extra_count)]
+        declaration_text=json.dumps(value);assert len(declaration_text.encode())<1_048_576
+        path.write_text(declaration_text)
+        output=fixture.run(command,work,work/(name+'.log'),env=environment,expected=1)
+        assert 'PKSM001' in output and 'fixed buffer; no growth' in output,name
+        assert 'OutOfMemory' not in output and 'MSB4018' not in output,name
+        assert packed.read_bytes()==limit_pack and emitted.read_bytes()==limit_metadata,name
+        expansions.append(dict(case=name,sourceBytes=len(text.encode()),declarationBytes=len(declaration_text.encode()),
+                               theoreticalDefaultBytes=(extra_count+1)*256*16384,encoderBufferBytes=2_097_152))
+    # The final assembly gate rejects length before hashing, and hashes allowed files as streams.
+    (work/'Options.cs').write_text(source,encoding='utf-8',newline='\n');path.write_text(json.dumps(metadata))
+    saved_bin=bin_assembly.read_bytes()
+    try:
+        with bin_assembly.open('r+b') as stream:stream.truncate(268_435_457)
+        output=fixture.run(command+['--no-build'],work,work/'assembly-limit.log',env=environment,expected=1)
+        assert 'Settings assembly exceeds 256 MiB limit' in output
+        assert packed.read_bytes()==limit_pack and emitted.read_bytes()==limit_metadata
+    finally:bin_assembly.write_bytes(saved_bin)
     (work/'Options.cs').write_text(source,encoding='utf-8',newline='\n');path.write_text(json.dumps(metadata))
     fixture.run(command,work,work/'limits-restored.log',env=environment)
     # A reviewed source change updates the extracted default; it cannot retain a manually copied value.
@@ -188,6 +217,6 @@ public static class Startup {
     metadata['contracts'][0]['complete']=False;metadata['contracts'][0]['settings'].pop();path.write_text(json.dumps(metadata))
     fixture.run(command,work,work/'partial.log',env=environment)
     assert json.loads(emitted.read_text())['contracts'][0]['complete'] is False
-    (work/'results.json').write_text(json.dumps(dict(package=str(package),packageSha256=hashlib.sha256(package.read_bytes()).hexdigest(),rejected=[n for n,_ in invalid]+list(source_cases),publisherNeverStarted=True,changedDefaultDerived=True,outputsPreserved=True,binMutationRejected=True,constantDefaultDerived=True,conditionalFeatureCompiledDefault=9,conditionalMetadataRejected=True,skipCompilerRejected=True,designTimeRejected=True,directTargetCompiles=True,limitsRejected=limits),indent=2)+'\n')
+    (work/'results.json').write_text(json.dumps(dict(package=str(package),packageSha256=hashlib.sha256(package.read_bytes()).hexdigest(),rejected=[n for n,_ in invalid]+list(source_cases),publisherNeverStarted=True,changedDefaultDerived=True,outputsPreserved=True,binMutationRejected=True,constantDefaultDerived=True,conditionalFeatureCompiledDefault=9,conditionalMetadataRejected=True,skipCompilerRejected=True,designTimeRejected=True,directTargetCompiles=True,limitsRejected=limits,expansionRejected=expansions,assemblySizeRejected=True),indent=2)+'\n')
     print(f'Installed settings task: source-derived defaults, secret omission, independent multi-feature descriptor, {len(invalid)+len(source_cases)} rejection cases and output preservation passed. Evidence: {work}/results.json')
 if __name__=='__main__':main()

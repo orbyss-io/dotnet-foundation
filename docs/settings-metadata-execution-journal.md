@@ -96,3 +96,40 @@ The concurrent owner's newer runtime fixes after6d9 must be overlaid and reviewe
 its runtime/Host/F6 release qualification. Only this companion amendment is proposed here;
 no full-framework coverage, new provider/ASP.NET/Host metadata, publication, stable tag,
 paid worker, complete Release suite or original/dirty consumer modification is claimed.
+
+
+## Expansion/allocation review follow-on
+
+The owner independently found that5ef85c8 encoded the entire JSON string before checking
+2 MiB and used unbounded ReadAllBytes for assembly hashes. Preserve that candidate; repair
+now uses fixed-buffer encoding, per-setting cumulative admission before retaining more DTO
+nodes, typed constant JsonValues without duplicated encoded elements, and streamed bounded
+assembly hashes. Constraints and existing receipt byte reads are bounded as well.
+Installed expansion and sparse assembly-size acceptance pending. The initial build correctly
+rejected a nested helper type via ORB1003/ORB1004; the buffer was moved to its own source file
+and private helper order corrected, without suppressing analyzers.
+Runtime owner has newer cf495f7 source; overlay/requalify before publication remains its job.
+
+Final expansion evidence sealed against exact streaming package bytes:
+- artifacts/settings-build/tmp5hkdpj78/results.json: all prior base/review/limit tests pass,
+  plus admitted source17,925bytes/declaration1,256bytes expanding to4,194,304 default bytes,
+  and source287,203bytes/declaration64,036bytes expanding to1,061,158,912 default bytes.
+  Both reject inside the fixed2,097,152-byte encoding buffer, without buffer growth,
+  OutOfMemory/MSB4018, owner initialization or replacing metadata/packed output.
+  Sparse final DLL length268,435,457 rejects before streamed hashing at256MiB cap.
+- artifacts/feature-build/tmpl00xi6k5/descriptor-validation.json: 31 descriptor negatives
+  and both supported schemas pass with this exact final Build archive.
+- artifacts/settings-owner/tmpx0udxd2a/results.json: current Json default/admission and
+  assembly-byte equality pass with streaming output generation.
+- Program Kit settings-streaming-integration.log: actual final Json/Collections/compiler
+  schema metadata passes native package/hash/assembly checks and independent Python-I receiver.
+  No Program Kit product code changes in this follow-on; its prior70/70 bounded Development
+  evidence remains applicable to unchanged receiver code. No new Release receipt is implied.
+
+The buffer stores exactly one2MiB encoding allocation, reused for constraints/admission/final
+output. Incremental per-setting encoding bounds retained DTO expansion before another setting
+is processed; typed JsonValues share primitive strings without pre-encoding each JsonElement.
+Final output copying is also bounded, and source/assembly receipts admit finite file lengths.
+No ToJsonString/unbounded ReadAllBytes remains on output/assembly processing. Older candidates
+5ef85c8 and0cd7947 remain preserved; this follow-on is required before integration/publication.
+The runtime owner's newer cf495f7 fixes still require its source overlay and full qualification.
