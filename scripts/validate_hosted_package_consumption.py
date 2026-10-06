@@ -49,6 +49,22 @@ def main():
         packaged.write_restore_configuration(repository, packages, restore_config)
         packaged.restore_runtime_closure(root, identities, version, args.dotnet, restore_config,
             root / "nuget-cache", ["-p:TargetFramework=net10.0", "-p:RestorePackagesWithLockFile=true"], root, root)
+        # Host contracts are deliberately private in feature nuspec dependencies.
+        # Restore their exact central pins explicitly so shared-DLL admission proves
+        # the native Host bytes without treating these archives as loader roots.
+        host_contracts = ET.Element("Project", {"Sdk": "Microsoft.NET.Sdk"})
+        properties = ET.SubElement(host_contracts, "PropertyGroup")
+        ET.SubElement(properties, "RestoreEnablePackagePruning").text = "false"
+        references = ET.SubElement(host_contracts, "ItemGroup")
+        for identity in ("CShells.Abstractions", "CShells.AspNetCore.Abstractions"):
+            ET.SubElement(references, "PackageReference", {"Include": identity, "Version": f"[{cshells_version}]"})
+        host_contract_project = root / "HostProvidedContracts.csproj"
+        ET.indent(host_contracts, space="  ")
+        ET.ElementTree(host_contracts).write(host_contract_project, encoding="utf-8", xml_declaration=True)
+        contract_restore = packaged.restore_command(args.dotnet, host_contract_project, restore_config,
+            root / "nuget-cache", ["-p:TargetFramework=net10.0", "-p:RestorePackagesWithLockFile=true"])
+        packaged.run_command(contract_restore, root, root / "host-contracts-restore.log")
+        packaged.run_command([*contract_restore, "--locked-mode"], root, root / "host-contracts-locked-restore.log")
         packaged.copy_restored_packages(root / "nuget-cache", feed)
         host_hashes = packaged.preserve_host_payload(host, root / "host")
         host = root / "host" / host.name
