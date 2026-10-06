@@ -193,10 +193,12 @@ def copy_runtime_feed(feed: Path, target: Path, host: Path, version: str, cshell
 
 def verify_neutral_host(host: Path) -> None:
     """The platform Host supplies transport/contracts, never a selected Foundation feature."""
-    assert not any(path.name.startswith("Orbyss.Foundation.") and path.name != host.name
-                   for path in host.parent.glob("*.dll")), "Host contains an unconditional Foundation feature dependency."
+    assert not any(path.name.casefold().startswith("orbyss.foundation.") and path != host
+                   for path in host.parent.rglob("*") if path.is_file() and path.suffix.casefold() == ".dll"), (
+        "Host contains an unconditional Foundation feature dependency.")
     dependencies = json.loads(host.with_suffix(".deps.json").read_text(encoding="utf-8"))
-    assert not any(identity.startswith("Orbyss.Foundation.") and not identity.startswith("Orbyss.Foundation.Host/")
+    assert not any(identity.rsplit("/", 1)[0].casefold().startswith("orbyss.foundation.")
+                   and identity.rsplit("/", 1)[0] != "Orbyss.Foundation.Host"
                    for identity in dependencies["libraries"]), "Host references Foundation feature packages."
     configuration = json.loads((host.parent / "appsettings.json").read_text(encoding="utf-8"))
     shared = configuration["Nuplane"]["Loading"]["SharedAssemblies"]

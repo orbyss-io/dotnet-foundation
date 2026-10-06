@@ -180,7 +180,7 @@ def validate(payload: Path, inputs_path: Path, version: str | None, packages: Pa
             + repr(sorted(expected.keys() - actual.keys())) + "; extra=" + repr(sorted(actual.keys() - expected.keys())))
     changed = [relative for relative in sorted(expected) if actual[relative] != expected[relative]]
     require(not changed, "Runtime payload bytes differ from F6: " + repr(changed))
-    require(not any(name.startswith("Orbyss.Foundation.") and name.endswith(".dll")
+    require(not any(PurePosixPath(name).name.casefold().startswith("orbyss.foundation.") and name.casefold().endswith(".dll")
                     and name != "Orbyss.Foundation.Host.dll" for name in actual),
             "Neutral Host cannot provide Foundation feature runtime assemblies.")
     bindings = verify_archives(packages or inputs_path.parent / "feed", selected, inputs, expected)
@@ -264,6 +264,13 @@ def self_test(root: Path) -> dict:
         document["hostRuntimeFiles"] = payload_inventory(p)[0]
         i.write_text(json.dumps(document), encoding="utf-8")
     case("rehashed-host-feature-coupling", coupled_host, "cannot provide Foundation feature")
+    def nested_coupling(p, i, n):
+        path = p / "runtimes/linux-x64/native/ORBYSS.FOUNDATION.EXECUTION.DLL"
+        path.write_bytes(b"unselected native-path Foundation feature")
+        document = read_json(i)
+        document["hostRuntimeFiles"] = payload_inventory(p)[0]
+        i.write_text(json.dumps(document), encoding="utf-8")
+    case("rehashed-case-varied-native-feature-coupling", nested_coupling, "cannot provide Foundation feature")
     case("unbound-inventory", lambda p, i, n: change_json(i, "hostRuntimeFiles", {}), "complete Host runtime")
     def missing_required_shells(p, i, n):
         (p / "shells.json").unlink()
