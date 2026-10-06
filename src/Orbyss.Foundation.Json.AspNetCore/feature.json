@@ -8,12 +8,34 @@
       "runtimeDependencies": [],
       "routes": [],
       "dormant": true,
-      "composeForOpenApi": false,
+      "composeForOpenApi": true,
       "requiresContractCoverage": false
     }
   ],
   "sourceSha256": {
-    "FoundationJsonFeature.cs": "10d9466818c0bcbefde70b88d881b4a9acec72e0974089e315df8eb19a5cff3f",
-    "FoundationJsonOptions.cs": "b8f75fdcde620603f6a9c0464ee164a39991c55ec9382a90c537bdaa2a68239b"
+    "FoundationJsonEndpointExtensions.cs": "2b051b476ec7266e3ac4d2c59575cf4d76d8cfee83489563160afb214b75fcfb",
+    "FoundationJsonFeature.cs": "e6a75dbc079576ad477a57dd58b3a1dffceba4f572b293f653ff7d29e7dc1e0c",
+    "FoundationJsonOptions.cs": "ac87eee0ae1958fe20c17a73c27b2da0a914b87e5a80ee0368253c8e36d82559",
+    "FoundationJsonRequestExceptionHandler.cs": "49c01e2ec35783ca4a86e2c96e3b18f78783326f72f3d75f285183994c8d6c0a",
+    "FoundationJsonResponseExceptionHandler.cs": "c9a8fb095d17f574dd01f9e1cc25c6e425b1e5bf796a077427e582ade85dbe44",
+    "FoundationJsonServiceCollectionExtensions.cs": "589a4b2caf5247bc5fa744c0229abfac5bdf370ee4315d5947765cd0495a5ba3",
+    "IJsonContractMetadata.cs": "3f298dbdc166f07191b84ed717d5740f4c2ccbe23dbfc184eec764f6549846e6",
+    "IJsonProfileResult.cs": "d6842a0e6efc65588ba23640b9fb96922b3dd7fa1b0fe34f5dcad4b87f4dd197",
+    "IJsonRequestReader.cs": "556f48fe694968b8ddd306bcc1ddc407c057e96287390703586f172c93c61309",
+    "IJsonResponseFactory.cs": "8af0ff5ac8fedab9fa4d7400f9ba816a21fefad03c94cec72ab31c801775caa6",
+    "JsonAdmissionPipeReader.cs": "6871febf985e8b2a74637e8cae4cfd87eff5a3c584afde82a66a91cb481915d3",
+    "JsonAdmissionPipeWriter.cs": "efbe91d6b132253a6f49a8288b5b3f1a2c15cc50a36e1b41406eec2ae8130c50",
+    "JsonAdmissionRequestBodyPipeFeature.cs": "50a18586b234d2ef6d46cf9a9717816ba3b7bc443f79173caa23c9572ccbc9e0",
+    "JsonAdmissionResponseBodyFeature.cs": "4c2e6f06372824f376e823418b9c7674669bcf86dcb84dfa9f79d29c28d493fa",
+    "JsonAdmissionResult.cs": "f1ad6dadce5f93eb3c7460acfb026ed232b27da3bc571dcc8b09a080ac1eaef1",
+    "JsonAdmissionState.cs": "44216a09ccfa325bcd7fedca3cdf31bea9aee83353a3b0abcd2206156340f5f1",
+    "JsonAdmissionStream.cs": "cc1bc4c6c32d3084471110b32802cc52fe97ce4ac529abfe77332ace2f9857ab",
+    "JsonContractDirection.cs": "abff4b897a0f0a1e64a471b87bd7d782ea87e70badea2564f13334ab55057613",
+    "JsonContractMetadata.cs": "d65bbeb3a39e6f4f46ace1b172935c10d5fdfe26d6a7584f1897163e07b4c8cd",
+    "JsonContractOperationTransformer.cs": "2e0da06b2847c8e2b5e6959a27363bd05a0677d6b5414d41ab0173ff1158f0db",
+    "JsonPageOptions.cs": "c8096fc696471f9e4670a4ad115f5e25cf6e1d815a5666a8ab199497be09014d",
+    "JsonProfileResult.cs": "cf770b3a3dd90d9aa909d31df7da3afc8e25f662a7ef7d1140f319e7de37764f",
+    "JsonRequestReader.cs": "c76387551f72a50bb84c5bd6f5cf94e6a41e09456c3ad839e23736080a5cc351",
+    "JsonResponseFactory.cs": "4dd8451ea4ce163f30f519274d837628847fdb6bb532efc2b7f83fa9b9ff4de7"
   }
 }

@@ -66,6 +66,8 @@ internal static class OptionsBindingProbe
         }
         foreach (var selection in new[]
         {
+            "\"RoleClaim\":\"urn:orbyss-foundation:authentication:validated-issuer\"",
+            "\"PermissionClaim\":\"urn:orbyss-foundation:authentication:validated-subject\"",
             "\"CallbackPath\":null", "\"CallbackPath\":\"//other.example/callback\"",
             "\"CallbackPath\":\"/oidc/{value}\"", "\"CallbackPath\":\"/oidc/callback?x=1\"",
             "\"CallbackPath\":\"/oidc/../callback\"", "\"CallbackPath\":\"/signin-oidc/\"",

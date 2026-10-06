@@ -14,7 +14,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Orbyss.Foundation.Authentication;
+using Orbyss.Foundation.Authentication.Core;
 using Orbyss.Foundation.WebDefaults;
+using Orbyss.Foundation.Json;
+using Orbyss.Foundation.Json.AspNetCore;
+using Orbyss.Foundation.Web.ProblemDetails;
+using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 namespace Orbyss.Foundation.Authentication.BffCookie;
 
@@ -23,15 +28,9 @@ namespace Orbyss.Foundation.Authentication.BffCookie;
     name: "Orbyss.Foundation.Authentication.BffCookie",
     DisplayName = "Orbyss Foundation BFF Cookie Authentication",
     Description = "Provides server-held OIDC tokens, an opaque session cookie, antiforgery, and BFF endpoints.",
-    DependsOn = [typeof(FoundationAuthenticationFeature), typeof(FoundationWebDefaultsFeature)])]
+    DependsOn = [typeof(FoundationAuthenticationFeature), typeof(FoundationWebDefaultsFeature), typeof(FoundationJsonFeature)])]
 public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareShellFeature
 {
-    /// <summary>Preserves the token-validated issuer after protocol claim actions run.</summary>
-    private const string ValidatedIssuerClaim = "urn:orbyss-foundation:authentication:validated-issuer";
-
-    /// <summary>Preserves the token-validated subject after protocol claim actions run.</summary>
-    private const string ValidatedSubjectClaim = "urn:orbyss-foundation:authentication:validated-subject";
-
     /// <summary>Names the accepted antiforgery header.</summary>
     public const string AntiforgeryHeader = "X-CSRF-TOKEN";
 
@@ -44,6 +43,11 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     /// <inheritdoc />
     public void ConfigureServices(IServiceCollection services)
     {
+        var responseProfile = new JsonProfileKey(JsonProfileKeys.SuccessResponse);
+        var responseRequirement = new JsonProfileRequirement(JsonProfileKeys.TolerantResponse);
+        services.AddJsonResponseContract<BffUserResponse>(responseProfile, responseRequirement);
+        services.AddJsonResponseContract<BffAntiforgeryResponse>(responseProfile, responseRequirement);
+        services.AddJsonResponseContract<BffSignedOutResponse>(responseProfile, responseRequirement);
         services.AddSingleton<IFoundationAuthenticationProfile, BffCookieProfileMarker>();
         services.AddSingleton<IValidateOptions<FoundationWebOptions>, BffCookieOptionsValidator>();
         services.AddAuthentication(options =>
@@ -79,7 +83,7 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         foreach (var path in new[] { selected.CallbackPath, selected.SignedOutCallbackPath, selected.RemoteSignOutPath })
         {
             endpoints.MapMethods(path, ["GET", "POST"], (HttpContext context, IAuthenticationErrorWriter errorWriter) =>
-                errorWriter.WriteAsync(context, StatusCodes.Status400BadRequest, "authentication_callback_invalid"))
+                errorWriter.WriteAsync(context, StatusCodes.Status400BadRequest, AuthenticationErrorCodes.CallbackInvalid))
                 .WithMetadata(new WebResponseMetadata(Private: true))
                 .AllowAnonymous()
                 .ExcludeFromDescription();
@@ -92,21 +96,17 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                 [OpenIdConnectDefaults.AuthenticationScheme]);
         }).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
-        endpoints.MapGet("/bff/user", WriteUserAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        endpoints.MapGet("/bff/user", WriteUserAsync).WithJsonResponse<BffUserResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
-        endpoints.MapGet("/bff/antiforgery", (HttpContext context, IAntiforgery antiforgery) =>
+        endpoints.MapGet("/bff/antiforgery", (HttpContext context, IAntiforgery antiforgery, IJsonResponseFactory<BffAntiforgeryResponse> responses) =>
         {
             var tokens = antiforgery.GetAndStoreTokens(context);
-            return Results.Ok(new
-            {
-                headerName = AntiforgeryHeader,
-                formFieldName = AntiforgeryFormField,
-                requestToken = tokens.RequestToken
-            });
-        }).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+            return responses.Create(new(AntiforgeryHeader, AntiforgeryFormField, tokens.RequestToken));
+        }).WithJsonResponse<BffAntiforgeryResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
         endpoints.MapPost("/bff/logout", LogoutAsync).WithMetadata(new WebResponseMetadata(Private: true)).RequireAuthorization();
-        endpoints.MapGet("/bff/signed-out", () => Results.Ok(new { signedOut = true })).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        endpoints.MapGet("/bff/signed-out", (IJsonResponseFactory<BffSignedOutResponse> responses) => responses.Create(new(true)))
+            .WithJsonResponse<BffSignedOutResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
         endpoints.MapGet(selected.AccessDeniedPath, WriteAccessDeniedAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
     }
 
@@ -134,11 +134,27 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                     options.Events.OnRedirectToLogin = context => ApiRedirectAsErrorAsync(
                         context,
                         StatusCodes.Status401Unauthorized,
-                        "authentication_required");
+                        AuthenticationErrorCodes.AuthenticationRequired);
                     options.Events.OnRedirectToAccessDenied = context => ApiRedirectAsErrorAsync(
                         context,
                         StatusCodes.Status403Forbidden,
-                        "authorization_denied");
+                        AuthenticationErrorCodes.AuthorizationDenied);
+                    options.Events.OnSigningIn = context =>
+                    {
+                        if (context.Principal is null || !context.HttpContext.RequestServices
+                            .GetRequiredService<IValidatedAccountIdentityReader>().TryRead(context.Principal, out _))
+                        {
+                            throw new InvalidOperationException("A cookie ticket requires one validated account identity.");
+                        }
+                        return Task.CompletedTask;
+                    };
+                    options.Events.OnValidatePrincipal = async context =>
+                    {
+                        if (context.Principal is not null && context.HttpContext.RequestServices
+                            .GetRequiredService<IValidatedAccountIdentityReader>().TryRead(context.Principal, out _)) return;
+                        context.RejectPrincipal();
+                        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
+                    };
                 });
     }
 
@@ -193,29 +209,31 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                 options.TokenValidationParameters = ValidationParameters(settings, settings.ClientId);
                 options.Events.OnTokenValidated = context =>
                 {
-                    var issuer = context.Principal?.FindFirstValue("iss");
-                    var subject = context.Principal?.FindFirstValue("sub");
-                    if (string.IsNullOrWhiteSpace(issuer) || string.IsNullOrWhiteSpace(subject))
+                    if (!ValidatedIdentityTicketProjection.Canonicalize(context))
                     {
-                        context.Fail("The validated OpenID Connect identity requires issuer and subject claims.");
-                        return Task.CompletedTask;
+                        context.Fail("The validated OpenID Connect identity requires one authenticated identity and one issuer-subject pair.");
                     }
-
-                    var identity = (ClaimsIdentity)context.Principal!.Identity!;
-                    identity.AddClaim(new Claim(ValidatedIssuerClaim, issuer));
-                    identity.AddClaim(new Claim(ValidatedSubjectClaim, subject));
+                    return Task.CompletedTask;
+                };
+                options.Events.OnTicketReceived = context =>
+                {
+                    if (!ValidatedIdentityTicketProjection.Admit(context, context.HttpContext.RequestServices
+                        .GetRequiredService<IValidatedAccountIdentityReader>()))
+                    {
+                        context.Fail("The validated account projection was not preserved through OpenID Connect claim actions.");
+                    }
                     return Task.CompletedTask;
                 };
                 options.Events.OnRemoteFailure = context =>
                 {
                     var code = context.Failure is HttpRequestException or TaskCanceledException
-                        ? "identity_provider_unavailable"
-                        : "authentication_callback_invalid";
+                        ? AuthenticationErrorCodes.IdentityProviderUnavailable
+                        : AuthenticationErrorCodes.CallbackInvalid;
                     loggerFactory.CreateLogger("Orbyss.Foundation.RemoteAuthentication")
                         .LogWarning(
-                            context.Failure,
-                            "OIDC remote authentication failed with stable code {AuthenticationErrorCode}.",
-                            code);
+                            "OIDC remote authentication failed with stable code {AuthenticationErrorCode} and failure kind {AuthenticationFailureKind}.",
+                            code,
+                            context.Failure?.GetType().Name ?? "unknown");
                     context.HandleResponse();
                     context.Response.Redirect($"{context.Request.PathBase}{settings.AccessDeniedPath}?code={code}");
                     return Task.CompletedTask;
@@ -264,40 +282,38 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     }
 
     /// <summary>Returns a minimal session projection only for a validated issuer-subject identity.</summary>
-    private static async Task WriteUserAsync(
+    private static async Task<IResult> WriteUserAsync(
         HttpContext context,
         IOptions<FoundationWebOptions> options,
-        IAuthenticationErrorWriter errorWriter)
+        IValidatedAccountIdentityReader identityReader,
+        IJsonResponseFactory<BffUserResponse> responses,
+        JsonProfileCatalog profiles)
     {
         var user = context.User;
-        if (user.Identity?.IsAuthenticated != true)
+        if (!user.Identities.Any(identity => identity.IsAuthenticated))
         {
-            await context.Response.WriteAsJsonAsync(new { authenticated = false }).ConfigureAwait(false);
-            return;
+            return responses.Create(new BffAnonymousUserResponse());
         }
 
-        var issuer = user.FindFirstValue(ValidatedIssuerClaim);
-        var subject = user.FindFirstValue(ValidatedSubjectClaim);
-        if (string.IsNullOrWhiteSpace(issuer) || string.IsNullOrWhiteSpace(subject))
+        if (!identityReader.TryRead(user, out var account))
         {
             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
-            await errorWriter.WriteAsync(
-                context,
-                StatusCodes.Status401Unauthorized,
-                "authentication_identity_invalid").ConfigureAwait(false);
-            return;
+            return FoundationProblemResults.Problem(new ProblemDefinition(
+                StatusCodes.Status401Unauthorized, AuthenticationErrorCodes.IdentityInvalid));
         }
 
-        var permissions = user.FindAll(options.Value.PermissionClaim).Select(claim => claim.Value)
-            .Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
-        await context.Response.WriteAsJsonAsync(new
+        var permissions = new SortedSet<string>(StringComparer.Ordinal);
+        var lowerBoundBytes = 0L;
+        var maximumBytes = profiles.Get(new JsonProfileKey(JsonProfileKeys.SuccessResponse)).MaxBytes;
+        foreach (var claim in user.FindAll(options.Value.PermissionClaim))
         {
-            authenticated = true,
-            issuer,
-            subject,
-            displayName = user.FindFirstValue("name"),
-            permissions
-        }).ConfigureAwait(false);
+            context.RequestAborted.ThrowIfCancellationRequested();
+            if (!permissions.Add(claim.Value)) continue;
+            lowerBoundBytes += claim.Value.Length + 3L;
+            if (lowerBoundBytes > maximumBytes) throw new JsonOutputLimitException();
+        }
+        return responses.Create(new BffAuthenticatedUserResponse(account.Issuer, account.Subject,
+            user.FindFirstValue("name"), permissions.ToArray()));
     }
 
     /// <summary>Maps interactive protocol failures to stable authentication error codes.</summary>
@@ -308,11 +324,11 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     {
         var (status, stableCode) = code switch
         {
-            "authentication_callback_invalid" =>
-                (StatusCodes.Status400BadRequest, "authentication_callback_invalid"),
-            "identity_provider_unavailable" =>
-                (StatusCodes.Status503ServiceUnavailable, "identity_provider_unavailable"),
-            _ => (StatusCodes.Status403Forbidden, "authorization_denied")
+            AuthenticationErrorCodes.CallbackInvalid =>
+                (StatusCodes.Status400BadRequest, AuthenticationErrorCodes.CallbackInvalid),
+            AuthenticationErrorCodes.IdentityProviderUnavailable =>
+                (StatusCodes.Status503ServiceUnavailable, AuthenticationErrorCodes.IdentityProviderUnavailable),
+            _ => (StatusCodes.Status403Forbidden, AuthenticationErrorCodes.AuthorizationDenied)
         };
         return errorWriter.WriteAsync(context, status, stableCode);
     }

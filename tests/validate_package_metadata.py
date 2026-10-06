@@ -22,19 +22,20 @@ def child(parent: ElementTree.Element, name: str) -> ElementTree.Element:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--packages", type=Path, default=ROOT / "artifacts/nuget")
+    parser.add_argument("--version", help="Exact private candidate version; tagged releases use VERSION by default.")
     args = parser.parse_args()
 
     if (ROOT / "src/dotnet").exists() or (ROOT / "eng").exists():
         raise AssertionError("Foundation must keep a flat src layout and repository tooling under scripts/.")
 
-    expected_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    expected_version = args.version or (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     expected_ids = {
         project.stem
         for project in (ROOT / "src").glob("Orbyss.Foundation*/*.csproj")
         if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build", "Orbyss.Foundation.OpenApi.Exporter"}
     }
-    if len(expected_ids) != 24:
-        raise AssertionError(f"Expected 24 Foundation package projects, found {len(expected_ids)}.")
+    if len(expected_ids) != 30:
+        raise AssertionError(f"Expected 30 Foundation package projects, found {len(expected_ids)}.")
 
     found: set[str] = set()
     for package in sorted(args.packages.glob("*.nupkg")):
@@ -50,6 +51,8 @@ def main() -> int:
         repository = child(metadata, "repository")
         if package_id not in expected_ids:
             raise AssertionError(f"Unexpected package ID: {package_id}")
+        if package_id in found:
+            raise AssertionError(f"Duplicate package ID: {package_id}")
         package_version = expected_version
         if package_id == 'Orbyss.Foundation.OpenApi.Exporter':
             project = ROOT / 'src' / package_id / (package_id + '.csproj')
@@ -62,6 +65,8 @@ def main() -> int:
             raise AssertionError(f"{package_id} is outside the Foundation namespace.")
         if b"ProgramKit" in nuspec:
             raise AssertionError(f"{package_id} still exposes a ProgramKit package identity.")
+        if b"Orbyss.Foundation.Build" in nuspec:
+            raise AssertionError(f"{package_id} exposes private descriptor build tooling.")
         source = ROOT / 'src' / package_id / 'feature.json'
         if source.is_file():
             with zipfile.ZipFile(package) as archive:
@@ -76,7 +81,7 @@ def main() -> int:
 
     if found != expected_ids:
         raise AssertionError(f"Package set mismatch. Missing={sorted(expected_ids - found)}, extra={sorted(found - expected_ids)}")
-    print("Exact 24-package Orbyss Foundation NuGet metadata contract passed.")
+    print("Exact 30-package Orbyss Foundation NuGet metadata contract passed.")
     return 0
 
 

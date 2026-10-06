@@ -33,8 +33,14 @@
         "resolved": "10.0.1",
         "contentHash": "IiWPd4j8JLNjSkyXl5hvJwX2ZENDVQVPDHYgZmYdw8+YkY2xp9iQt0vjdnAQZLpo/ipeW1xgOqfSBEnivKWPYQ=="
       },
-      "orbyss.foundation.json": {
+      "orbyss.foundation.collections.core": {
         "type": "Project"
+      },
+      "orbyss.foundation.json": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Collections.Core": "[0.2.4, )"
+        }
       },
       "orbyss.foundation.web.hostedpages": {
         "type": "Project",

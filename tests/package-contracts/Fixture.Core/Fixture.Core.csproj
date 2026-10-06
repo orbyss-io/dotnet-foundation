@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><PackageId>Foundation.ContractFixture.Core</PackageId><AssemblyName>$(PackageId)</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Orbyss.Foundation.Authentication.Core" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Collections.Core" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Web.ProblemDetails.Core" Version="[$(FoundationCandidateVersion)]" />
+  </ItemGroup>
+</Project>

@@ -49,22 +49,61 @@ jobs:
       - name: Validate Foundation contracts before publication
         run: python scripts/validate_foundation.py
 
+      - name: Capture the built portable Host for package and image qualification
+        run: dotnet publish src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj -c Release --no-build --no-restore -p:UseAppHost=false -o artifacts/host-runtime
+
       - name: Validate package family
         shell: bash
         run: |
           shopt -s nullglob
           packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 24 ]] || { echo "Expected 24 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
+          [[ ${#packages[@]} -eq 30 ]] || { echo "Expected 30 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
           for package in "${packages[@]}"; do
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done
           python tests/validate_package_metadata.py --packages artifacts/nuget
+          python tests/validate_settings_owner.py
 
       - name: Verify packaged settings-only host consumption
-        run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
+        run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget --host artifacts/host-runtime/Orbyss.Foundation.Host.dll
 
       - name: Verify packed OpenAPI exporter admission and evidence
         run: python tests/validate_openapi_exporter.py
+
+      - name: Verify packaged public contracts through Host and PostgreSQL
+        run: python tests/run_contract_package_qualification.py --host artifacts/host-runtime/Orbyss.Foundation.Host.dll
+
+      - name: Verify the exact qualified image payload
+        run: python tests/validate_host_release_payload.py --payload artifacts/host-runtime --qualification-root artifacts/contract-package-consumption --packages artifacts/nuget
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build both Host image platforms before publication
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: artifacts/host-runtime
+          file: src/Orbyss.Foundation.Host/Dockerfile.qualified
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Preserve qualification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: foundation-release-qualification-${{ github.sha }}
+          path: |
+            artifacts/**/*.log
+            artifacts/**/result.json
+            artifacts/**/results.json
+            artifacts/**/inputs.json
+            artifacts/**/observations.json
+            artifacts/**/provenance.json
+            artifacts/**/cancellation.json
+            artifacts/**/descriptor-validation.json
+          if-no-files-found: warn
 
       - name: Attest validated packages
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
@@ -96,18 +135,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-
       - name: Build and publish Foundation host
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
-          context: .
-          file: src/Orbyss.Foundation.Host/Dockerfile
+          context: artifacts/host-runtime
+          file: src/Orbyss.Foundation.Host/Dockerfile.qualified
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: mode=max
           sbom: true
+          cache-from: type=gha
           tags: |
             ghcr.io/orbyss-io/foundation-host:${{ github.ref_name }}
             ghcr.io/orbyss-io/foundation-host:latest

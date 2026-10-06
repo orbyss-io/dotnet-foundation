@@ -6,7 +6,8 @@
       "identity": "Orbyss.Foundation.Authentication.BffCookie",
       "featureDependencies": [
         "Orbyss.Foundation.Authentication",
-        "Orbyss.Foundation.WebDefaults"
+        "Orbyss.Foundation.WebDefaults",
+        "Orbyss.Foundation.Json.AspNetCore"
       ],
       "runtimeDependencies": [],
       "routes": [
@@ -23,10 +24,17 @@
     }
   ],
   "sourceSha256": {
-    "AntiforgeryMiddleware.cs": "5410785f15c26d52ee117ad7642c0f265e7b76fd3569cc8e916f7486df3b498d",
+    "AntiforgeryMiddleware.cs": "705115a97337c51333e62f60ec14611fce3ba00b5406f9b8c57dd4c1e9e9de38",
+    "BffAnonymousUserResponse.cs": "55904a2580363db689a0b84dd56b09dea147bb16bdd87fbc46790ee65a4c7de6",
+    "BffAntiforgeryResponse.cs": "ad0f48c98191cefb190ac640041d17bd9b709882bbda02dab0b7df9869c10240",
+    "BffAuthenticatedUserResponse.cs": "1544165ebd40a38c628828507ca47aa63520acd0c90c61545a10913683539bc1",
     "BffCookieOptionsValidator.cs": "771cf46c1cca7d8297809a40ec0adf3f9f0c6aa3cb2bb6e8c89e05770a0d598b",
     "BffCookieProfileMarker.cs": "65cad9fabf6e8cd9ea43d3b8009275b65c618ceba4175ae4433e138deaf9d5b8",
-    "DistributedTicketStore.cs": "84e481ce948c4f0b985034f0f3f8c25a948335347a269399e0f2ac0824dbbec8",
-    "FoundationBffCookieFeature.cs": "09a38ad09f9b2d50cd545055e2961ff4dfc74e99a7ddc3c744d501d4d974bff1"
+    "BffSignedOutResponse.cs": "08b7b279562ae9bdfcaba3d5d3839e09a580f46aac6ef1547a717cdd4b8acd29",
+    "BffUserResponse.cs": "f455b6ee0a3e392253849d159f88b635b9f46b29c1317bf1f861cfcaa3663538",
+    "DistributedTicketStore.cs": "73a7283f763cb5375454e45ec44838ed072fdde80e8fc7ee7bfac112d4b06583",
+    "FoundationBffCookieFeature.cs": "01f1f2b7039a65a504fca2fb3d73eb07ff772406d8b6ff194c645b657d82a00f",
+    "PendingValidatedIdentityProjection.cs": "0ee050ca083bb0be192442fbf5ff69d48b8de2d76b938b496de5eb2af58406a6",
+    "ValidatedIdentityTicketProjection.cs": "6effc67087a7ad6819b2ffe6a7647a09636b325186ef5e06561098629b08c403"
   }
 }

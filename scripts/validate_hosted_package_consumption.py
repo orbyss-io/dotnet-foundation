@@ -1,5 +1,6 @@
 """Verify settings-only hosted-page consumption through the actual Nuplane package-loading Host."""
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -7,24 +8,71 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 
 def main():
     repository = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(repository / "tests"))
+    import validate_contract_package_consumption as packaged
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--packages", type=Path, required=True)
+    parser.add_argument("--version", help="Exact private candidate version; tagged releases use VERSION.")
+    parser.add_argument("--dotnet", default="dotnet")
+    parser.add_argument("--host", type=Path)
     args = parser.parse_args()
     packages = args.packages.resolve()
-    host = repository / "src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll"
-    version = (repository / "VERSION").read_text().strip()
-    with tempfile.TemporaryDirectory(prefix="orbyss-host-consumption-") as directory:
+    host = (args.host or repository / "src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll").resolve()
+    version = args.version or (repository / "VERSION").read_text().strip()
+    central_packages = ET.parse(repository / "Directory.Packages.props")
+    cshells_version = next(entry.attrib["Version"] for entry in central_packages.findall(".//PackageVersion")
+        if entry.attrib.get("Include") == "CShells.AspNetCore.Abstractions")
+    evidence = repository / "artifacts/hosted-package-consumption"
+    evidence.mkdir(parents=True, exist_ok=True)
+    with nullcontext(tempfile.mkdtemp(prefix="run-", dir=evidence)) as directory:
         root = Path(directory)
-        (root / "packages").mkdir()
-        for name in ("Json", "WebDefaults", "Web.HostedPages"):
+        feed = root / "feed"
+        feed.mkdir()
+        identities = []
+        for name in ("Json", "WebDefaults", "Web.HostedPages", "Web.ProblemDetails"):
             package = packages / f"Orbyss.Foundation.{name}.{version}.nupkg"
-            shutil.copy2(package, root / "packages" / package.name)
+            shutil.copy2(package, feed / package.name)
+            identities.append("Orbyss.Foundation." + name)
+        # The native loader consumes the selected TFM nuspec closure, including
+        # dependencies the SDK may otherwise prune as provided by net10 itself.
+        for name in ("Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props"):
+            (root / name).write_text("<Project/>", encoding="utf-8")
+        restore_config = root / "NuGet.config"
+        packaged.write_restore_configuration(repository, packages, restore_config)
+        packaged.restore_runtime_closure(root, identities, version, args.dotnet, restore_config,
+            root / "nuget-cache", ["-p:TargetFramework=net10.0", "-p:RestorePackagesWithLockFile=true"], root, root)
+        # Host contracts are deliberately private in feature nuspec dependencies.
+        # Restore their exact central pins explicitly so shared-DLL admission proves
+        # the native Host bytes without treating these archives as loader roots.
+        host_contracts = ET.Element("Project", {"Sdk": "Microsoft.NET.Sdk"})
+        properties = ET.SubElement(host_contracts, "PropertyGroup")
+        ET.SubElement(properties, "RestoreEnablePackagePruning").text = "false"
+        references = ET.SubElement(host_contracts, "ItemGroup")
+        for identity in ("CShells.Abstractions", "CShells.AspNetCore.Abstractions"):
+            ET.SubElement(references, "PackageReference", {"Include": identity, "Version": f"[{cshells_version}]"})
+        host_contract_project = root / "HostProvidedContracts.csproj"
+        ET.indent(host_contracts, space="  ")
+        ET.ElementTree(host_contracts).write(host_contract_project, encoding="utf-8", xml_declaration=True)
+        contract_restore = packaged.restore_command(args.dotnet, host_contract_project, restore_config,
+            root / "nuget-cache", ["-p:TargetFramework=net10.0", "-p:RestorePackagesWithLockFile=true"])
+        packaged.run_command(contract_restore, root, root / "host-contracts-restore.log")
+        packaged.run_command([*contract_restore, "--locked-mode"], root, root / "host-contracts-locked-restore.log")
+        packaged.copy_restored_packages(root / "nuget-cache", feed)
+        host_hashes = packaged.preserve_host_payload(host, root / "host")
+        host = root / "host" / host.name
+        shared_bindings = packaged.copy_runtime_feed(feed, root / "packages", host, version, cshells_version)
+        package_hashes = {path.name: packaged.sha256(path) for path in feed.glob("*.nupkg")}
+        (root / "inputs.json").write_text(json.dumps({"version": version,
+            "packages": package_hashes, "hostRuntime": host_hashes,
+            "hostProvidedSharedPackages": shared_bindings}, indent=2) + "\n", encoding="utf-8")
         deployment = root / "hosted-pages"
         deployment.mkdir()
         runtime = b"export function mount(target, bootstrap) { target.textContent = bootstrap.title; }"
@@ -50,11 +98,17 @@ def main():
             }}}
         }
         (root / "shells.json").write_text(json.dumps(settings))
-        shutil.copy2(repository / "src/Orbyss.Foundation.Host/appsettings.json", root / "appsettings.json")
+        configuration = json.loads((root / "host/appsettings.json").read_text(encoding="utf-8"))
+        paths = configuration.setdefault("Nuplane", {}).setdefault("Paths", {})
+        paths.update(StateFilePath=str(root / "nuplane-state.json"), PackageInstallRoot=str(root / "installed"),
+                     ActiveStoreRoot=str(root / "packages/.installed"))
+        (root / "appsettings.json").write_text(json.dumps(configuration), encoding="utf-8")
+        environment = {key: value for key, value in os.environ.items()
+                       if not key.upper().startswith(("CSHELLS__", "FOUNDATION__", "NUPLANE__"))}
         log_path = root / "host.log"
         with log_path.open("w", encoding="utf-8") as log:
-            process = subprocess.Popen(["dotnet", str(host), "--contentRoot", str(root), "--urls", "http://127.0.0.1:0"],
-                                       cwd=root, stdout=log, stderr=subprocess.STDOUT,
+            process = subprocess.Popen([args.dotnet, str(host), "--contentRoot", str(root), "--urls", "http://127.0.0.1:0"],
+                                       cwd=root, env=environment, stdout=log, stderr=subprocess.STDOUT,
                                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             try:
                 deadline = time.monotonic() + 75
@@ -80,7 +134,13 @@ def main():
                 with urllib.request.urlopen(address + bootstrap["runtime"], timeout=15) as response:
                     assert response.read() == runtime
                     assert "immutable" in response.headers["Cache-Control"]
-                print("Actual Nuplane Host consumed packaged hosted pages through settings only.")
+                assert package_hashes == {path.name: packaged.sha256(path) for path in feed.glob("*.nupkg")}
+                assert all(packaged.sha256(root / "host" / relative) == digest
+                           for relative, digest in host_hashes.items())
+                (root / "result.json").write_text(json.dumps({"status": "qualified", "version": version,
+                    "settingsOnlyActivation": True, "packageHashesVerified": True,
+                    "hostRuntimeHashesVerified": True}, indent=2) + "\n", encoding="utf-8")
+                print("Actual Nuplane Host consumed packaged hosted pages through settings only. Evidence: " + str(root))
             finally:
                 process.terminate()
                 try: process.wait(timeout=15)

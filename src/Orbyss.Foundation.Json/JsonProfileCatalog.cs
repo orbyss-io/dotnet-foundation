@@ -17,4 +17,6 @@ public sealed class JsonProfileCatalog
     /// <summary>Gets a deliberately selected named profile or fails closed.</summary>
     public JsonProfile Get(string name) => profiles.TryGetValue(name, out var profile)
         ? profile : throw new InvalidOperationException("Foundation:Json selects an unknown profile.");
+    /// <summary>Resolves an explicitly selected typed profile key.</summary>
+    public JsonProfile Get(JsonProfileKey key) => Get(key.Name ?? throw new InvalidOperationException("Uninitialized JSON profile key."));
 }

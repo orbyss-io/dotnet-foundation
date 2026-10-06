@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><OutputType>Exe</OutputType><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CShells.AspNetCore" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Json.AspNetCore/Orbyss.Foundation.Json.AspNetCore.csproj" />
+  </ItemGroup>
+</Project>

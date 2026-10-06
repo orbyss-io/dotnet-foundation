@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Provider-neutral validated account identity and authentication protocol constants.</Description>
+    <PackageId>Orbyss.Foundation.Authentication.Core</PackageId>
+    <PackageTags>orbyss-foundation;authentication;identity;contracts</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <RunAnalyzers>false</RunAnalyzers>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" />
+    <PackageReference Include="CShells.AspNetCore" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../../src/Orbyss.Foundation.Host/Diagnostics/*.cs" Link="HostDiagnostics/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

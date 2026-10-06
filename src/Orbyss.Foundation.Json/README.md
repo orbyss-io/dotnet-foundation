@@ -30,7 +30,29 @@ does not fall back to reflection when a selected resolver lacks a contract.
 
 JsonProfileException exposes deterministic safe codes. Contract/syntax diagnostics omit payloads.
 Stream reads enforce the actual byte count regardless of declared content length and honor cancellation.
-Serialization bounds are checked after encoding; output objects must already be reasonably bounded.
+Server output uses `JsonResponseContractException` (including `JsonOutputLimitException`), distinct
+from client `JsonProfileException`. Native serialization admits retained bytes through a bounded
+buffer before returning output. Each ordinary string and dictionary key is counted with the native
+encoder before encoding, including near-cap scalar failures. Retained bytes never exceed MaxBytes;
+native contiguous scratch reservations are finite at `6 * MaxBytes + 4096`, and oversized reservations
+fail before allocation. This is an explicit scratch bound, not a claim that heap use equals wire size.
+Cancellation is observed before serialization and at buffer operations. Consumers publish only after
+successful admission and keep object construction bounded too.
+
+String conversion is reserved for bounded native encoding; overlapping string converters fail metadata
+admission. Trusted converters must remain bounded and delegate string values through
+`JsonSerializer.Serialize(writer, value, options)` to retain scalar admission. Converter-internal
+allocation/semantic ownership still requires ordinary source review.
+
+`JsonProfileKeys`, `JsonProfileKey` and `JsonProfileRequirement` describe explicit selection and
+supported preset/capacity/depth intervals. Runtime values live in configured settings. `ValueSequenceJsonExtension`
+adapts `Collections.Core.ValueSequence<T>` to arrays; it also works with generated closed contract
+metadata. The Core collection owns shallow snapshots and ordered equality without serializer dependencies.
+
+`CanonicalUtf8Writer` supplies strict UTF-8, minimal JSON escaping, finite byte admission and incremental
+SHA-256 with fixed scratch space. It preserves caller-specified order and does not normalize or sort.
+A null destination hashes/counts without an aggregate byte array. Callers own destination disposal and
+publish only after `CompleteSha256`; overflow, malformed Unicode and destination failure prevent sealing.
 
 ## Canonicalization and compatibility
 

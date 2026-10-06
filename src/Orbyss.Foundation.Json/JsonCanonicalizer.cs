@@ -22,11 +22,11 @@ public static class JsonCanonicalizer
             var output = new StringBuilder();
             AppendValue(output, document.RootElement);
             var bytes = new UTF8Encoding(false, true).GetBytes(output.ToString());
-            if (bytes.Length > maxBytes) throw new JsonProfileException("json_size_exceeded");
+            if (bytes.Length > maxBytes) throw new JsonProfileException(JsonFailureCodes.SizeExceeded);
             return bytes;
         }
-        catch (JsonException) { throw new JsonProfileException("json_invalid_syntax"); }
-        catch (EncoderFallbackException) { throw new JsonProfileException("json_invalid_unicode"); }
+        catch (JsonException) { throw new JsonProfileException(JsonFailureCodes.InvalidSyntax); }
+        catch (EncoderFallbackException) { throw new JsonProfileException(JsonFailureCodes.InvalidUnicode); }
     }
 
     /// <summary>Writes ordered objects, unchanged arrays, exact strings, and binary64 numbers.</summary>
@@ -63,7 +63,7 @@ public static class JsonCanonicalizer
             case JsonValueKind.True: output.Append("true"); break;
             case JsonValueKind.False: output.Append("false"); break;
             case JsonValueKind.Null: output.Append("null"); break;
-            default: throw new JsonProfileException("json_invalid_syntax");
+            default: throw new JsonProfileException(JsonFailureCodes.InvalidSyntax);
         }
     }
 
@@ -95,10 +95,10 @@ public static class JsonCanonicalizer
     private static string FormatNumber(string token)
     {
         if (!double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) || !double.IsFinite(number))
-            throw new JsonProfileException("json_number_not_representable");
+            throw new JsonProfileException(JsonFailureCodes.NumberNotRepresentable);
         if (number == 0)
         {
-            if (token[0] == '-') throw new JsonProfileException("json_negative_zero");
+            if (token[0] == '-') throw new JsonProfileException(JsonFailureCodes.NegativeZero);
             return "0";
         }
         var sign = number < 0 ? "-" : "";

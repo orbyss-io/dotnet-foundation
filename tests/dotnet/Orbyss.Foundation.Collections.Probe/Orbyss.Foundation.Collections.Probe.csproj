@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Collections.Core/Orbyss.Foundation.Collections.Core.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Json/Orbyss.Foundation.Json.csproj" />
+    <None Include="canonical-v1.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
