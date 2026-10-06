@@ -73,3 +73,11 @@ source total, 64 MiB per reference and 256 MiB reference total, 32 contracts,
 256 settings/contract, 128 semantic strings, 4 Ki-character declaration text,
 16 KiB constraints, 16 Ki-character string defaults, 256 default array items,
 and 2 MiB emitted payload. Violations preserve existing metadata and packed output.
+
+Encoding admission is incremental: each setting is encoded before retaining another,
+through one fixed non-growing 2 MiB IBufferWriter. Expanded defaults hold typed JsonValue
+references rather than pre-serialized JsonElements. Final indented payload and constraints
+also use that bounded encoder; oversized output fails during encoding, never after building
+an unbounded encoded string. Final/packed assemblies are streamed through SHA256 after a
+256 MiB file admission check. Installed tests cover one >4 MiB expanded array and 253 arrays
+whose admitted source/declaration would expand past 1 GiB, preserving existing output.

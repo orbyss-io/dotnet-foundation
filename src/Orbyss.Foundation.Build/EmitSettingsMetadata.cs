@@ -111,6 +111,13 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
         var contracts = declaration["contracts"] as JsonArray ?? throw new InvalidDataException("contracts is required.");
         Require(contracts.Count is > 0 and <= 32, "Settings contracts require 1 to 32 explicitly scoped entries.");
         var outputContracts = new JsonArray();
+        var outputEnvelope = new JsonObject { ["schemaVersion"] = 1, ["packageId"] = PackageId, ["packageVersion"] = PackageVersion,
+            ["sourceSha256"] = hashes.DeepClone(), ["contracts"] = outputContracts,
+            ["assembly"] = new JsonObject { ["name"] = Path.GetFileName(CompiledAssembly), ["sha256"] = AssemblyHash(CompiledAssembly) } };
+        // One fixed buffer, reused for admission and final encoding. Account each setting before retaining another.
+        var buffer = new BoundedJsonBuffer();
+        var remaining = 2_097_151 - Encode(outputEnvelope, buffer, 2_097_151, indented: false);
+        void Admit(JsonNode value) => remaining -= Encode(value, buffer, remaining, indented: false);
         var scopes = new HashSet<string>(StringComparer.Ordinal);
         foreach (var node in contracts)
         {
@@ -137,6 +144,10 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
             var declared = new HashSet<string>(StringComparer.Ordinal);
             var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var outputSettings = new JsonArray();
+            var outputContract = new JsonObject { ["schemaVersion"] = 1, ["owner"] = PackageId, ["scope"] = scope,
+                ["complete"] = complete, ["sources"] = hashes.DeepClone(), ["settings"] = outputSettings,
+                ["semanticConstraints"] = contract["semanticConstraints"]!.DeepClone() };
+            Admit(outputContract);
             foreach (var settingNode in settings)
             {
                 var setting = settingNode as JsonObject ?? throw new InvalidDataException("Setting must be an object.");
@@ -150,7 +161,8 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
                 Require(Text(setting["reload"]) is "restart" or "reload" or "immutable", "Invalid reload semantics.");
                 Strings(setting["precedence"], nonempty: true);
                 var constraints = setting["constraints"] as JsonObject ?? throw new InvalidDataException("constraints must be an object.");
-                Require(Encoding.UTF8.GetByteCount(constraints.ToJsonString()) <= 16_384, "Setting constraints exceed 16 KiB limit.");
+                try { _ = Encode(constraints, buffer, 16_384, indented: false); }
+                catch (InvalidDataException error) { throw new InvalidDataException("Setting constraints exceed 16 KiB limit.", error); }
                 Require(!secret || !constraints.Any(item => item.Key is "default" or "example" or "examples" or "enum" or "const"), "Secret settings cannot contain values or examples.");
                 var property = properties[name];
                 Require(property.AccessorList is not null && property.AccessorList.Accessors.All(accessor => accessor.Body is null && accessor.ExpressionBody is null),
@@ -159,20 +171,15 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
                 var output = (JsonObject)setting.DeepClone();
                 output.Remove("property"); output["type"] = kind;
                 if (!secret) output["default"] = Default(property.Initializer?.Value, kind, compilation.GetSemanticModel(property.SyntaxTree));
+                Admit(output);
                 outputSettings.Add(output);
             }
             Require(!complete || declared.SetEquals(properties.Keys), "Complete type contract must cover every public instance property.");
             Strings(contract["semanticConstraints"], nonempty: false);
-            outputContracts.Add(new JsonObject { ["schemaVersion"] = 1, ["owner"] = PackageId, ["scope"] = scope,
-                ["complete"] = complete, ["sources"] = hashes.DeepClone(), ["settings"] = outputSettings,
-                ["semanticConstraints"] = contract["semanticConstraints"]!.DeepClone() });
+            outputContracts.Add(outputContract);
         }
-        var outputEnvelope = new JsonObject { ["schemaVersion"] = 1, ["packageId"] = PackageId, ["packageVersion"] = PackageVersion,
-            ["sourceSha256"] = hashes.DeepClone(), ["contracts"] = outputContracts,
-            ["assembly"] = new JsonObject { ["name"] = Path.GetFileName(CompiledAssembly),
-                ["sha256"] = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(CompiledAssembly))) } };
-        var payload = outputEnvelope.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";
-        Require(Encoding.UTF8.GetByteCount(payload) <= 2_097_152, "Settings payload exceeds 2 MiB limit.");
+        var length = Encode(outputEnvelope, buffer, 2_097_151, indented: true);
+        var payload = buffer.GetBytes(length);
         if (ValidateOnly)
         {
             var expectedName = Path.GetFileName(CompiledAssembly);
@@ -180,14 +187,14 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
             Require(packed.Length == 1, "Settings must bind exactly one actual NuGet assembly output.");
             var packedPath = packed[0].GetMetadata("FinalOutputPath");
             if (string.IsNullOrWhiteSpace(packedPath)) packedPath = packed[0].ItemSpec;
-            Require(SHA256.HashData(File.ReadAllBytes(packedPath)).AsSpan().SequenceEqual(SHA256.HashData(File.ReadAllBytes(CompiledAssembly))),
+            Require(AssemblyHash(packedPath) == outputEnvelope["assembly"]!["sha256"]!.GetValue<string>(),
                 "NuGet assembly output differs from the bound final assembly; rebuild before packing.");
-            Require(File.Exists(OutputFile) && File.ReadAllText(OutputFile) == payload,
+            Require(File.Exists(OutputFile) && new FileInfo(OutputFile).Length <= 2_097_152 && File.ReadAllBytes(OutputFile).AsSpan().SequenceEqual(payload),
                 "Compiled settings metadata differs; rebuild the publisher before packing. --no-build cannot refresh provenance.");
             return;
         }
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(OutputFile))!);
-        File.WriteAllText(OutputFile, payload);
+        File.WriteAllBytes(OutputFile, payload);
     }
 
     /// <summary>Finds an unambiguous namespace-qualified source type.</summary>
@@ -221,10 +228,33 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
                 "number" => value is int or long or float or double or decimal, _ => false };
             Require(valid, "Default constant differs from source type.");
             Require(value is not string text || text.Length <= 16_384, "Settings default string exceeds 16 Ki-character limit.");
-            return JsonSerializer.SerializeToNode(value);
+            return value switch
+            {
+                string item => JsonValue.Create(item), bool item => JsonValue.Create(item), int item => JsonValue.Create(item),
+                long item => JsonValue.Create(item), float item => JsonValue.Create(item), double item => JsonValue.Create(item),
+                decimal item => JsonValue.Create(item), _ => throw new InvalidDataException("Unsupported constant value.")
+            };
         }
         throw new InvalidDataException("Unsupported settings initializer; no publisher code is executed and defaults cannot be supplied by hand.");
     }
+    /// <summary>Encodes directly into a finite buffer; no expanded string is materialized.</summary>
+    private static int Encode(JsonNode value, BoundedJsonBuffer buffer, int limit, bool indented)
+    {
+        buffer.Reset(limit);
+        using var writer = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = indented });
+        value.WriteTo(writer);
+        writer.Flush();
+        return buffer.Length;
+    }
+
+    /// <summary>Hashes the admitted assembly stream without reading it into one allocation.</summary>
+    private static string AssemblyHash(string path)
+    {
+        using var file = File.OpenRead(path);
+        Require(file.Length <= 268_435_456, "Settings assembly exceeds 256 MiB limit.");
+        return Convert.ToHexStringLower(SHA256.HashData(file));
+    }
+
     /// <summary>Rejects missing, extra, and misplaced declaration fields.</summary>
     private static void Keys(JsonObject value, string[] fields) => Require(value.Select(item => item.Key).ToHashSet(StringComparer.Ordinal).SetEquals(fields), "Declaration fields differ from the versioned contract.");
     /// <summary>Requires concrete reviewed text.</summary>
