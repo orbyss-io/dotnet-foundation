@@ -418,7 +418,8 @@ def qualify_native_statuses(base: str, evidence: Path, first_root: bool = False)
             assert packet[0] == expected, packet
             assert headers.get("content-type", "").startswith("text/plain"), headers
             reason = {404: "Not Found", 405: "Method Not Allowed"}[expected]
-            assert packet[2].decode("utf-8") == f"Status Code: {expected}; {reason}", packet
+            # Native status-code pages pad short messages to avoid browser-generated errors.
+            assert len(packet[2]) <= 512 and packet[2].rstrip(b" ") == f"Status Code: {expected}; {reason}".encode(), packet
         if expected == 405:
             assert "POST" in {value.strip().upper() for value in headers.get("allow", "").split(",")}, headers
     return observations
