@@ -38,6 +38,26 @@ from the request provider. Programming defects retain safe 500 handling; arbitra
 do not become client 400. Cancellation does not fabricate a completed error response, and a started
 response cannot be replaced. The Host and provider retain classified, redacted native diagnostics.
 
+The managed Host uses native status-code pages for uncommitted empty routing failures.
+Unowned 404/405 responses use the common bounded policy; requests selected into a shell
+retain its scoped enrichment and configured problem budget, even without the optional
+global exception feature. Existing bodies, cancellation, started output and native `Allow`
+headers retain their meaning.
+
+The new Host owns six shared assembly identities: `CShells.Abstractions`,
+`CShells.AspNetCore.Abstractions`, `Orbyss.Foundation.Web.ProblemDetails`,
+`Orbyss.Foundation.Web.ProblemDetails.Core`, `Orbyss.Foundation.Json` and
+`Orbyss.Foundation.Collections.Core`. Preserve those shared-assembly settings when composing
+deployment configuration. Keep all exact archives in qualification evidence; omit these six
+from loader roots only after their selected versions and net10 DLL hashes match the retained
+Host payload. An old two-name shared-assembly override is not qualified for this new Host.
+Historical profiles continue to select their historical Host.
+
+Release images copy the portable Host payload produced by no-build publish and qualification,
+including effective JSON configuration and native runtime assets. They do not rebuild shared
+assemblies after package qualification. The tagged workflow verifies these bytes against the
+actual packaged shell/PostgreSQL run before package and image publication.
+
 ## Typed JSON and transport
 
 Register operation-owned wire types and requirements in the API feature:

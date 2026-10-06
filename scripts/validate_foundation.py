@@ -23,6 +23,7 @@ VALIDATORS = (
     "validate_postgresql.py",
     "validate_hosted_pages.py",
     "validate_openapi_exporter.py",
+    "validate_host_release_payload.py",
 )
 
 def main():
@@ -33,6 +34,8 @@ def main():
     root = Path(__file__).resolve().parents[1]
     for validator in VALIDATORS:
         command = [sys.executable, str(root / "tests" / validator)]
+        if validator == "validate_host_release_payload.py":
+            command.append("--self-test")
         if arguments.postgresql_deadline_only and validator == "validate_postgresql.py":
             command.append("--deadline-only")
         subprocess.run(command, cwd=root, check=True)

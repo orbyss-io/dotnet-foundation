@@ -5,6 +5,8 @@ using Orbyss.Foundation.PostgreSql;
 using Orbyss.Foundation.Execution;
 using System.Diagnostics;
 using System.Data.Common;
+using System.Data;
+using Npgsql;
 namespace Foundation.ContractFixture.PostgreSql;
 internal sealed class FixtureStorageProbe(IPostgreSqlUnitLeaseFactory<FixtureDbContext> leases, IServiceProvider provider) : IFixtureStorageProbe
 {
@@ -80,7 +82,51 @@ internal sealed class FixtureStorageProbe(IPostgreSqlUnitLeaseFactory<FixtureDbC
         await using var check = await reconciliation.Factory.CreateDbContextAsync(reconciliation.Deadline.Token);
         var committed = await check.Database.SqlQueryRaw<bool>("SELECT EXISTS (SELECT 1 FROM fixture_cancellation_receipts WHERE id = {0}) AS \"Value\"", receipt)
             .SingleAsync(reconciliation.Deadline.Token);
+        var open = await ObserveConnectionAdmissionAsync(setup: false, cancellationToken);
+        var setup = await ObserveConnectionAdmissionAsync(setup: true, cancellationToken);
         return new(canceled, outerExpired, watch.Elapsed.TotalMilliseconds, followup,
-            fastCanceled, committed, clock.ScheduledAdvanceOccurred);
+            fastCanceled, committed, clock.ScheduledAdvanceOccurred,
+            open.Canceled, open.Closed, open.Recovered, open.OuterExpired, open.AdvanceObserved,
+            setup.Canceled, setup.Closed, setup.Recovered, setup.OuterExpired, setup.AdvanceObserved);
+    }
+
+    private async Task<(bool Canceled, bool Closed, bool Recovered, bool OuterExpired, bool AdvanceObserved)>
+        ObserveConnectionAdmissionAsync(bool setup, CancellationToken cancellationToken)
+    {
+        var clock = new FixtureTimeProvider();
+        using var outer = new TimeProviderDeadlineFactory(clock).Create(TimeSpan.FromSeconds(10), cancellationToken);
+        var canceled = false;
+        bool closed;
+        Guid sourceId;
+        await using (var unit = await leases.BeginUnitAsync(cancellationToken, outer))
+        await using (var context = await unit.Factory.CreateDbContextAsync(unit.Deadline.Token))
+        {
+            sourceId = context.DataSourceId;
+            var native = context.Database.GetDbConnection();
+            if (native is not NpgsqlConnection) throw new InvalidOperationException("The package changed native connection identity.");
+            if (setup)
+            {
+                // Both stages have one-second caps. Arm setup only after the
+                // concrete native connection opened, so this cannot expire open.
+                native.StateChange += (_, value) =>
+                {
+                    if (value.CurrentState == ConnectionState.Open)
+                        clock.AdvanceOnTimerCreation(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1.5));
+                };
+            }
+            else clock.AdvanceOnTimerCreation(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1.5));
+            try { await context.Database.OpenConnectionAsync(unit.Deadline.Token); }
+            catch (OperationCanceledException) { canceled = true; }
+            closed = native.State == ConnectionState.Closed
+                && ReferenceEquals(native, context.Database.GetDbConnection());
+        }
+        // Expiry rejection must not return an open/poisoned connection or a new
+        // datasource. Verify recovery through a fresh public tracked factory unit.
+        await using var recovery = await leases.BeginUnitAsync(cancellationToken);
+        await using var healthy = await recovery.Factory.CreateDbContextAsync(recovery.Deadline.Token);
+        var lockTimeout = await healthy.Database.SqlQueryRaw<string>("SELECT current_setting('lock_timeout') AS \"Value\"")
+            .SingleAsync(recovery.Deadline.Token);
+        return (canceled, closed, healthy.DataSourceId == sourceId && lockTimeout == "500ms",
+            outer.IsExpired, clock.ScheduledAdvanceOccurred);
     }
 }

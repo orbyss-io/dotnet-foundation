@@ -70,6 +70,7 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
         http.RequestAborted.ThrowIfCancellationRequested();
         http.Response.StatusCode = context.ProblemDetails.Status ?? 500;
         http.Response.ContentType = "application/problem+json";
+        http.Response.Headers.CacheControl = "no-store";
         http.Response.ContentLength = bytes.Length;
         await http.Response.Body.WriteAsync(bytes, http.RequestAborted).ConfigureAwait(false);
     }

@@ -8,6 +8,7 @@ using Orbyss.Foundation.Host.Feed;
 using Orbyss.Foundation.Host.Shells;
 using Orbyss.Foundation.Host.Transport;
 using Orbyss.Foundation.Host.Diagnostics;
+using Orbyss.Foundation.Web.ProblemDetails;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
@@ -21,6 +22,7 @@ var nuplaneConfiguration = configuration.GetSection("Nuplane");
 var transport = configuration.GetSection("Foundation:Transport").Get<FoundationTransportOptions>() ?? new();
 builder.WebHost.ConfigureKestrel(options => transport.Apply(options));
 builder.Services.AddFoundationRequestDiagnosticRedaction();
+builder.Services.AddFoundationProblemDetails();
 
 builder.Services.AddNuplane(nuplaneConfiguration, nuplane =>
 {
@@ -40,5 +42,6 @@ builder.Services.AddCShellsAspNetCore(shells => shells
 builder.Services.AddHostedService<EagerShellActivationHostedService>();
 
 var app = builder.Build();
+app.UseFoundationProblemStatusCodePages();
 app.MapShells();
 app.Run();

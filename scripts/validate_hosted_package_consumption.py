@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 
 def main():
     repository = Path(__file__).resolve().parents[1]
@@ -26,6 +27,9 @@ def main():
     packages = args.packages.resolve()
     host = (args.host or repository / "src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll").resolve()
     version = args.version or (repository / "VERSION").read_text().strip()
+    central_packages = ET.parse(repository / "Directory.Packages.props")
+    cshells_version = next(entry.attrib["Version"] for entry in central_packages.findall(".//PackageVersion")
+        if entry.attrib.get("Include") == "CShells.AspNetCore.Abstractions")
     evidence = repository / "artifacts/hosted-package-consumption"
     evidence.mkdir(parents=True, exist_ok=True)
     with nullcontext(tempfile.mkdtemp(prefix="run-", dir=evidence)) as directory:
@@ -33,7 +37,7 @@ def main():
         feed = root / "feed"
         feed.mkdir()
         identities = []
-        for name in ("Json", "WebDefaults", "Web.HostedPages"):
+        for name in ("Json", "WebDefaults", "Web.HostedPages", "Web.ProblemDetails"):
             package = packages / f"Orbyss.Foundation.{name}.{version}.nupkg"
             shutil.copy2(package, feed / package.name)
             identities.append("Orbyss.Foundation." + name)
@@ -46,12 +50,13 @@ def main():
         packaged.restore_runtime_closure(root, identities, version, args.dotnet, restore_config,
             root / "nuget-cache", ["-p:TargetFramework=net10.0", "-p:RestorePackagesWithLockFile=true"], root, root)
         packaged.copy_restored_packages(root / "nuget-cache", feed)
-        packaged.copy_runtime_feed(feed, root / "packages")
         host_hashes = packaged.preserve_host_payload(host, root / "host")
         host = root / "host" / host.name
+        shared_bindings = packaged.copy_runtime_feed(feed, root / "packages", host, version, cshells_version)
         package_hashes = {path.name: packaged.sha256(path) for path in feed.glob("*.nupkg")}
         (root / "inputs.json").write_text(json.dumps({"version": version,
-            "packages": package_hashes, "hostRuntime": host_hashes}, indent=2) + "\n", encoding="utf-8")
+            "packages": package_hashes, "hostRuntime": host_hashes,
+            "hostProvidedSharedPackages": shared_bindings}, indent=2) + "\n", encoding="utf-8")
         deployment = root / "hosted-pages"
         deployment.mkdir()
         runtime = b"export function mount(target, bootstrap) { target.textContent = bootstrap.title; }"

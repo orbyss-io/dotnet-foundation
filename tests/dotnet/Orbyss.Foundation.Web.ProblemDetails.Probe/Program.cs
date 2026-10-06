@@ -194,6 +194,41 @@ foreach (var invalid in new[] { (Depth: 2, Preset: "tolerant-response"), (Depth:
     catch (Microsoft.Extensions.Options.OptionsValidationException) { }
 }
 Console.WriteLine($"Problem exact-cap {admitted.Bytes.Length} bytes; overflow fallback {overflow.Bytes.Length} bytes.");
+await using (var statusProvider = ProblemProvider(512))
+{
+    Require(!statusProvider.GetServices<IExceptionHandler>().Any(), "Status fallback activated global handlers.");
+    await using var scope = statusProvider.CreateAsyncScope();
+    var statusPipeline = new ApplicationBuilder(statusProvider);
+    statusPipeline.UseFoundationProblemStatusCodePages();
+    statusPipeline.Run(context =>
+    {
+        if (!context.Response.HasStarted) context.Response.StatusCode = 405;
+        return Task.CompletedTask;
+    });
+    var delegatePipeline = statusPipeline.Build();
+    var empty = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
+    empty.Response.Body = new MemoryStream();
+    await delegatePipeline(empty);
+    Require(empty.Response.StatusCode == 405 && empty.Response.ContentLength is > 0 and <= 512
+        && empty.Response.Headers.CacheControl == "no-store", "Native empty-status fallback was not bounded/private.");
+    var aborted = new DefaultHttpContext { RequestServices = scope.ServiceProvider,
+        RequestAborted = new CancellationToken(canceled: true) };
+    aborted.Response.Body = new MemoryStream();
+    await delegatePipeline(aborted);
+    Require(aborted.Response.StatusCode == 405 && aborted.Response.ContentLength is null
+        && ((MemoryStream)aborted.Response.Body).Length == 0, "Aborted status was replaced by fabricated output.");
+    var started = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
+    started.Features.Set<IHttpResponseFeature>(new StartedResponseFeature());
+    await delegatePipeline(started);
+    Require(started.Response.StatusCode == 200 && started.Response.ContentLength is null,
+        "Already-started status was dishonestly replaced.");
+    var defectPipeline = new ApplicationBuilder(statusProvider);
+    defectPipeline.UseFoundationProblemStatusCodePages();
+    var unhandled = new ArgumentException("PRIVATE unhandled without optional feature");
+    defectPipeline.Run(_ => Task.FromException(unhandled));
+    try { await defectPipeline.Build()(empty); throw new Exception("Status fallback activated exception handling."); }
+    catch (ArgumentException error) { Require(ReferenceEquals(error, unhandled), "Unowned exception identity changed."); }
+}
 Console.WriteLine("Foundation Problem Details conformance passed: definitions, all envelopes, scoped enrichment, native ordering, privacy, cancellation and auth-only activation.");
 static void Reject(Action action)
 {

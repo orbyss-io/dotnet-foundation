@@ -1,0 +1,12 @@
+# syntax=docker/dockerfile:1.26@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+# Build context is the portable Host payload admitted by validate_host_release_payload.py.
+# Compilation and qualification occur before this image build; no source is rebuilt here.
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:a4556ed033fa96f984bb7a8d348851cb2d36b1281dd2420070045f664fbb5f94 AS final
+WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+COPY . ./
+RUN mkdir -p /app/packages \
+    && chown -R $APP_UID:$APP_UID /app
+USER $APP_UID
+ENTRYPOINT ["dotnet", "Orbyss.Foundation.Host.dll"]

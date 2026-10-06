@@ -1,6 +1,7 @@
 using System.Reflection;
 using CShells.Features;
 using Nuplane.Loading;
+using Orbyss.Foundation.Web.ProblemDetails;
 
 namespace Orbyss.Foundation.Host.Feed;
 
@@ -11,5 +12,6 @@ internal sealed class NuplaneAssemblyProvider(IPackageAssemblyCatalog packageAss
     public async Task<IEnumerable<Assembly>> GetAssembliesAsync(
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken = default) =>
-        await packageAssemblyCatalog.GetAssembliesAsync(cancellationToken).ConfigureAwait(false);
+        (await packageAssemblyCatalog.GetAssembliesAsync(cancellationToken).ConfigureAwait(false))
+        .Append(typeof(FoundationProblemDetailsFeature).Assembly).Distinct();
 }

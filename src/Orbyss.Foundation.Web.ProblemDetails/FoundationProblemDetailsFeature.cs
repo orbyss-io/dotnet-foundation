@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Diagnostics;
-using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 namespace Orbyss.Foundation.Web.ProblemDetails;
 
@@ -40,12 +39,6 @@ public sealed class FoundationProblemDetailsFeature : IMiddlewareShellFeature
     {
         _ = app.ApplicationServices.GetRequiredService<IProblemDetailsService>();
         app.UseExceptionHandler();
-        app.UseStatusCodePages(async statusContext =>
-        {
-            var response = statusContext.HttpContext.Response;
-            await FoundationProblemResults.Problem(new ProblemDefinition(response.StatusCode,
-                FoundationProblemResults.CodeForStatus(response.StatusCode)))
-                .ExecuteAsync(statusContext.HttpContext).ConfigureAwait(false);
-        });
+        app.UseFoundationProblemStatusCodePages();
     }
 }

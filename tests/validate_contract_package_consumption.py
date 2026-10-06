@@ -32,6 +32,14 @@ FEATURES = {
 }
 PRIVATE_MARKER = "FIXTURE_PRIVATE_SECRET"
 HOST_CONTRACT_PACKAGES = {"cshells.abstractions", "cshells.aspnetcore.abstractions"}
+HOST_SHARED_PACKAGES = {
+    "cshells.abstractions": "CShells.Abstractions.dll",
+    "cshells.aspnetcore.abstractions": "CShells.AspNetCore.Abstractions.dll",
+    "orbyss.foundation.web.problemdetails": "Orbyss.Foundation.Web.ProblemDetails.dll",
+    "orbyss.foundation.web.problemdetails.core": "Orbyss.Foundation.Web.ProblemDetails.Core.dll",
+    "orbyss.foundation.json": "Orbyss.Foundation.Json.dll",
+    "orbyss.foundation.collections.core": "Orbyss.Foundation.Collections.Core.dll",
+}
 
 
 def sha256(path: Path) -> str:
@@ -44,9 +52,11 @@ def sha256(path: Path) -> str:
 
 def preserve_host_payload(host: Path, destination: Path) -> dict[str, str]:
     files = set(host.parent.glob("*.dll"))
-    files.update(host.parent.glob("*.deps.json"))
-    files.update(host.parent.glob("*.runtimeconfig.json"))
+    files.update(host.parent.glob("*.json"))
     files.add(host.parent / "appsettings.json")
+    profile_configuration = host.parent / ".orbyss-foundation"
+    if profile_configuration.is_dir():
+        files.update(profile_configuration.glob("*.json"))
     runtimes = host.parent / "runtimes"
     if runtimes.is_dir():
         files.update(path for path in runtimes.rglob("*") if path.is_file())
@@ -152,14 +162,36 @@ def copy_restored_packages(cache: Path, feed: Path) -> dict[str, str]:
     return hashes
 
 
-def copy_runtime_feed(feed: Path, target: Path) -> None:
+def copy_runtime_feed(feed: Path, target: Path, host: Path, version: str, cshells_version: str) -> list[dict]:
+    """Keep Host-owned identities out of catalog roots, proving identical archive/payload bytes."""
     target.mkdir()
+    bindings = {}
     for package in feed.glob("*.nupkg"):
         with zipfile.ZipFile(package) as archive:
             nuspec = next(name for name in archive.namelist() if name.endswith(".nuspec"))
-            identity = ET.fromstring(archive.read(nuspec)).find("./{*}metadata/{*}id").text.casefold()
-        if identity not in HOST_CONTRACT_PACKAGES:
+            metadata = ET.fromstring(archive.read(nuspec))
+            identity = metadata.find("./{*}metadata/{*}id").text.casefold()
+            if identity in HOST_SHARED_PACKAGES:
+                assert identity not in bindings, f"Duplicate Host-provided package identity: {identity}"
+                package_version = metadata.find("./{*}metadata/{*}version").text
+                expected_version = cshells_version if identity in HOST_CONTRACT_PACKAGES else version
+                assert package_version == expected_version, f"Host-provided package version mismatch: {identity}"
+                assembly_name = HOST_SHARED_PACKAGES[identity]
+                assembly_path = f"lib/net10.0/{assembly_name}"
+                assert archive.namelist().count(assembly_path) == 1, f"Exact Host target assembly missing/duplicated: {identity}"
+                archive_assembly_hash = hashlib.sha256(archive.read(assembly_path)).hexdigest()
+                host_assembly = host.parent / assembly_name
+                assert host_assembly.is_file() and sha256(host_assembly) == archive_assembly_hash, (
+                    f"Host/archive shared assembly bytes mismatch: {identity}")
+                bindings[identity] = {"identity": identity, "version": package_version,
+                    "archive": package.name, "archiveSha256": sha256(package),
+                    "assemblyPath": assembly_path, "hostAssembly": assembly_name,
+                    "assemblySha256": archive_assembly_hash, "omittedRuntimeRoot": True}
+        if identity not in HOST_SHARED_PACKAGES:
             shutil.copy2(package, target / package.name)
+    assert set(bindings) == set(HOST_SHARED_PACKAGES), (
+        "Exact Host-provided package closure is incomplete", sorted(set(HOST_SHARED_PACKAGES) - set(bindings)))
+    return [bindings[identity] for identity in sorted(bindings)]
 
 
 def terminate(process: subprocess.Popen) -> None:
@@ -291,6 +323,16 @@ def start_host(host: Path, runtime: Path, connection: str, dotnet: str) -> tuple
     raise AssertionError(f"Package-loading host did not become ready; preserved output: {log_path}")
 
 
+def write_runtime_configuration(host: Path, runtime: Path, shell_configuration: dict) -> None:
+    shutil.copy2(host.parent / "appsettings.json", runtime / "appsettings.json")
+    (runtime / "shells.json").write_text(json.dumps(shell_configuration, indent=2), encoding="utf-8")
+    (runtime / "hostsettings.json").write_text(json.dumps({
+        "Foundation": {"Transport": {"MaxRequestBodyBytes": 1024}},
+        "Nuplane": {"Setup": {"StateFilePath": str(runtime / "nuplane-store-state.json")},
+                    "FeedResolution": {"PackageInstallRoot": str(runtime / "installed")},
+                    "Loading": {"ActiveStoreRoot": str(runtime / "packages/.installed")}}}), encoding="utf-8")
+
+
 def request(opener: urllib.request.OpenerDirector, base: str, path: str, payload: bytes | None = None,
             method: str | None = None) -> tuple[int, dict, bytes]:
     packet = urllib.request.Request(base + path, data=payload, method=method,
@@ -322,9 +364,53 @@ def problem(packet: tuple[int, dict, bytes], expected_status: int, code: str, sh
     return document
 
 
+def qualify_native_statuses(base: str, evidence: Path, first_root: bool = False) -> list[dict]:
+    """Exercise real routing failures, preserving selected and unowned request scopes."""
+    observations, packets = [], []
+    for shell in ("first", "second"):
+        prefix = "" if first_root and shell == "first" else f"/{shell}"
+        scoped = not (first_root and shell == "first")
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        # Authentication is an independent prerequisite for selected prefix routing.
+        # Unowned root routing does not acquire a shell simply because this cookie exists.
+        assert request(opener, base, f"{prefix}/fixture-cookie/0", b"", "POST")[0] == 200
+        assert json.loads(request(opener, base, f"{prefix}/bff/user")[2])["authenticated"] is True
+        for method, path, expected in (("DELETE", f"{prefix}/echo", 405),
+                                       ("GET", f"{prefix}/unmatched-contract-fixture-route", 404)):
+            packet = request(opener, base, path, method=method)
+            status, headers, body = packet
+            normalized = {key.casefold(): value for key, value in headers.items()}
+            try:
+                envelope = json.loads(body)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                envelope = None
+            observations.append({"shellPrefix": shell, "method": method, "path": path,
+                "status": status, "expectedStatus": expected, "bytes": len(body),
+                "bodySha256": hashlib.sha256(body).hexdigest(), "envelope": envelope,
+                "headers": {key: normalized.get(key) for key in ("content-type", "content-length", "cache-control", "allow")},
+                "shellScopeExpected": scoped,
+                "configuredProblemMaximumBytes": (512 if shell == "first" else 65536) if scoped else 65536})
+            packets.append((packet, expected, normalized, shell, scoped))
+    # Preserve all actual wire failures even when the first assertion rejects an old candidate.
+    name = "native-status-root.json" if first_root else "native-status.json"
+    (evidence / name).write_text(json.dumps(observations, indent=2), encoding="utf-8")
+    for packet, expected, headers, shell, scoped in packets:
+        document = problem(packet, expected, "request_failed", shell, enriched=scoped,
+                           maximum=512 if shell == "first" or not scoped else 65536)
+        if not scoped:
+            assert document["title"] == {404: "Not Found", 405: "Method Not Allowed"}[expected], document
+        assert document["fieldErrors"] == [] and document.get("detail") is None, document
+        assert "no-store" in headers.get("cache-control", "").casefold(), headers
+        assert headers.get("content-length") == str(len(packet[2])), headers
+        if expected == 405:
+            assert "POST" in {value.strip().upper() for value in headers.get("allow", "").split(",")}, headers
+    return observations
+
+
 def qualify(base: str, version: str, evidence: Path) -> dict:
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     snapshots = {}
+    snapshots["nativeStatusResponses"] = qualify_native_statuses(base, evidence)
     problem_titles = []
     adversaries = [("forged200", "/first/forged-problem/200", None, "json_response_profile_bypass"),
                    ("forged409", "/first/forged-problem/409", None, "json_response_profile_bypass"),
@@ -344,7 +430,11 @@ def qualify(base: str, version: str, evidence: Path) -> dict:
     cancellation_safe = all(item["httpStatus"] == 200 and item.get("stageCanceled")
         and not item.get("outerExpired") and item.get("elapsedMilliseconds", 99999) < 2500
         and item.get("followupSucceeded") and item.get("scheduledAdvanceOccurred")
-        and item.get("fastWriteCanceled") and not item.get("fastWriteCommitted") for item in cancellations.values())
+        and item.get("fastWriteCanceled") and not item.get("fastWriteCommitted")
+        and all(item.get(stage + flag) is True for stage in ("openStage", "setupStage")
+                for flag in ("Canceled", "Closed", "Recovered", "AdvanceObserved"))
+        and all(item.get(stage + "OuterExpired") is False for stage in ("openStage", "setupStage"))
+        for item in cancellations.values())
     assert all(item["boundedSafeFailure"] for item in provenance) and cancellation_safe, (
         "Packaged admission/cancellation guarantees failed", {"provenance": provenance, "cancellation": cancellations})
     for _, packet, code in packets:
@@ -432,13 +522,14 @@ def qualify(base: str, version: str, evidence: Path) -> dict:
     assert reload["drainCompletedAfterRelease"] and reload["oldDataSourceId"] != reload["newDataSourceId"]
     snapshots["reload"] = reload
     # A committed response stays200 and aborts; it cannot become a fabricated complete problem.
-    with opener.open(base + "/first/started", timeout=15) as response:
-        assert response.status == 200
-        try:
-            response.read()
-            raise AssertionError("Committed failure falsely completed.")
-        except http.client.IncompleteRead as error:
-            assert PRIVATE_MARKER.encode() not in error.partial
+    for shell in ("first", "second"):
+        with opener.open(base + f"/{shell}/started", timeout=15) as response:
+            assert response.status == 200
+            try:
+                response.read()
+                raise AssertionError("Committed failure falsely completed.")
+            except http.client.IncompleteRead as error:
+                assert PRIVATE_MARKER.encode() not in error.partial
     assert len(set(problem_titles)) == len(problem_titles)
     return snapshots
 
@@ -521,20 +612,12 @@ def main() -> None:
         assert "orbyss-foundation/feature.json" not in archive.namelist(), "Contract-only Core was advertised as an activated feature."
     restored_packages = copy_restored_packages(cache, feed)
     runtime.mkdir()
-    copy_runtime_feed(feed, runtime / "packages")
-    configuration = qualified_host.parent / "appsettings.json"
-    if not configuration.is_file():
-        configuration = repository / "src/Orbyss.Foundation.Host/appsettings.json"
-    shutil.copy2(configuration, runtime / "appsettings.json")
-    (runtime / "shells.json").write_text(json.dumps(settings(), indent=2), encoding="utf-8")
-    (runtime / "hostsettings.json").write_text(json.dumps({
-        "Foundation": {"Transport": {"MaxRequestBodyBytes": 1024}},
-        "Nuplane": {"Setup": {"StateFilePath": str(runtime / "nuplane-store-state.json")},
-                    "FeedResolution": {"PackageInstallRoot": str(runtime / "installed")},
-                    "Loading": {"ActiveStoreRoot": str(runtime / "packages/.installed")}}}), encoding="utf-8")
+    shared_bindings = copy_runtime_feed(feed, runtime / "packages", qualified_host, args.version, args.cshells_version)
+    write_runtime_configuration(qualified_host, runtime, settings())
     manifest.update({"packages": {path.name: sha256(path) for path in sorted(feed.glob("*.nupkg"))},
                      "freshRestoredPackages": restored_packages, "transportStartup": transport,
-                     "hostProvidedContractPackages": sorted(HOST_CONTRACT_PACKAGES)})
+                     "hostProvidedContractPackages": sorted(HOST_CONTRACT_PACKAGES),
+                     "hostProvidedSharedPackages": shared_bindings})
     inputs.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     process = None
     try:
@@ -544,7 +627,29 @@ def main() -> None:
     finally:
         if process is not None:
             terminate(process)
+    # Omitting WebRouting matches the endpoint-owned root topology used by Notes.
+    # Explicit Path="" instead installs a path fallback and would conceal the native gap.
+    root_runtime = run / "runtime-root-routing"
+    root_runtime.mkdir()
+    root_bindings = copy_runtime_feed(feed, root_runtime / "packages", qualified_host, args.version, args.cshells_version)
+    assert root_bindings == shared_bindings
+    root_configuration = settings()
+    del root_configuration["CShells"]["Shells"]["first"]["Configuration"]["WebRouting"]
+    write_runtime_configuration(qualified_host, root_runtime, root_configuration)
+    process = None
+    try:
+        process, address, _ = start_host(qualified_host, root_runtime, args.postgres_connection, args.dotnet)
+        observations["rootNativeStatusResponses"] = qualify_native_statuses(address, run, first_root=True)
+        (run / "observations.json").write_text(json.dumps(observations, indent=2), encoding="utf-8")
+    finally:
+        if process is not None:
+            terminate(process)
     output = (runtime / "host.log").read_text(encoding="utf-8", errors="replace")
+    root_output = (root_runtime / "host.log").read_text(encoding="utf-8", errors="replace")
+    assert PRIVATE_MARKER not in root_output, "Private payload reached root routing diagnostics."
+    manifest["rootRouting"] = {"firstShellExplicitWebRouting": False,
+        "shellConfigurationSha256": sha256(root_runtime / "shells.json"), "ownedRuntime": str(root_runtime)}
+    inputs.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     assert PRIVATE_MARKER not in output, "Private password/SQL/body reached native host diagnostics."
     assert "Framework request failure System.InvalidOperationException" in output, "Committed native failure diagnostics were suppressed instead of redacted."
     (run / "result.json").write_text(json.dumps({"status": "passed", "version": args.version,

@@ -8,6 +8,8 @@ internal sealed class ManualTimeProvider : TimeProvider
     private TimeSpan scheduledAdvance;
     private bool advanceOnTimestamp;
     private bool deliverScheduledTimers;
+    private TimeSpan? advanceAtCreation;
+    private TimeSpan creationAdvance;
     private DateTimeOffset utc = DateTimeOffset.Parse("2026-10-06T00:00:00Z", CultureInfo.InvariantCulture);
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override long GetTimestamp()
@@ -31,6 +33,11 @@ internal sealed class ManualTimeProvider : TimeProvider
         ScheduledAdvanceOccurred = false;
     }
     public void ShiftUtc(TimeSpan change) => utc += change;
+    public void AdvanceAfterTimerCreation(TimeSpan dueTime, TimeSpan advance)
+    {
+        advanceAtCreation = dueTime;
+        creationAdvance = advance;
+    }
     public void Advance(TimeSpan change, bool deliverTimers = true)
     {
         timestamp += change.Ticks;
@@ -46,6 +53,11 @@ internal sealed class ManualTimeProvider : TimeProvider
         {
             advanceAfterTimer = null;
             advanceOnTimestamp = true;
+        }
+        if (advanceAtCreation == dueTime)
+        {
+            advanceAtCreation = null;
+            Advance(creationAdvance, deliverTimers: false);
         }
         return timer;
     }

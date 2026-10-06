@@ -138,6 +138,8 @@ Require(capturedLogs.Entries.Any(entry => entry.Contains("23505", StringComparis
 Require(capturedLogs.Entries.Any(entry => entry.StartsWith("Microsoft.EntityFrameworkCore.Update|Error|", StringComparison.Ordinal)),
     "native PostgreSQL logging lost category or severity");
 
+await ConnectionStageProbe.RunAsync(leases, capturedLogs);
+
 // Expiry after the first stage check but before native dispatch must reject a fast mutation.
 // Cancel() alone cannot cancel a command that has not started executing yet.
 foreach (var mode in new[] { "nonquery", "reader", "scalar" })

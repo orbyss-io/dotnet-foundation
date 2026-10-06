@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 internal sealed class CaptureLoggerProvider : ILoggerProvider
 {
     public ConcurrentQueue<string> Entries { get; } = new();
+    public Action? NativeCommandCompleted;
     public ILogger CreateLogger(string categoryName) => new CaptureLogger(this, categoryName);
     public void Dispose() { }
     private sealed class CaptureLogger(CaptureLoggerProvider owner, string category) : ILogger
@@ -19,6 +20,8 @@ internal sealed class CaptureLoggerProvider : ILoggerProvider
         {
             if (category.StartsWith("Npgsql", StringComparison.Ordinal) || category.StartsWith("Microsoft.EntityFrameworkCore", StringComparison.Ordinal))
                 owner.Entries.Enqueue(category + "|" + logLevel + "|" + eventId.Id + "|" + formatter(state, exception) + (exception is null ? "" : "\n" + exception));
+            if (category == "Npgsql.Command" && eventId.Id == 2001)
+                Interlocked.Exchange(ref owner.NativeCommandCompleted, null)?.Invoke();
         }
     }
 }
