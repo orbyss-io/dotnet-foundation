@@ -18,4 +18,19 @@
       ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
       Dormant="$(FoundationFeatureDormant)" ComposeForOpenApi="$(FoundationComposeForOpenApi)" />
   </Target>
+  <UsingTask TaskName="Orbyss.Foundation.Build.EmitSettingsMetadata" AssemblyFile="$(FoundationBuildTaskAssembly)" />
+  <PropertyGroup><FoundationSettingsMetadata>$(IntermediateOutputPath)orbyss-foundation/settings.json</FoundationSettingsMetadata></PropertyGroup>
+  <ItemGroup Condition="'$(FoundationSettingsMetadataSource)' != ''">
+    <None Include="$(FoundationSettingsMetadata)" Pack="true" PackagePath="orbyss-foundation/settings.json" Visible="false" />
+  </ItemGroup>
+  <Target Name="FoundationCompileSettingsMetadata" AfterTargets="CoreCompile" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+    <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
+      PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
+      CompiledAssembly="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" />
+  </Target>
+  <Target Name="FoundationEmitSettingsMetadata" BeforeTargets="GenerateNuspec" Condition="'$(FoundationSettingsMetadataSource)' != ''">
+    <Orbyss.Foundation.Build.EmitSettingsMetadata DeclarationSource="$(FoundationSettingsMetadataSource)" OutputFile="$(FoundationSettingsMetadata)"
+      PackageId="$(PackageId)" PackageVersion="$(PackageVersion)" ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
+      CompiledAssembly="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" ValidateOnly="true" />
+  </Target>
 </Project>
