@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Diagnostics;
+using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 namespace Orbyss.Foundation.Web.ProblemDetails;
 
@@ -18,39 +20,32 @@ public sealed class FoundationProblemDetailsFeature : IMiddlewareShellFeature
     public int Order => -900;
 
     /// <inheritdoc />
-    public void ConfigureServices(IServiceCollection services) =>
-        services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddFoundationProblemDetails();
+        services.AddExceptionHandler<FoundationBadHttpRequestExceptionHandler>();
+        // Native raw-exception diagnostics can contain credentials or SQL. The policy and known
+        // handlers emit bounded classifications with correlation instead, including on .NET 10.
+        services.Configure<ExceptionHandlerOptions>(options =>
         {
-            if (!context.ProblemDetails.Extensions.TryGetValue("code", out var code) || code is null)
-            {
-                context.ProblemDetails.Extensions["code"] = CodeFor(context.HttpContext.Response.StatusCode);
-            }
-            context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+            options.SuppressDiagnosticsCallback = _ => true;
+            options.ExceptionHandler = context => new FoundationProblemResult(
+                new Microsoft.AspNetCore.Mvc.ProblemDetails { Status = 500 },
+                context.Features.Get<IExceptionHandlerFeature>()?.Error).ExecuteAsync(context);
         });
+    }
 
     /// <inheritdoc />
     public void UseMiddleware(IApplicationBuilder app, IHostEnvironment? environment)
     {
+        _ = app.ApplicationServices.GetRequiredService<IProblemDetailsService>();
         app.UseExceptionHandler();
         app.UseStatusCodePages(async statusContext =>
         {
             var response = statusContext.HttpContext.Response;
-            await Results.Problem(
-                statusCode: response.StatusCode,
-                extensions: new Dictionary<string, object?>
-                {
-                    ["code"] = CodeFor(response.StatusCode),
-                    ["traceId"] = statusContext.HttpContext.TraceIdentifier
-                }).ExecuteAsync(statusContext.HttpContext).ConfigureAwait(false);
+            await FoundationProblemResults.Problem(new ProblemDefinition(response.StatusCode,
+                FoundationProblemResults.CodeForStatus(response.StatusCode)))
+                .ExecuteAsync(statusContext.HttpContext).ConfigureAwait(false);
         });
     }
-
-    /// <summary>Maps an HTTP status to the default stable problem code.</summary>
-    private static string CodeFor(int status) => status switch
-    {
-        StatusCodes.Status401Unauthorized => "authentication_required",
-        StatusCodes.Status403Forbidden => "authorization_denied",
-        StatusCodes.Status400BadRequest => "invalid_request",
-        _ => "request_failed"
-    };
 }

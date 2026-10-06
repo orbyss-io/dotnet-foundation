@@ -27,6 +27,12 @@
     <Project Path="src/Orbyss.Foundation.Web.OpenApi/Orbyss.Foundation.Web.OpenApi.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
     <Project Path="src/Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+    <Project Path="src/Orbyss.Foundation.Authentication.Core/Orbyss.Foundation.Authentication.Core.csproj" />
+    <Project Path="src/Orbyss.Foundation.Collections.Core/Orbyss.Foundation.Collections.Core.csproj" />
+    <Project Path="src/Orbyss.Foundation.Execution/Orbyss.Foundation.Execution.csproj" />
+    <Project Path="src/Orbyss.Foundation.Execution.Core/Orbyss.Foundation.Execution.Core.csproj" />
+    <Project Path="src/Orbyss.Foundation.PostgreSql/Orbyss.Foundation.PostgreSql.csproj" />
+    <Project Path="src/Orbyss.Foundation.Web.ProblemDetails.Core/Orbyss.Foundation.Web.ProblemDetails.Core.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/dotnet/">
@@ -43,5 +49,11 @@
     <Project Path="tests/dotnet/Orbyss.Foundation.Web.Discovery.Probe/Orbyss.Foundation.Web.Discovery.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Web.HostedPages.Probe/Orbyss.Foundation.Web.HostedPages.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.WebDefaults.Probe/Orbyss.Foundation.WebDefaults.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Collections.Probe/Orbyss.Foundation.Collections.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Json.Admission.Probe/Orbyss.Foundation.Json.Admission.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Json.Budget.Probe/Orbyss.Foundation.Json.Budget.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Json.Http.Probe/Orbyss.Foundation.Json.Http.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.PostgreSql.Probe/Orbyss.Foundation.PostgreSql.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Web.ProblemDetails.Probe/Orbyss.Foundation.Web.ProblemDetails.Probe.csproj" />
   </Folder>
 </Solution>

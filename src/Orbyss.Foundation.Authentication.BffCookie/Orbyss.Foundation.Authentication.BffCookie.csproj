@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="../Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
     <ProjectReference Include="../Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Json.AspNetCore/Orbyss.Foundation.Json.AspNetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="/" />

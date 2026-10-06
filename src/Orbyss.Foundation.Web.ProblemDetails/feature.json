@@ -13,6 +13,18 @@
     }
   ],
   "sourceSha256": {
-    "FoundationProblemDetailsFeature.cs": "a6dda565aa133ef454cd8bf094a67d419ebdc8a18c3691cd9bf555d2382d7d65"
+    "FoundationBadHttpRequestExceptionHandler.cs": "5db1b9e886c63d96ea09b147ffd57714e6994ee1328a80b1cc46b08bde36e66d",
+    "FoundationBoundedProblemDetailsWriter.cs": "d3de83644abdd40a551a07777fcad73a98a067921fa02dbe1ce8d7b41c61ac4e",
+    "FoundationProblemDetailsFeature.cs": "7d402e61fa0819ceff52abc1afc07e93e24f6d70145d2a299bbe85e05f608de6",
+    "FoundationProblemDetailsOptionsSetup.cs": "b02c0f007aea1cb03c13ea6aa78a01ebfa8538ef25ad625f3a15374c94c55cf6",
+    "FoundationProblemDetailsServiceCollectionExtensions.cs": "5e5842c2d1c376d5916ebe4f80ba8ee280a00ef5f78901e873134981f2b60305",
+    "FoundationProblemEnvelope.cs": "3767a3403a8bb7f390001a2df3c0a341280e75887df1bbf737390045307fdd7e",
+    "FoundationProblemRepresentationPolicy.cs": "d3236ac312d33430d1b556e3edbb223aa3208730dbebd21463226b1e1649fa71",
+    "FoundationProblemResponseOptions.cs": "1ae2064b90d20bdbe1357048e765b162ed24ccc764d20c5a0c41820a99d5b7d3",
+    "FoundationProblemResult.cs": "ccdf35641c63e32193b369e11d86d537d02dbb7e2e867f61dd0b29dbccf9bd87",
+    "FoundationProblemResults.cs": "aafd33b650d084096e24775dfd7cb7fc26f1e3a467dea40b2a9ca00ebf2a5ae8",
+    "IFoundationProblemResult.cs": "0cbd1ec3c0f1a4dfc04d005b2fc9aac5587918611739d83d8bb1cc27be9597d8",
+    "IProblemDetailsEnricher.cs": "a3f7cb9fe2a7c643c8c78586bbf6ebfb485523dcebd6c6bfa17b050b75605dd6",
+    "IProblemRepresentationPolicy.cs": "32ed022d557332935677be796b8860a71a5f50608afc526c65878cdb50931a72"
   }
 }

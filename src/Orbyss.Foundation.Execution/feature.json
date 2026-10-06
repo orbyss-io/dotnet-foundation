@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Execution",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Execution",
+      "featureDependencies": [],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ],
+  "sourceSha256": {
+    "ExecutionDeadline.cs": "33e45ae9b5d16219c12ac9b0b3ade782e894e1687d2f0d8a3a55adb2cfe5f483",
+    "FoundationExecutionFeature.cs": "76ddb2fc2801c86b5aa283e4bfa5cf7515bc1083432e4507e6346922599dce9e",
+    "FoundationExecutionServiceCollectionExtensions.cs": "ff11c40c9087b95ba9fa56e8a373a010c61c3c87276752c739bbc1b96d0b01a9",
+    "TimeProviderDeadlineFactory.cs": "3695cc52ba6fd6f51723b92aae9dd1b8c5b42b8c691243f94a31276eda4b4d3e"
+  }
+}

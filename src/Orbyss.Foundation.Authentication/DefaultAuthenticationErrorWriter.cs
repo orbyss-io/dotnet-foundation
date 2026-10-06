@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Http;
+using Orbyss.Foundation.Web.ProblemDetails;
+using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 namespace Orbyss.Foundation.Authentication;
 
@@ -8,13 +10,7 @@ internal sealed class DefaultAuthenticationErrorWriter : IAuthenticationErrorWri
     /// <inheritdoc />
     public async Task WriteAsync(HttpContext context, int statusCode, string code)
     {
-        context.Response.StatusCode = statusCode;
-        await Results.Problem(
-            statusCode: statusCode,
-            extensions: new Dictionary<string, object?>
-            {
-                ["code"] = code,
-                ["traceId"] = context.TraceIdentifier
-            }).ExecuteAsync(context).ConfigureAwait(false);
+        await FoundationProblemResults.Problem(new ProblemDefinition(statusCode, code))
+            .ExecuteAsync(context).ConfigureAwait(false);
     }
 }

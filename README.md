@@ -47,7 +47,7 @@ Stable tags must exactly match `VERSION`. The release workflow publishes the NuG
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.
 
 The exporter and `Orbyss.Foundation.Build` have independent versions. The runtime
-publication gate packs exactly 24 runtime/analyzer packages with
+publication gate packs exactly 30 runtime/analyzer packages with
 `-p:FoundationRuntimeOnly=true`. An `exporter-v<version>` tag qualifies and publishes
 only the exporter; a `build-v<version>` tag qualifies and publishes only the descriptor
 build package. Both use the protected `release-tools.yml` workflow with exact source

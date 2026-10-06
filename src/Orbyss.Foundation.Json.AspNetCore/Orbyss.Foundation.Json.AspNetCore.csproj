@@ -3,7 +3,9 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <ProjectReference Include="../Orbyss.Foundation.Json/Orbyss.Foundation.Json.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
   </ItemGroup>
   <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
 </Project>

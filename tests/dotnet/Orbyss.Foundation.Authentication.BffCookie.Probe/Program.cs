@@ -7,10 +7,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Orbyss.Foundation.Authentication;
 using Orbyss.Foundation.Authentication.BffCookie;
+using CShells.Lifecycle.Blueprints;
+using Microsoft.Extensions.Configuration;
 
 VerifyLocalHttpDevelopmentCookies();
 VerifyProductionCookies();
 OptionsBindingProbe.Run();
+await IdentityProjectionProbe.RunAsync();
 await CallbackRoutingProbe.RunAsync();
 
 static void VerifyLocalHttpDevelopmentCookies()
@@ -71,6 +74,9 @@ static ServiceProvider CreateProvider(string environmentName, bool allowHttpForL
         Audience = "orbyss-foundation-api",
         AllowHttpForLocalDevelopment = allowHttpForLocalDevelopment
     }));
+    var settings = new ConfigurationShellBlueprint(Guid.NewGuid().ToString("N"), new ConfigurationBuilder().Build())
+        .ComposeAsync().GetAwaiter().GetResult();
+    new FoundationAuthenticationFeature(settings).ConfigureServices(services);
     new FoundationBffCookieFeature().ConfigureServices(services);
     return services.BuildServiceProvider(validateScopes: true);
 }

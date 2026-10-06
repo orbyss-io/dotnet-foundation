@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Orbyss.Foundation.Authentication.Core/Orbyss.Foundation.Authentication.Core.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
     <PackageReference Include="CShells.Abstractions" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>

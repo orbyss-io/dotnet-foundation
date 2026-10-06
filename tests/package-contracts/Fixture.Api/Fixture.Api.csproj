@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><PackageId>Foundation.ContractFixture.Api</PackageId><AssemblyName>$(PackageId)</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Foundation.ContractFixture.Core" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Authentication" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Json.AspNetCore" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Web.ProblemDetails" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Execution" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" Version="[$(CShellsCandidateVersion)]" PrivateAssets="all" />
+    <None Include="feature.json" Pack="true" PackagePath="orbyss-foundation/feature.json" />
+  </ItemGroup>
+</Project>

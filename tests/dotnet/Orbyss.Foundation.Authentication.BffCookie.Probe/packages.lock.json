@@ -95,6 +95,11 @@
           "Microsoft.IdentityModel.Logging": "8.19.2"
         }
       },
+      "Microsoft.OpenApi": {
+        "type": "Transitive",
+        "resolved": "2.7.5",
+        "contentHash": "0FA67RSnRM4tcBKqiqVu/HPdZ9+QOKbmeRjxRUGTCjPU4C0bmUhd97Dso7Yild5P7nOV6GxJ2xrK0Kv/O9xp0w=="
+      },
       "System.IdentityModel.Tokens.Jwt": {
         "type": "Transitive",
         "resolved": "8.19.2",
@@ -105,15 +110,50 @@
         }
       },
       "orbyss.foundation.authentication": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Authentication.Core": "[0.2.4, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.2.4, )"
+        }
       },
       "orbyss.foundation.authentication.bffcookie": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.OpenIdConnect": "[10.0.11, )",
           "Orbyss.Foundation.Authentication": "[0.2.4, )",
+          "Orbyss.Foundation.Json.AspNetCore": "[0.2.4, )",
           "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
         }
+      },
+      "orbyss.foundation.authentication.core": {
+        "type": "Project"
+      },
+      "orbyss.foundation.collections.core": {
+        "type": "Project"
+      },
+      "orbyss.foundation.json": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Collections.Core": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.json.aspnetcore": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.AspNetCore.OpenApi": "[10.0.11, )",
+          "Orbyss.Foundation.Json": "[0.2.4, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.web.problemdetails": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Json": "[0.2.4, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.web.problemdetails.core": {
+        "type": "Project"
       },
       "orbyss.foundation.webdefaults": {
         "type": "Project"
@@ -134,6 +174,15 @@
         "contentHash": "LM2J/cxqAB6W1sZ0Lo8sf0AYcnYQWEDTyRQTIxGt/cZ7C24VKugbvux2iswkyAbPC8M4HP7NEqC2cWbvyTWVnQ==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.19.2"
+        }
+      },
+      "Microsoft.AspNetCore.OpenApi": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "R/1EATnPLU+gRfB6lwVkMcymmyAY5ppBBdRN/5lhNEiT3xP1sWccuSFkU/f1lQvN/WgRq5Vn8AhCdE3fqgsL/w==",
+        "dependencies": {
+          "Microsoft.OpenApi": "[2.7.5, 3.0.0)"
         }
       }
     }

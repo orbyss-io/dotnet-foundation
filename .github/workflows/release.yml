@@ -54,7 +54,7 @@ jobs:
         run: |
           shopt -s nullglob
           packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 24 ]] || { echo "Expected 24 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
+          [[ ${#packages[@]} -eq 30 ]] || { echo "Expected 30 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
           for package in "${packages[@]}"; do
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done
@@ -65,6 +65,9 @@ jobs:
 
       - name: Verify packed OpenAPI exporter admission and evidence
         run: python tests/validate_openapi_exporter.py
+
+      - name: Verify packaged public contracts through Host and PostgreSQL
+        run: python tests/run_contract_package_qualification.py
 
       - name: Attest validated packages
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4

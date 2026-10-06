@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><PackageId>Foundation.ContractFixture</PackageId><AssemblyName>$(PackageId)</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Foundation.ContractFixture.Core" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Execution" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="CShells.Abstractions" Version="[$(CShellsCandidateVersion)]" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="[10.0.11]" />
+    <None Include="feature.json" Pack="true" PackagePath="orbyss-foundation/feature.json" />
+  </ItemGroup>
+</Project>

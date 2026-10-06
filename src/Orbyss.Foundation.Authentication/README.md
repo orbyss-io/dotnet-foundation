@@ -24,3 +24,15 @@ These rules apply to the effective shell configuration after configuration-provi
 standard IConfiguration providers merge indexed keys across sources, so deploy a complete shell
 selection rather than relying on a shorter array in a later provider to delete earlier indices.
 Recreate the shell to apply configuration changes to its authentication handlers.
+
+The shell also registers the replaceable `IValidatedAccountIdentityReader`. Adapt an authenticated
+`ClaimsPrincipal` through this service before translating its result to an application account.
+Admission requires exactly one identity, that identity authenticated, and exactly one nonempty
+`AuthenticationClaimTypes.ValidatedIssuer` / `ValidatedSubject` pair. Duplicate or conflicting
+claims, additional identities and unauthenticated identities are rejected. The projection retains
+exact ordinal issuer/subject values and does not decide resource ownership.
+
+The immutable value and stable claim/error vocabulary are exported by the framework-light
+`Orbyss.Foundation.Authentication.Core` package. Role and permission configuration cannot select
+reserved projection claim names. Authentication errors use the shared Problem Details integration;
+applications can replace the reader or the authentication error writer through DI.

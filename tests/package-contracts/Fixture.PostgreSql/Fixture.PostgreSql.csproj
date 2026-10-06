@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><PackageId>Foundation.ContractFixture.PostgreSql</PackageId><AssemblyName>$(PackageId)</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Foundation.ContractFixture.Core" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.PostgreSql" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="CShells.Abstractions" Version="[$(CShellsCandidateVersion)]" PrivateAssets="all" />
+    <None Include="feature.json" Pack="true" PackagePath="orbyss-foundation/feature.json" />
+  </ItemGroup>
+</Project>

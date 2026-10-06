@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
+using Orbyss.Foundation.Authentication.Core;
 using Orbyss.Foundation.Authentication;
 
 namespace Orbyss.Foundation.Authentication.BffCookie;
@@ -26,7 +27,7 @@ internal sealed class AntiforgeryMiddleware(RequestDelegate next)
                 await errorWriter.WriteAsync(
                     context,
                     StatusCodes.Status400BadRequest,
-                    "invalid_antiforgery_token").ConfigureAwait(false);
+                    AuthenticationErrorCodes.InvalidAntiforgeryToken).ConfigureAwait(false);
                 return;
             }
         }

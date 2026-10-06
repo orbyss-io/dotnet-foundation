@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
+using Orbyss.Foundation.Authentication.Core;
 
 namespace Orbyss.Foundation.Authentication;
 
@@ -25,6 +26,10 @@ internal sealed class FoundationWebOptionsValidator(
         Require(options.Audience, "Foundation:Web:Audience", failures);
         Require(options.RoleClaim, "Foundation:Web:RoleClaim", failures);
         Require(options.PermissionClaim, "Foundation:Web:PermissionClaim", failures);
+        if (IsReserved(options.RoleClaim) || IsReserved(options.PermissionClaim))
+        {
+            failures.Add("Foundation:Web role and permission claim types must not use reserved validated identity projection names.");
+        }
 
         if (Uri.TryCreate(options.Authority, UriKind.Absolute, out var authority))
         {
@@ -104,6 +109,10 @@ internal sealed class FoundationWebOptionsValidator(
             failures.Add($"{path} is required by the selected secure web profile.");
         }
     }
+
+    /// <summary>Protects projection ownership from deployment claim mappings.</summary>
+    private static bool IsReserved(string? type) => string.Equals(type, AuthenticationClaimTypes.ValidatedIssuer, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(type, AuthenticationClaimTypes.ValidatedSubject, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Rejects empty provider keys and permission identities.</summary>
     private static void ValidatePermissionMappings(

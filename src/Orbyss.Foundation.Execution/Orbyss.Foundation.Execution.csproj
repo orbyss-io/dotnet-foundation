@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>TimeProvider-backed monotonic operation deadlines and shell registration.</Description>
+    <PackageId>Orbyss.Foundation.Execution</PackageId>
+    <PackageTags>orbyss-foundation;execution;deadlines;cshells</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CShells.Abstractions" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <ProjectReference Include="../Orbyss.Foundation.Execution.Core/Orbyss.Foundation.Execution.Core.csproj" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Orbyss.Foundation.Web.ProblemDetails;
 
 namespace Orbyss.Foundation.Authentication;
 
@@ -19,6 +20,7 @@ public sealed class FoundationAuthenticationFeature(ShellSettings settings) : IS
     /// <inheritdoc />
     public void ConfigureServices(IServiceCollection services)
     {
+        services.TryAddSingleton(settings);
         var configuration = settings.GetConfigurationRoot().GetSection(FoundationWebOptions.SectionName);
         services.Configure<FoundationWebOptions>(options =>
         {
@@ -44,6 +46,8 @@ public sealed class FoundationAuthenticationFeature(ShellSettings settings) : IS
             new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
         services.AddTransient<IClaimsTransformation, PermissionClaimsTransformation>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.TryAddSingleton<IValidatedAccountIdentityReader, ValidatedAccountIdentityReader>();
+        services.AddFoundationProblemDetails();
         services.TryAddSingleton<IAuthenticationErrorWriter, DefaultAuthenticationErrorWriter>();
     }
 }

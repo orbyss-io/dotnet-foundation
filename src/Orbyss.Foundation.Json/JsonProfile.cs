@@ -13,17 +13,20 @@ public sealed class JsonProfile
     public int MaxBytes { get; }
     /// <summary>Gets the maximum nesting depth.</summary>
     public int MaxDepth { get; }
+    /// <summary>Gets the admitted parser/serializer preset identity.</summary>
+    public string Preset { get; }
 
     /// <summary>Compiles a fixed preset and explicitly selected stateless extensions.</summary>
     public JsonProfile(JsonProfileSettings settings, IEnumerable<IJsonProfileExtension>? extensions = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         if (settings.MaxBytes is < 1 or > 16_777_216 || settings.MaxDepth is < 1 or > 64 ||
-            settings.Preset is not ("strict-request" or "tolerant-response"))
+            settings.Preset is not (JsonProfileKeys.StrictRequest or JsonProfileKeys.TolerantResponse))
             throw new InvalidOperationException("Foundation:Json profile has invalid limits or preset.");
         MaxBytes = settings.MaxBytes;
         MaxDepth = settings.MaxDepth;
-        var strict = settings.Preset == "strict-request";
+        Preset = settings.Preset;
+        var strict = settings.Preset == JsonProfileKeys.StrictRequest;
         options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -54,6 +57,7 @@ public sealed class JsonProfile
             }
         }
         if (resolver is not null) options.TypeInfoResolver = resolver;
+        options.Converters.Add(new BoundedStringJsonConverter(MaxBytes));
         options.TypeInfoResolver = new GuardedJsonTypeInfoResolver(options.TypeInfoResolver!);
         options.MakeReadOnly();
     }
@@ -74,8 +78,8 @@ public sealed class JsonProfile
     {
         RequireOptions(typeInfo);
         ValidateInput(utf8);
-        try { return JsonSerializer.Deserialize(utf8, typeInfo) ?? throw new JsonProfileException("json_null_root"); }
-        catch (JsonException) { throw new JsonProfileException("json_invalid_contract"); }
+        try { return JsonSerializer.Deserialize(utf8, typeInfo) ?? throw new JsonProfileException(JsonFailureCodes.NullRoot); }
+        catch (JsonException) { throw new JsonProfileException(JsonFailureCodes.InvalidContract); }
     }
 
     /// <summary>Serializes a known contract, retaining explicitly nullable members.</summary>
@@ -83,15 +87,26 @@ public sealed class JsonProfile
 
     /// <summary>Serializes with explicit profile-governed metadata.</summary>
     public byte[] Serialize<T>(T value, JsonTypeInfo<T> typeInfo)
+        => Serialize(value, typeInfo, CancellationToken.None);
+
+    /// <summary>Serializes within finite retained/scratch bounds and observes caller cancellation before commitment.</summary>
+    public byte[] Serialize<T>(T value, JsonTypeInfo<T> typeInfo, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         RequireOptions(typeInfo);
+        if (value is null) throw new JsonResponseContractException(JsonFailureCodes.ResponseNullRoot);
         try
         {
-            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, typeInfo);
-            ValidateInput(bytes);
+            var buffer = new BoundedJsonBuffer(MaxBytes, cancellationToken);
+            using var writer = new Utf8JsonWriter(buffer, new JsonWriterOptions { MaxDepth = MaxDepth });
+            JsonSerializer.Serialize(writer, value, typeInfo);
+            writer.Flush();
+            var bytes = buffer.ToArray();
+            try { ValidateInput(bytes); }
+            catch (JsonProfileException) { throw new JsonResponseContractException(JsonFailureCodes.ResponseInvalidContract); }
             return bytes;
         }
-        catch (JsonException) { throw new JsonProfileException("json_invalid_contract"); }
+        catch (JsonException) { throw new JsonResponseContractException(JsonFailureCodes.ResponseInvalidContract); }
     }
 
     /// <summary>Reads at most the configured byte limit plus one detection byte, honoring cancellation.</summary>
@@ -101,18 +116,21 @@ public sealed class JsonProfile
         var buffer = new byte[Math.Min(MaxBytes + 1, 8192)];
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var count = await stream.ReadAsync(buffer.AsMemory(0, Math.Min(buffer.Length, MaxBytes + 1 - (int)data.Length)), cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
             if (count == 0) break;
             data.Write(buffer, 0, count);
-            if (data.Length > MaxBytes) throw new JsonProfileException("json_size_exceeded");
+            if (data.Length > MaxBytes) throw new JsonProfileException(JsonFailureCodes.SizeExceeded);
         }
+        cancellationToken.ThrowIfCancellationRequested();
         return Deserialize<T>(data.GetBuffer().AsSpan(0, (int)data.Length));
     }
 
     /// <summary>Rejects malformed Unicode, duplicate decoded keys, excessive depth, and extra roots before typed conversion.</summary>
     public void ValidateInput(ReadOnlySpan<byte> utf8)
     {
-        if (utf8.Length > MaxBytes) throw new JsonProfileException("json_size_exceeded");
+        if (utf8.Length > MaxBytes) throw new JsonProfileException(JsonFailureCodes.SizeExceeded);
         try
         {
             var reader = new Utf8JsonReader(utf8, new JsonReaderOptions { MaxDepth = MaxDepth });
@@ -124,14 +142,14 @@ public sealed class JsonProfile
                 else if (reader.TokenType == JsonTokenType.EndObject) objects.Pop();
                 else if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    if (!objects.Peek().Add(reader.GetString()!)) throw new JsonProfileException("json_duplicate_member");
+                    if (!objects.Peek().Add(reader.GetString()!)) throw new JsonProfileException(JsonFailureCodes.DuplicateMember);
                 }
                 else if (reader.TokenType == JsonTokenType.String) _ = reader.GetString();
             }
-            if (reader.BytesConsumed == 0) throw new JsonProfileException("json_invalid_syntax");
+            if (reader.BytesConsumed == 0) throw new JsonProfileException(JsonFailureCodes.InvalidSyntax);
         }
-        catch (JsonException) { throw new JsonProfileException("json_invalid_syntax"); }
-        catch (InvalidOperationException) { throw new JsonProfileException("json_invalid_unicode"); }
+        catch (JsonException) { throw new JsonProfileException(JsonFailureCodes.InvalidSyntax); }
+        catch (InvalidOperationException) { throw new JsonProfileException(JsonFailureCodes.InvalidUnicode); }
     }
 
     /// <summary>Prevents supplied metadata from bypassing the selected profile's guarantees.</summary>

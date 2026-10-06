@@ -6,6 +6,8 @@ using Nuplane.Loading.Hosting.Builder;
 using Nuplane.Sources.Directory.Configuration;
 using Orbyss.Foundation.Host.Feed;
 using Orbyss.Foundation.Host.Shells;
+using Orbyss.Foundation.Host.Transport;
+using Orbyss.Foundation.Host.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
@@ -16,6 +18,9 @@ builder.Configuration
     .AddCommandLine(args);
 var configuration = builder.Configuration;
 var nuplaneConfiguration = configuration.GetSection("Nuplane");
+var transport = configuration.GetSection("Foundation:Transport").Get<FoundationTransportOptions>() ?? new();
+builder.WebHost.ConfigureKestrel(options => transport.Apply(options));
+builder.Services.AddFoundationRequestDiagnosticRedaction();
 
 builder.Services.AddNuplane(nuplaneConfiguration, nuplane =>
 {

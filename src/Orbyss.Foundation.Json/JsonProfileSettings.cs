@@ -4,7 +4,7 @@ namespace Orbyss.Foundation.Json;
 public sealed class JsonProfileSettings
 {
     /// <summary>Gets or sets strict-request or tolerant-response.</summary>
-    public string Preset { get; set; } = "strict-request";
+    public string Preset { get; set; } = JsonProfileKeys.StrictRequest;
     /// <summary>Gets or sets the maximum input/output size, capped at 16 MiB.</summary>
     public int MaxBytes { get; set; } = 1_048_576;
     /// <summary>Gets or sets the maximum nesting depth, capped at 64.</summary>

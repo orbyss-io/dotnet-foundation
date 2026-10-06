@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><Description>Owned ordered collection values with structural equality.</Description><PackageReadmeFile>README.md</PackageReadmeFile></PropertyGroup>
+  <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
+</Project>

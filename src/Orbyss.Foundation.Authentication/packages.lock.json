@@ -15,6 +15,28 @@
         "type": "Transitive",
         "resolved": "2025.2.4",
         "contentHash": "TwbgxAkXxY+vNEhNVx/QXjJ4vqxmepOjsgRvvImQPbHkHMMb4W+ahL3laMsxXKtNT7iMy+E1B3xkqao2hf1n3A=="
+      },
+      "orbyss.foundation.authentication.core": {
+        "type": "Project"
+      },
+      "orbyss.foundation.collections.core": {
+        "type": "Project"
+      },
+      "orbyss.foundation.json": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Collections.Core": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.web.problemdetails": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Json": "[0.2.4, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.web.problemdetails.core": {
+        "type": "Project"
       }
     }
   }

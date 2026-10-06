@@ -1,1 +1,8 @@
-{}
+{
+  "Foundation": {
+    "Transport": {
+      "MaxRequestBodyBytes": 30000000,
+      "MaxRequestHeadersBytes": 32768
+    }
+  }
+}

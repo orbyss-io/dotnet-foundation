@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Provider-neutral monotonic operation deadline contracts.</Description>
+    <PackageId>Orbyss.Foundation.Execution.Core</PackageId>
+    <PackageTags>orbyss-foundation;execution;deadlines;contracts</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
+</Project>

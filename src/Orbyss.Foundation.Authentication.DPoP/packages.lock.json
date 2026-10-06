@@ -88,6 +88,13 @@
         }
       },
       "orbyss.foundation.authentication": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Authentication.Core": "[0.2.4, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.authentication.core": {
         "type": "Project"
       },
       "orbyss.foundation.authentication.spapkce": {
@@ -97,6 +104,25 @@
           "Orbyss.Foundation.Authentication": "[0.2.4, )",
           "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
         }
+      },
+      "orbyss.foundation.collections.core": {
+        "type": "Project"
+      },
+      "orbyss.foundation.json": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Collections.Core": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.web.problemdetails": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Json": "[0.2.4, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.2.4, )"
+        }
+      },
+      "orbyss.foundation.web.problemdetails.core": {
+        "type": "Project"
       },
       "orbyss.foundation.webdefaults": {
         "type": "Project"
