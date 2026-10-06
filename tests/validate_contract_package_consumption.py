@@ -54,6 +54,9 @@ def preserve_host_payload(host: Path, destination: Path) -> dict[str, str]:
     profile_configuration = host.parent / ".orbyss-foundation"
     if profile_configuration.is_dir():
         files.update(profile_configuration.glob("*.json"))
+        metadata_sources = profile_configuration / "settings-sources"
+        if metadata_sources.is_dir():
+            files.update(path for path in metadata_sources.rglob("*.txt") if path.is_file())
     runtimes = host.parent / "runtimes"
     if runtimes.is_dir():
         files.update(path for path in runtimes.rglob("*") if path.is_file())

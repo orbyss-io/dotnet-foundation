@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.ProblemDetails",
+  "sourceSha256": {
+    "FoundationBadHttpRequestExceptionHandler.cs": "5db1b9e886c63d96ea09b147ffd57714e6994ee1328a80b1cc46b08bde36e66d",
+    "FoundationBoundedProblemDetailsWriter.cs": "6c8a05de4e8dbe1b486d844eb3f81aaaeb739ccd60e95f5facf7f152033d3432",
+    "FoundationProblemDetailsApplicationBuilderExtensions.cs": "2dfcb350df23fc16d1bbeef87af1bfa914caf600dd5da1fed88f88e6436cc39e",
+    "FoundationProblemDetailsFeature.cs": "93c221ac94f1cda5a99f820132f0e8869bd95429a8a2c90d0834fa02802e98c4",
+    "FoundationProblemDetailsOptionsSetup.cs": "b02c0f007aea1cb03c13ea6aa78a01ebfa8538ef25ad625f3a15374c94c55cf6",
+    "FoundationProblemDetailsServiceCollectionExtensions.cs": "5e5842c2d1c376d5916ebe4f80ba8ee280a00ef5f78901e873134981f2b60305",
+    "FoundationProblemEnvelope.cs": "3767a3403a8bb7f390001a2df3c0a341280e75887df1bbf737390045307fdd7e",
+    "FoundationProblemRepresentationPolicy.cs": "d3236ac312d33430d1b556e3edbb223aa3208730dbebd21463226b1e1649fa71",
+    "FoundationProblemResponseOptions.cs": "1ae2064b90d20bdbe1357048e765b162ed24ccc764d20c5a0c41820a99d5b7d3",
+    "FoundationProblemResult.cs": "ccdf35641c63e32193b369e11d86d537d02dbb7e2e867f61dd0b29dbccf9bd87",
+    "FoundationProblemResults.cs": "2377fae5d9825ec6f21adfc48da3a2cf1fa5e6f4ce8a569f00bf056a578a0eff",
+    "IFoundationProblemResult.cs": "81bd5d756032c76dca36d82d426b38949f8660a189274171dbfa2d4d2c05e68a",
+    "IProblemDetailsEnricher.cs": "a3f7cb9fe2a7c643c8c78586bbf6ebfb485523dcebd6c6bfa17b050b75605dd6",
+    "IProblemRepresentationPolicy.cs": "32ed022d557332935677be796b8860a71a5f50608afc526c65878cdb50931a72"
+  },
+  "contracts": [
+    {
+      "scope": "problem-response",
+      "typeName": "Orbyss.Foundation.Web.ProblemDetails.FoundationProblemResponseOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "MaxBytes",
+          "path": "FoundationProblemResponseOptions:MaxBytes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 512,
+            "maximum": 16777216
+          },
+          "binding": "Code options; selected Json.AspNetCore projects the configured problem-response profile.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "immutable",
+          "description": "Supported MaxBytes value owned by FoundationProblemResponseOptions."
+        },
+        {
+          "property": "MaxDepth",
+          "path": "FoundationProblemResponseOptions:MaxDepth",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 3,
+            "maximum": 64
+          },
+          "binding": "Code options; selected Json.AspNetCore projects the configured problem-response profile.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "immutable",
+          "description": "Supported MaxDepth value owned by FoundationProblemResponseOptions."
+        },
+        {
+          "property": "Preset",
+          "path": "FoundationProblemResponseOptions:Preset",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "tolerant-response"
+            ]
+          },
+          "binding": "Code options; selected Json.AspNetCore projects the configured problem-response profile.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "immutable",
+          "description": "Supported Preset value owned by FoundationProblemResponseOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "AddFoundationProblemDetails registers code options without a configuration-file binder.",
+        "Selecting Json.AspNetCore projects MaxBytes, MaxDepth and Preset from Foundation:Json:Profiles:problem-response before native bounded writer admission.",
+        "The closed response encoder owns its DTO/resolver; application JSON extensions do not replace that shape."
+      ],
+      "appliesTo": {
+        "kind": "code",
+        "features": [],
+        "configuration": []
+      }
+    }
+  ],
+  "imports": []
+}

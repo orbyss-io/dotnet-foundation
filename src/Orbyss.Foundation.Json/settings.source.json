@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "packageId": "Orbyss.Foundation.Json",
   "sourceSha256": {
     "BoundedJsonBuffer.cs": "42a8fed226c1f9e150e8210a07227fdc246c4f0e949db227757e8150105be8aa",
@@ -104,7 +104,13 @@
         "JsonProfile rejects invalid presets and bounds before creating immutable serializer options.",
         "Extensions must be non-null, unique and registered by code; at most one selected resolver is allowed.",
         "Converter overlap fails when type metadata is resolved; these declarations do not enumerate application contracts."
-      ]
+      ],
+      "appliesTo": {
+        "kind": "code",
+        "features": [],
+        "configuration": []
+      }
     }
-  ]
+  ],
+  "imports": []
 }

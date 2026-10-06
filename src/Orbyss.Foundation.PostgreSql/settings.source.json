@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.PostgreSql",
+  "sourceSha256": {
+    "ContextLeaseState.cs": "0374fda52f16c84224d3b72cb862ef141150f6ffbb38187398cccab1042752c6",
+    "FoundationPostgreSqlDbContext.cs": "f7607fa8ba617c90d28234ba48b897c774ad84fce9be7ae7d4c53260fa8833ab",
+    "FoundationPostgreSqlServiceCollectionExtensions.cs": "6e8c7c5d76b1b35522542fdeb9db50411e6308062d01f6ed0fb69a9d59f6a02b",
+    "IPostgreSqlUnitLeaseFactory.cs": "6280f1fc36cafe2c3e5f64de049f0f7494a10e4c80e89dbc422f1775ac8c0b3b",
+    "OwnedPostgreSqlDbContextFactory.cs": "9472b0df3f4b7fe9ae5f586a116f8f22f22d49cdc591cb7283041d05461e9ffd",
+    "PostgreSqlCommandInterceptor.cs": "26019fe6a3e4a2ffb26588a134ddc1e0c535bc49b105869f4aaf0d517ddb931c",
+    "PostgreSqlCommandStage.cs": "4f57b21e7184419617ef0c0463e4fe68647823c00253cdd62484b7b3b9506e35",
+    "PostgreSqlConnectionInterceptor.cs": "326f34ee4cc2fd9695c8b9195a1dcfaf6361afd45d4e8cad29850ec0753a9c70",
+    "PostgreSqlContextLease.cs": "10e7f584b8bbf373ef2ac31b1cd544f7f9e654a50cabed3f42c67e46b7244e3b",
+    "PostgreSqlContextRegistration.cs": "280fab4ae346b3f0a8dacd4d61b2690ee6b1379b68a43bf99dc30fbd69b8a2e7",
+    "PostgreSqlFailureInfo.cs": "12b0a08f39622ca4fbc9cf77e1c54a24c01002e9e1582259f00f2cf90caf7a3c",
+    "PostgreSqlOptions.cs": "5395b0d391c18d546112ff4de81ad46145cd351d5e91aa2bc1202f50002d5bcb",
+    "PostgreSqlPolicy.cs": "e4b048bf1cc5e4cba836c00a6a1ac905e1b0562b3352854b5ee87da75b941e3e",
+    "PostgreSqlRedactingLogger.cs": "d0d2e3275ff46999890b1c3e577ac50d4bb4ffc07f3bc7af77d40f0e5db302e2",
+    "PostgreSqlRedactingLoggerFactory.cs": "479dc9adac8eb6695846114e3d815ea6351a6fb93a8446d1b21cdc435861c780",
+    "PostgreSqlUnitLease.cs": "b0232977c646b9120d754af245aa18e4cd509ec2f21eeffb18f88e0c20da8a5b",
+    "PostgreSqlUnitLeaseFactory.cs": "42d730f2021cc13b4ebd2f7b9c3f111c5612e7e34da9170735a4f2cd88d251f8",
+    "ShellPostgreSqlDataSource.cs": "50bd40a29f743753a4a9ef02c562b99cd6a711deaf9636e349f988816b52d23f"
+  },
+  "contracts": [
+    {
+      "scope": "postgresql-policy",
+      "typeName": "Orbyss.Foundation.PostgreSql.PostgreSqlOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "ConnectionString",
+          "path": "Foundation:PostgreSql:Policies:{policyName}:ConnectionString",
+          "required": true,
+          "secret": true,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:PostgreSql:Policies:{policyName} to PostgreSqlOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ConnectionString value owned by PostgreSqlOptions."
+        },
+        {
+          "property": "OperationTimeout",
+          "path": "Foundation:PostgreSql:Policies:{policyName}:OperationTimeout",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "format": "timespan",
+            "exclusiveMinimumMilliseconds": 0,
+            "maximumMilliseconds": 2147483647
+          },
+          "binding": "Shell configuration binds Foundation:PostgreSql:Policies:{policyName} to PostgreSqlOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported OperationTimeout value owned by PostgreSqlOptions."
+        },
+        {
+          "property": "ConnectionTimeout",
+          "path": "Foundation:PostgreSql:Policies:{policyName}:ConnectionTimeout",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "format": "timespan",
+            "exclusiveMinimumMilliseconds": 0,
+            "maximumMilliseconds": 1024000
+          },
+          "binding": "Shell configuration binds Foundation:PostgreSql:Policies:{policyName} to PostgreSqlOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ConnectionTimeout value owned by PostgreSqlOptions."
+        },
+        {
+          "property": "CommandTimeout",
+          "path": "Foundation:PostgreSql:Policies:{policyName}:CommandTimeout",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "format": "timespan",
+            "exclusiveMinimumMilliseconds": 0,
+            "maximumMilliseconds": 2147483647
+          },
+          "binding": "Shell configuration binds Foundation:PostgreSql:Policies:{policyName} to PostgreSqlOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported CommandTimeout value owned by PostgreSqlOptions."
+        },
+        {
+          "property": "LockTimeout",
+          "path": "Foundation:PostgreSql:Policies:{policyName}:LockTimeout",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "format": "timespan",
+            "exclusiveMinimumMilliseconds": 0,
+            "maximumMilliseconds": 2147483647
+          },
+          "binding": "Shell configuration binds Foundation:PostgreSql:Policies:{policyName} to PostgreSqlOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported LockTimeout value owned by PostgreSqlOptions."
+        },
+        {
+          "property": "CancellationTimeout",
+          "path": "Foundation:PostgreSql:Policies:{policyName}:CancellationTimeout",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "format": "timespan",
+            "exclusiveMinimumMilliseconds": 0,
+            "maximumMilliseconds": 2147483647
+          },
+          "binding": "Shell configuration binds Foundation:PostgreSql:Policies:{policyName} to PostgreSqlOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported CancellationTimeout value owned by PostgreSqlOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "Each duration must be positive and at most Int32.MaxValue milliseconds; connection/command must fit operation and lock must fit command.",
+        "ConnectionTimeout is additionally at most1024000 milliseconds: native Npgsql Timeout is the positive duration rounded up to whole seconds and must not exceed1024 seconds. CommandTimeout is likewise rounded up to at least one whole second; CancellationTimeout rounds up to whole milliseconds. These fallbacks do not replace the independently enforced stage deadlines.",
+        "ConnectionString is secret, required and parsed by the native NpgsqlConnectionStringBuilder. Native policy overrides connection/command/cancellation timeout fallbacks and always enables reset-on-close.",
+        "PolicyName is application-owned; stable datasource/context-unit ownership is established by explicit AddFoundationPostgreSql registration. No metadata export creates a datasource or connects.",
+        "Binding occurs at shell composition; each provider generation owns its validated immutable snapshot and existing work drains before disposal."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [],
+        "configuration": [
+          "Foundation:PostgreSql:Policies"
+        ]
+      }
+    }
+  ],
+  "imports": []
+}

@@ -53,6 +53,8 @@ def is_link(path: Path) -> bool:
 def runtime_path(relative: str) -> bool:
     name = PurePosixPath(relative)
     return (name.parts[0] == "runtimes" and len(name.parts) > 1) or (
+        name.parts[:2] == (".orbyss-foundation", "settings-sources") and len(name.parts) > 2
+        and relative.casefold().endswith(".txt")) or (
         name.parts[0] == ".orbyss-foundation" and len(name.parts) == 2
         and relative.casefold().endswith(".json")) or (
         len(name.parts) == 1 and relative.casefold().endswith((".dll", ".json")))
@@ -199,7 +201,8 @@ def fake_fixture(root: Path, version: str = "0.3.0-fixture.1") -> tuple[Path, Pa
         directory.mkdir(parents=True)
     for relative in sorted(REQUIRED_FILES | {"Native.Loader.dll", "runtimes/linux-x64/native/loader.so",
             "hostsettings.json", "shells.json", "Host.staticwebassets.endpoints.json",
-            ".orbyss-foundation/web-profile.shells.json"}):
+            ".orbyss-foundation/web-profile.shells.json", ".orbyss-foundation/host-settings.json",
+            ".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt"}):
         path = payload / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(("fake fixture " + relative).encode())
@@ -212,6 +215,8 @@ def fake_fixture(root: Path, version: str = "0.3.0-fixture.1") -> tuple[Path, Pa
             archive.write(payload / (identity + ".dll"), "lib/net10.0/" + identity + ".dll")
         hashes[package.name] = sha256(package)
     inputs = {"version": version, "hostRuntimeFiles": payload_inventory(payload)[0], "packages": hashes}
+    require(".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt" in inputs["hostRuntimeFiles"],
+            "Host metadata sources must be bound runtime inputs.")
     (evidence / "inputs.json").write_text(json.dumps(inputs), encoding="utf-8")
     (evidence / "result.json").write_text(json.dumps({"status": "passed", "version": version,
         **{flag: True for flag in F6_FLAGS}}), encoding="utf-8")
@@ -250,6 +255,9 @@ def self_test(root: Path) -> dict:
     case("changed-hostsettings", lambda p, i, n: (p / "hostsettings.json").write_bytes(b"{}"), "bytes differ")
     case("changed-shells", lambda p, i, n: (p / "shells.json").write_bytes(b"{}"), "bytes differ")
     case("changed-profile-settings", lambda p, i, n: (p / ".orbyss-foundation/web-profile.shells.json").write_bytes(b"{}"), "bytes differ")
+    case("changed-owner-source", lambda p, i, n: (p / ".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt").write_bytes(b"changed source"), "bytes differ")
+    case("missing-owner-source", lambda p, i, n: (p / ".orbyss-foundation/settings-sources/host/Transport/Options.cs.txt").unlink(), "file set differs")
+    case("extra-owner-source", lambda p, i, n: (p / ".orbyss-foundation/settings-sources/host/Transport/Extra.cs.txt").write_bytes(b"unqualified source"), "file set differs")
     case("extra-root-settings", lambda p, i, n: (p / "Unqualified.json").write_bytes(b"{}"), "file set differs")
     case("missing-staticwebassets", lambda p, i, n: (p / "Host.staticwebassets.endpoints.json").unlink(), "file set differs")
     case("extra-profile-settings", lambda p, i, n: (p / ".orbyss-foundation/unqualified.json").write_bytes(b"{}"), "file set differs")

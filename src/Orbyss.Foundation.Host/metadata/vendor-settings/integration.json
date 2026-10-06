@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "owner": "Orbyss.Foundation.Host",
+  "types": [
+    "CShells.Configuration.CShellsOptions",
+    "CShells.Configuration.ShellConfig",
+    "CShells.AspNetCore.WebRoutingShellOptions",
+    "Nuplane.Setup.NuplaneSetupOptions",
+    "Nuplane.Feeds.Setup.NuplaneFeedSetupOptions",
+    "Nuplane.Feeds.Setup.NuplaneDirectoryFeedSetupOptions",
+    "Nuplane.Feeds.Setup.DirectoryFeedRole",
+    "Nuplane.Reconciliation.Configuration.ReconciliationOptions",
+    "Nuplane.Reconciliation.Configuration.StartupFailurePolicy",
+    "Nuplane.Feeds.Configuration.FeedResolutionOptions",
+    "Nuplane.Feeds.Configuration.FeedResolutionPolicyMode",
+    "Nuplane.Feeds.Configuration.RemoteFallbackMode",
+    "Nuplane.Abstractions.FeedDefinition",
+    "Nuplane.Reconciliation.LockFile.LockFileOptions",
+    "Nuplane.Reconciliation.LockFile.LockFileMode",
+    "Nuplane.Store.Cleanup.CleanupPolicyOptions",
+    "Nuplane.Store.Cleanup.CleanupExecutionMode",
+    "Nuplane.Reconciliation.Convergence.ConvergenceOptions",
+    "Nuplane.Sources.ManifestOptions",
+    "Nuplane.Store.State.StoreRegistryOptions",
+    "Nuplane.Loading.LoadingOptions",
+    "Nuplane.Loading.PackageLoadModeOverrideOptions",
+    "Nuplane.Loading.SharedAssemblyIdentity",
+    "Nuplane.Loading.PackageLoadMode",
+    "Nuplane.Loading.PackageLoadModeSelectionPolicy"
+  ],
+  "boundaries": [
+    {
+      "scope": "host-cshells-binding",
+      "configuration": ["CShells"],
+      "precedence": [
+        "WebApplication.CreateBuilder default configuration providers",
+        "hostsettings.json (optional; reloadOnChange false)",
+        ".orbyss-foundation/web-profile.shells.json (optional; reloadOnChange false)",
+        "shells.json (required; reloadOnChange false)",
+        "environment variables; double underscore separates path segments",
+        "command-line arguments"
+      ],
+      "semanticConstraints": [
+        "This scope covers the exact selected Host WithConfigurationProvider and WithWebRouting integration, not every CShells public option type or feature's private settings.",
+        "CShells:SharedAssemblies is read as indexed scalar patterns by CShellsBuilderExtensions.WithConfigurationProvider. SharedAssemblySelector rejects blank selectors and wildcard positions other than a final '*'; selectors target assembly simple names.",
+        "CShells:Shells is a map keyed by nonempty trimmed shell identity. ConfigurationShellBlueprintProvider rejects keys parsed by Int32.TryParse as unsupported array syntax; its case-insensitive dictionary overwrites normalization collisions rather than independently rejecting them. ShellConfig.Name is not a separately bound Host identity.",
+        "ConfigurationShellBlueprint.ComposeAsync loads Configuration first, then Features. Feature settings flatten below the feature name and replace matching Configuration prefixes. ShellSettingsExtensions caches a separate in-memory configuration root for each composed settings snapshot.",
+        "ConfigurationHelper accepts feature-name strings and Name-bearing objects in legacy arrays, or a map of feature names to true/false/direct setting objects. Feature names are trimmed and unique case-insensitively; mixed numeric/named keys and invalid scalar/wrapper shapes are rejected. true resets inherited feature settings; false removes the feature and its settings; an empty direct object preserves existing settings.",
+        "Web routing keys are resolved from each shell's WebRouting settings. Host resolver strategy options are code-configured, not JSON-bound. Only an explicitly empty WebRouting.Path selects an unprefixed fallback shell; unmatched unowned routes retain the native Host status response.",
+        "The configuration blueprint rereads its selected section on composition. Existing active-shell settings are a snapshot; changing these Host files does not automatically rebuild an active shell. Restart or an explicit native generation lifecycle operation is required. Package directory watching is distinct from settings reload.",
+        "Configuration may contain selected feature settings and secret references; their own setting contracts must supply value constraints. This integration contract does not export application secret values or claim feature-owned settings coverage."
+      ],
+      "bindings": [
+        {
+          "typeName": "CShells.Configuration.CShellsOptions",
+          "prefix": "CShells",
+          "properties": ["SharedAssemblies", "Shells"],
+          "readerControls": true,
+          "sourceApi": "CShells.DependencyInjection.CShellsBuilderExtensions.WithConfigurationProvider",
+          "binding": "Manual native WithConfigurationProvider section readers; CShellsOptions is a source shape, not a wholesale ConfigurationBinder target.",
+          "semantics": {
+            "SharedAssemblies": {"description": "Assembly simple-name selectors used for feature discovery; exact names or final-star prefixes."},
+            "Shells": {"description": "Named shell blueprints. Each map key owns the shell identity; native Int32-parsable array keys are rejected.", "constraints": {"mapKey": "nonempty trimmed shell name not parsed by native Int32.TryParse; normalized names use case-insensitive dictionary identity"}}
+          }
+        },
+        {
+          "typeName": "CShells.Configuration.ShellConfig",
+          "prefix": "CShells:Shells:{shell}",
+          "properties": ["Features", "Configuration"],
+          "readerControls": true,
+          "sourceApi": "CShells.Lifecycle.Blueprints.ConfigurationShellBlueprint.ComposeAsync / CShells.Configuration.ConfigurationHelper",
+          "binding": "ConfigurationShellBlueprint calls ConfigurationHelper.LoadConfigurationFromSection, ParseFeaturesFromConfiguration and ApplyFeatureEntries; no wholesale ShellConfig binder.",
+          "semantics": {
+            "Features": {"description": "Feature selection with preferred object-map or supported legacy-array protocol.", "constraints": {"acceptedShapes": ["object", "array"]}},
+            "Configuration": {"description": "Shell-local hierarchical values flattened into a new settings snapshot. Selected features own their detailed value contracts."}
+          }
+        },
+        {
+          "typeName": "CShells.AspNetCore.WebRoutingShellOptions",
+          "prefix": "CShells:Shells:{shell}:Configuration:WebRouting",
+          "readerControls": true,
+          "sourceApi": "CShells.AspNetCore.Routing.ShellRouteIndexBuilder / DefaultShellRouteIndex / Notifications.ShellEndpointRegistrationHandler",
+          "binding": "Native ShellRouteIndexBuilder, DefaultShellRouteIndex and ShellEndpointRegistrationHandler read WebRouting keys from the shell settings snapshot.",
+          "semantics": {
+            "Path": {"description": "Shell path identifier; explicitly empty selects root fallback. Native path index admission and endpoint prefix normalization are distinct."},
+            "RoutePrefix": {"description": "Native endpoint registration trims '/' at the edges and combines this prefix with the shell Path."},
+            "Host": {"description": "Host-name match used by the native enabled host-routing strategy."},
+            "HeaderName": {"description": "Optional shell-local header routing declaration; resolver strategy selection remains Host code."},
+            "ClaimKey": {"description": "Optional shell-local claim routing declaration; resolver strategy selection remains Host code."}
+          }
+        }
+      ]
+    },
+    {
+      "scope": "host-nuplane-binding",
+      "configuration": ["Nuplane"],
+      "precedence": [
+        "WebApplication.CreateBuilder default configuration providers",
+        "hostsettings.json (optional; reloadOnChange false)",
+        ".orbyss-foundation/web-profile.shells.json (optional; reloadOnChange false)",
+        "shells.json (required; reloadOnChange false)",
+        "environment variables; double underscore separates path segments",
+        "command-line arguments",
+        "native Setup translations after bound dedicated options",
+        "Host directory-feed and Loading module configuration callbacks"
+      ],
+      "semanticConstraints": [
+        "This scope covers the eight Nuplane sections bound by this exact Host AddNuplane callback; it does not claim every Nuplane module's public configuration API.",
+        "NuplaneOptionsRegistrationServices binds Setup, Reconciliation, FeedResolution, LockFile, CleanupPolicy, Convergence and StoreRegistry using ConfigurationBinder; LoadingRegistrationServices binds Loading through the Host AutoloadPackages(configuration) overload with enableByDefault false. Native validators run on options start without this metadata producer initializing services.",
+        "NuplaneSetupConfigurationServices translates AutomaticReconciliation through NuplaneBuilder.PollEvery, overriding dedicated reconciliation enablement and poll interval only when enabled. Nonblank Setup.StateFilePath overrides StoreRegistry.StateFilePath. Setup.UseInMemoryStore true overrides its dedicated flag. Native validators reject conflicting in-memory/file modes.",
+        "NuplaneFeedSetupDeclarationReader supports indexed feed declarations and named-map declarations. Named keys supply Name and must agree with an explicit Name; a named declaration wins over a legacy array declaration of the same case-insensitive name with a warning. Duplicate named declarations and source-shape errors are rejected by the owning validator.",
+        "Setup feed declarations select exactly one nonblank directory path or absolute service index. Directory settings are translated by the separately selected Directory module; remote feed names/endpoints are translated through native builder registrations. Setup include patterns are nonblank and deduplicated case-insensitively before translation.",
+        "NuplaneSetupOptionsValidator, ReconciliationOptionsValidator, FeedResolutionOptionsValidator, FeedCredentialOptionsValidator, ConvergenceOptionsValidator, LockFileOptionsValidator, CleanupPolicyOptionsValidator, StoreRegistryOptionsValidator and LoadingOptionsValidator are retained exact source authorities for range, relationship, URI, credential-reference and uniqueness constraints. Metadata structural shape supplements those semantic checks; it does not invent missing enum/range rejection in native validators.",
+        "LoadingOptionsValidator requires positive deactivation timeout and defined load-mode enums; override IDs must be nonblank, trim-stable and unique case-insensitively. Shared identities require nonblank Name, a 16-hex-character PublicKeyToken, nonnegative MajorVersion and unique composite identity. SharedAssemblyIdentity constructor fields have no implicit element defaults.",
+        "The selected native ConfigurationBinder silently omits a SharedAssemblies collection entry when a required constructor token is null/missing. Empty or malformed tokens bind an entry and are then rejected by LoadingOptionsValidator. Null samples are not evidence of accepted unsigned shared identities.",
+        "FeedCredentialOptionsValidator accepts remote feeds only with HTTPS and uses secrets:// credential references; file feeds cannot contain credentials. Secret values are not metadata defaults. The source validator supplies exact policy-dependent cross-setting behavior.",
+        "Default writable paths are computed by native runtime owners from AppContext.BaseDirectory; this producer emits the source option's null/default literal rather than an environment-specific resolved path. EffectiveStorePersistenceSettings.Resolve establishes the persisted store path and in-memory behavior.",
+        "Nuplane options are configured snapshots; these native registrations do not install an IOptionsMonitor reload contract. Changing Host configuration requires restart for these options. Directory Watch/Debounce controls package-feed reconciliation, not configuration-file reload."
+      ],
+      "bindings": [
+        {"typeName": "Nuplane.Setup.NuplaneSetupOptions", "prefix": "Nuplane:Setup", "binding": "NuplaneOptionsRegistrationServices.Bind followed by NuplaneSetupConfigurationServices.ApplySetupConfiguration."},
+        {"typeName": "Nuplane.Reconciliation.Configuration.ReconciliationOptions", "prefix": "Nuplane:Reconciliation", "binding": "NuplaneOptionsRegistrationServices.Configure<ReconciliationOptions>; later Setup translations may override named fields."},
+        {"typeName": "Nuplane.Feeds.Configuration.FeedResolutionOptions", "prefix": "Nuplane:FeedResolution", "binding": "NuplaneOptionsRegistrationServices.Configure<FeedResolutionOptions>; native Setup feed builders append selected feed registrations."},
+        {"typeName": "Nuplane.Reconciliation.LockFile.LockFileOptions", "prefix": "Nuplane:LockFile", "binding": "NuplaneOptionsRegistrationServices.Configure<LockFileOptions>."},
+        {"typeName": "Nuplane.Store.Cleanup.CleanupPolicyOptions", "prefix": "Nuplane:CleanupPolicy", "binding": "NuplaneOptionsRegistrationServices.Configure<CleanupPolicyOptions>."},
+        {"typeName": "Nuplane.Reconciliation.Convergence.ConvergenceOptions", "prefix": "Nuplane:Convergence", "binding": "NuplaneOptionsRegistrationServices.Configure<ConvergenceOptions>."},
+        {"typeName": "Nuplane.Store.State.StoreRegistryOptions", "prefix": "Nuplane:StoreRegistry", "binding": "NuplaneOptionsRegistrationServices.Configure<StoreRegistryOptions>; Setup persistence translations follow."},
+        {"typeName": "Nuplane.Loading.LoadingOptions", "prefix": "Nuplane:Loading", "binding": "Host AutoloadPackages(configuration.GetSection('Loading')); no implicit enable-by-default.", "semantics": {"SharedAssemblies": {"description": "Native host-sharing identities. Missing required record constructor fields may omit an entry during native binding; admitted entries are validated."}}},
+        {"typeName": "Nuplane.Feeds.Setup.NuplaneFeedSetupOptions", "prefix": "Nuplane:Setup:Feeds:{feed}", "binding": "NuplaneFeedSetupDeclarationReader binds each named/indexed setup feed; a named map key supplies Name.", "semantics": {"Credentials": {"secret": true, "description": "Credential reference consumed by the native feed credential policy; actual secret values are excluded."}, "Name": {"description": "Legacy indexed entries use Name; named entries derive it from the containing key and reject an explicit mismatch."}}},
+        {"typeName": "Nuplane.Feeds.Setup.NuplaneDirectoryFeedSetupOptions", "prefix": "Nuplane:Setup:Feeds:{feed}:Directory", "binding": "Nested NuplaneFeedSetupOptions.Directory is bound then translated by the Host-selected Directory module."},
+        {"typeName": "Nuplane.Abstractions.FeedDefinition", "prefix": "Nuplane:FeedResolution:Feeds:{index}", "binding": "ConfigurationBinder positional record element binding; required constructor fields must be present for an element to bind.", "semantics": {"Credentials": {"secret": true, "description": "Optional native credential reference; no secret value/default is exported."}}},
+        {"typeName": "Nuplane.Loading.SharedAssemblyIdentity", "prefix": "Nuplane:Loading:SharedAssemblies:{index}", "binding": "ConfigurationBinder positional record binding followed by LoadingOptionsValidator. A missing/null required constructor parameter silently omits the collection entry."},
+        {"typeName": "Nuplane.Loading.PackageLoadModeOverrideOptions", "prefix": "Nuplane:Loading:PackageLoadModes:{index}", "binding": "ConfigurationBinder native collection item binding followed by LoadingOptionsValidator."}
+      ]
+    }
+  ]
+}

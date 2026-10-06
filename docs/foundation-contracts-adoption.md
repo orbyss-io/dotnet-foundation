@@ -112,6 +112,22 @@ Host transport, authentication, PostgreSQL, CShells or Nuplane settings. Those e
 settings still require their owner-specific validation and acceptance tests. Metadata export never
 executes publisher initialization or starts storage.
 
+Build0.3.0 adds source/output schema2 for nullable, nested and imported typed settings. Current
+Foundation owner declarations cover authentication and its profiles, JSON/HTTP budgets, PostgreSQL,
+domain events and the selected web/MCP options. Each scope declares whether it applies to an active
+feature, configured prefix, explicit code construction or the Host. Inherited defaults bind the exact
+dependency metadata, named type and compiled implementation instead of copying another owner's values.
+Published schema1 retains its historical meaning; select the separately released new tool only after
+its publication gates succeed.
+
+The neutral Host supplies four image-owned scopes: transport, boot, CShells binding and Nuplane
+binding. Its offline integration producer retains the exact native package/source origins and derives
+defaults from those owning sources. It does not claim the vendor packages emitted metadata or infer
+contracts from sample configuration. Native binding, precedence, validation and reload explanations
+remain attached to those scopes. An independent receiver verifies the exact image layers, compiled
+Host/native DLLs, archived dependencies and retained source snapshots. Omitted required scopes prevent
+a ready handoff. Consumer feature configuration stays owned by its feature producer.
+
 ## Independent persistence units and deadlines
 
 Keep EF entities, mappings, migrations and configuration in the provider assembly. Its context derives

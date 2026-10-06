@@ -13,10 +13,11 @@ internal sealed class EagerShellActivationHostedService(
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (configuration.GetValue("Foundation:Boot:EagerShellActivation", defaultValue: true) is false)
+        var options = configuration.GetSection("Foundation:Boot").Get<FoundationBootOptions>() ?? new();
+        if (options.EagerShellActivation is false)
             return;
 
-        var failFast = configuration.GetValue("Foundation:Boot:FailOnShellActivationError", defaultValue: true);
+        var failFast = options.FailOnShellActivationError;
         var shellNames = configuration.GetSection("CShells:Shells").GetChildren()
             .Select(child => child.Key)
             .Where(name => !string.IsNullOrWhiteSpace(name))

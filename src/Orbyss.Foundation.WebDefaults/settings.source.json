@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.WebDefaults",
+  "sourceSha256": {
+    "CorrelationAndSecurityHeadersMiddleware.cs": "1f53e2c0e0650b649d5296df3e3f2d31f94ea0b8b14cb25fed8d83534b800150",
+    "FoundationWebDefaultsFeature.cs": "113313707f353ea3100822d5b07c8f515cbf38060462d43e034140d89b449f10",
+    "FoundationWebDefaultsOptions.cs": "104cd06d7440c3c26914d7cbffb51a34084898b7bce09eb2808da81692c94450",
+    "FoundationWebDefaultsOptionsValidator.cs": "9bc58c697dcc37daac0aad65353a77054e2bc618aca3cbf49768dafc3d35abc7",
+    "WebResponseMetadata.cs": "261b0c3ff52794dec1eabf524ec83725d0d415b21294686c42dc9fc4b8397ae4",
+    "WebResponsePoliciesMiddleware.cs": "f713bc35fba4b03fcba94407e0fbfe5d0be49ac3d63e86291dbe3aa74e1ea840",
+    "WebResponsePoliciesOptions.cs": "6812cdd90a47581e4487cd1d04350207804585e9b665aff9be3d3afa9b40e7a0",
+    "WebResponsePolicy.cs": "a4a1f446cbb5a2dd6037bba5649f42427af80194feadb2f32c4094d47f2643c1",
+    "WebResponsePolicyCatalog.cs": "50d148698f0167aba22c46af5da4a6e193d3dd453688251e0082df02af3a6806",
+    "WebResponsePolicyOptions.cs": "077cbff4b433469a0f60d636f73d65a26cd8686ac76259e0b1da973492a10976"
+  },
+  "contracts": [
+    {
+      "scope": "web-localization",
+      "typeName": "Orbyss.Foundation.WebDefaults.FoundationWebDefaultsOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "DefaultLocale",
+          "path": "Foundation:Web:DefaultLocale",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:Web to FoundationWebDefaultsOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported DefaultLocale value owned by FoundationWebDefaultsOptions."
+        },
+        {
+          "property": "SupportedLocales",
+          "path": "Foundation:Web:SupportedLocales",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "binding": "Shell configuration binds Foundation:Web to FoundationWebDefaultsOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported SupportedLocales value owned by FoundationWebDefaultsOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "An explicit SupportedLocales selection clears initialized array before binding; empty/null/non-indexed values reject rather than restoring fallback.",
+        "SupportedLocales must contain DefaultLocale ignoring case and distinct nonempty CultureInfo-recognized locale names."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.WebDefaults"
+        ],
+        "configuration": [
+          "Foundation:Web:DefaultLocale",
+          "Foundation:Web:SupportedLocales"
+        ]
+      }
+    },
+    {
+      "scope": "web-response-policies",
+      "typeName": "Orbyss.Foundation.WebDefaults.WebResponsePoliciesOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "DefaultPolicy",
+          "path": "Foundation:Web:ResponsePolicies:DefaultPolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies to WebResponsePoliciesOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported DefaultPolicy value owned by WebResponsePoliciesOptions."
+        },
+        {
+          "property": "Policies",
+          "path": "Foundation:Web:ResponsePolicies:Policies",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxProperties": 128
+          },
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies to WebResponsePoliciesOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Policies value owned by WebResponsePoliciesOptions."
+        },
+        {
+          "property": "FeaturePolicies",
+          "path": "Foundation:Web:ResponsePolicies:FeaturePolicies",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies to WebResponsePoliciesOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported FeaturePolicies value owned by WebResponsePoliciesOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "Policies and feature selectors bind as native string-key dictionaries over initialized source values.",
+        "DefaultPolicy and every feature/endpoint selector must resolve an existing complete policy; headers are selected as a whole and not merged across policies.",
+        "Named policy keys must be nonempty ASCII letters/digits/dot/hyphen/underscore and at most128 characters."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.WebDefaults"
+        ],
+        "configuration": [
+          "Foundation:Web:ResponsePolicies"
+        ]
+      }
+    },
+    {
+      "scope": "web-response-policy",
+      "typeName": "Orbyss.Foundation.WebDefaults.WebResponsePolicyOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "ContentSecurityPolicy",
+          "path": "Foundation:Web:ResponsePolicies:Policies:{policyName}:ContentSecurityPolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies:Policies:{policyName} to WebResponsePolicyOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ContentSecurityPolicy value owned by WebResponsePolicyOptions."
+        },
+        {
+          "property": "ReferrerPolicy",
+          "path": "Foundation:Web:ResponsePolicies:Policies:{policyName}:ReferrerPolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "no-referrer",
+              "same-origin",
+              "strict-origin",
+              "strict-origin-when-cross-origin"
+            ]
+          },
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies:Policies:{policyName} to WebResponsePolicyOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ReferrerPolicy value owned by WebResponsePolicyOptions."
+        },
+        {
+          "property": "PermissionsPolicy",
+          "path": "Foundation:Web:ResponsePolicies:Policies:{policyName}:PermissionsPolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies:Policies:{policyName} to WebResponsePolicyOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported PermissionsPolicy value owned by WebResponsePolicyOptions."
+        },
+        {
+          "property": "PublicAssetMaxAgeSeconds",
+          "path": "Foundation:Web:ResponsePolicies:Policies:{policyName}:PublicAssetMaxAgeSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 0,
+            "maximum": 31536000
+          },
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies:Policies:{policyName} to WebResponsePolicyOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported PublicAssetMaxAgeSeconds value owned by WebResponsePolicyOptions."
+        },
+        {
+          "property": "AllowIndexing",
+          "path": "Foundation:Web:ResponsePolicies:Policies:{policyName}:AllowIndexing",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell configuration binds Foundation:Web:ResponsePolicies:Policies:{policyName} to WebResponsePolicyOptions; native owner validation admits the resulting values.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported AllowIndexing value owned by WebResponsePolicyOptions."
+        }
+      ],
+      "semanticConstraints": [
+        "Headers must contain printable ASCII with no control characters. CSP requires default-src, frame-ancestors none, object-src none and base-uri self/none; unsafe-inline and unsafe-eval are prohibited.",
+        "Permissions-Policy grammar and distinct directive identities are enforced by WebResponsePolicyCatalog.",
+        "PublicAssetMaxAgeSeconds zero means no-store; caching/indexing remains endpoint/application policy."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.WebDefaults"
+        ],
+        "configuration": [
+          "Foundation:Web:ResponsePolicies:Policies"
+        ]
+      }
+    }
+  ],
+  "imports": []
+}

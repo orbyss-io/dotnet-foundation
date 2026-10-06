@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.DownstreamApi",
+  "sourceSha256": {
+    "DownstreamApiClient.cs": "6eebece3891da35edadfa19dc67fd2c65b0b28726bd307c12bc63f81a131e04e",
+    "DownstreamApiOptions.cs": "ca1f1c3be86d1a38c4668373d2b122d04b1e4960e1d4ea815291fd63eb15c237",
+    "DownstreamApiOptionsValidator.cs": "b10ab66b024e9e38f637968cb4dde2178274d8e50713549740acc6efe2917953",
+    "DownstreamApiRegistration.cs": "da3feaeea41ce553f1da2a6fd9daad694dc27c14cad6b3a9080cf1cd126cd7a9",
+    "FoundationDownstreamApiFeature.cs": "ee7844310af7977832d443dd9eb90364bdeecb3d368a60e989ea098c2bffb96b",
+    "HttpContextAccessTokenAccessor.cs": "720b43be403d5025cbcc26d7246c0f34c24f8a501becb56d32e81dc05b07e2c4",
+    "ICurrentAccessTokenAccessor.cs": "6deed5eee3bb8b2a1b327df887aacf5b2c2a031ef6d38aa421795419032cf2d2",
+    "IDownstreamApiClient.cs": "5eb6d62fb76ff0b1c835f9c027b3198ddea32dbfd14b7369f52f18df25dfb001"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "downstream-apis",
+      "typeName": "Orbyss.Foundation.Authentication.DownstreamApi.DownstreamApiOptions",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication.DownstreamApi"
+        ],
+        "configuration": [
+          "Foundation:Authentication:DownstreamApis"
+        ]
+      },
+      "settings": [
+        {
+          "property": "Registrations",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minProperties": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets downstream APIs keyed by an application-owned name."
+        }
+      ],
+      "semanticConstraints": [
+        "Endpoints/base addresses must be absolute HTTPS without query/fragment. Loopback HTTP is accepted only in Development with the explicit development override.",
+        "Named registration keys must not be blank and are compared ordinally.",
+        "Required string settings must not be empty or whitespace.",
+        "Configuration is metadata only; token clients and downstream requests are never initialized or executed by export.",
+        "TokenExchange mode requires at least one nonblank Audience or Resource to downscope the delegated token.",
+        "A nonnull Resource must be an absolute HTTP or HTTPS URI; it is not the downstream base-address transport setting.",
+        "Named TokenRegistration must be supplied; resolving the actual selected token source is a separate composition responsibility."
+      ]
+    },
+    {
+      "scope": "downstream-apis-registration",
+      "typeName": "Orbyss.Foundation.Authentication.DownstreamApi.DownstreamApiRegistration",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication.DownstreamApi"
+        ],
+        "configuration": [
+          "Foundation:Authentication:DownstreamApis"
+        ]
+      },
+      "settings": [
+        {
+          "property": "BaseAddress",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:BaseAddress",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "format": "uri"
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the absolute downstream base address."
+        },
+        {
+          "property": "AccessMode",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:AccessMode",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "ClientCredentials",
+              "TokenExchange"
+            ]
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets `ClientCredentials` or `TokenExchange`."
+        },
+        {
+          "property": "TokenRegistration",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:TokenRegistration",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "minLength": 1
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the named token-source or exchange-policy registration."
+        },
+        {
+          "property": "Audience",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:Audience",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "nullable": true
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the exchange target audience."
+        },
+        {
+          "property": "Resource",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:Resource",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "nullable": true
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the exchange target resource URI."
+        },
+        {
+          "property": "Scopes",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:Scopes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "items": {
+              "type": "string",
+              "pattern": "^\\S+$"
+            }
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets exact scopes used to downscope a delegated token."
+        },
+        {
+          "property": "AllowHttpForLocalDevelopment",
+          "path": "Foundation:Authentication:DownstreamApis:Registrations:*:AllowHttpForLocalDevelopment",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether loopback HTTP is accepted during local development."
+        }
+      ],
+      "semanticConstraints": [
+        "Endpoints/base addresses must be absolute HTTPS without query/fragment. Loopback HTTP is accepted only in Development with the explicit development override.",
+        "Named registration keys must not be blank and are compared ordinally.",
+        "Required string settings must not be empty or whitespace.",
+        "Configuration is metadata only; token clients and downstream requests are never initialized or executed by export.",
+        "TokenExchange mode requires at least one nonblank Audience or Resource to downscope the delegated token.",
+        "A nonnull Resource must be an absolute HTTP or HTTPS URI; it is not the downstream base-address transport setting.",
+        "Named TokenRegistration must be supplied; resolving the actual selected token source is a separate composition responsibility."
+      ]
+    }
+  ]
+}

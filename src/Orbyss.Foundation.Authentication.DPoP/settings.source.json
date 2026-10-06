@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Authentication.DPoP",
+  "sourceSha256": {
+    "DPoPAuthorizationHeaderMiddleware.cs": "90c7dfffa5f96377d99cd8d7342e4f0c6e2f62034b3e8d12925cb132993140b5",
+    "DPoPJwtBearerPostConfigure.cs": "e9d10b6735da33999a358b1498904b573e9f0e9489f49e19483ee1a9b72dda5c",
+    "DPoPOptions.cs": "f82983dc6b521d37d3fd9225276a00bd693f7a00418c526b7db8cd44fa3eb537",
+    "DPoPOptionsValidator.cs": "826ded3b493148cea45303d35dbeb7b53f92c30eb9db25e508fc3823ecada60e",
+    "DPoPProofRequest.cs": "d412d5d2d1313e989163c8a231cd081ecc930c1bae4913e1735fbd8509cabb79",
+    "DPoPProofValidator.cs": "f4149238c757fd70b5adf5470f37e6602379ecac185742b857b444e3560c6dbf",
+    "DPoPRequestState.cs": "ed34d8bd9144e621ead9c8310ceb10e4385b33d0e079985bc59da42702afd227",
+    "ECDsaDPoPProofGenerator.cs": "0660ba72e9eb95bc308e831a9e3022073c5ff6bf54958c3ac570bb361822bea4",
+    "FoundationDPoPFeature.cs": "f125238bb1a07a6ea81de6a63ab9401f9408e807ddbd29693867d20f34cb69be",
+    "IDPoPNonceStore.cs": "9592f63a59119e83b4d048e663ead1836488d8013f49f41e2aa2f1b5351d2cc5",
+    "IDPoPProofGenerator.cs": "32147271ca36fca7fd7b3124ab7edcfa1cbd04e75b285e2f02c1ceaab2f39dcf",
+    "IDPoPReplayStore.cs": "b0de04e3584bb1106c16dab17968da96734b6ff555e6805109bd15cd0ba09b67",
+    "InMemoryDPoPNonceStore.cs": "8b6788981fe456e3979c3a5b1bdde5295687307ce8eebe8728108f9f0731c82b",
+    "InMemoryDPoPReplayStore.cs": "c94e53fef96cadd23ed21a6529f5b48e71204b13113b38a017bbdae789c4b78f"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "dpop",
+      "typeName": "Orbyss.Foundation.Authentication.DPoP.DPoPOptions",
+      "complete": true,
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Authentication.DPoP"
+        ],
+        "configuration": [
+          "Foundation:Authentication:DPoP"
+        ]
+      },
+      "settings": [
+        {
+          "property": "Required",
+          "path": "Foundation:Authentication:DPoP:Required",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether every authenticated request must use a DPoP-bound token."
+        },
+        {
+          "property": "PublicOrigin",
+          "path": "Foundation:Authentication:DPoP:PublicOrigin",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "format": "uri"
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the externally visible origin used to validate `htu`."
+        },
+        {
+          "property": "ProofMaxAgeSeconds",
+          "path": "Foundation:Authentication:DPoP:ProofMaxAgeSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 10,
+            "maximum": 300
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the maximum accepted age of a proof, in seconds."
+        },
+        {
+          "property": "ClockSkewSeconds",
+          "path": "Foundation:Authentication:DPoP:ClockSkewSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 0,
+            "maximum": 30
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets the permitted proof-clock skew, in seconds."
+        },
+        {
+          "property": "AllowHttpForLocalDevelopment",
+          "path": "Foundation:Authentication:DPoP:AllowHttpForLocalDevelopment",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether loopback HTTP is accepted during local development."
+        },
+        {
+          "property": "RequireNonce",
+          "path": "Foundation:Authentication:DPoP:RequireNonce",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets whether each proof must carry a server-issued single-use nonce."
+        },
+        {
+          "property": "NonceLifetimeSeconds",
+          "path": "Foundation:Authentication:DPoP:NonceLifetimeSeconds",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "minimum": 10,
+            "maximum": 300
+          },
+          "binding": "The selected shell feature binds this section from ShellSettings.GetConfigurationRoot using the native .NET configuration binder. Options are consumed within that shell provider generation; recompose/restart the shell to replace cached options.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Gets or sets how long an issued nonce remains usable, in seconds."
+        }
+      ],
+      "semanticConstraints": [
+        "PublicOrigin must be an exact absolute HTTPS origin with root path and no query/fragment; loopback HTTP requires Development and the explicit override.",
+        "Required selects DPoP-bound-token admission for authenticated requests; RequireNonce adds the server-issued single-use nonce requirement.",
+        "Replay/nonce storage implementation is separately registered application composition; settings export neither resolves nor initializes it."
+      ]
+    }
+  ]
+}
