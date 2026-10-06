@@ -22,8 +22,8 @@
     "FoundationProblemRepresentationPolicy.cs": "d3236ac312d33430d1b556e3edbb223aa3208730dbebd21463226b1e1649fa71",
     "FoundationProblemResponseOptions.cs": "1ae2064b90d20bdbe1357048e765b162ed24ccc764d20c5a0c41820a99d5b7d3",
     "FoundationProblemResult.cs": "ccdf35641c63e32193b369e11d86d537d02dbb7e2e867f61dd0b29dbccf9bd87",
-    "FoundationProblemResults.cs": "aafd33b650d084096e24775dfd7cb7fc26f1e3a467dea40b2a9ca00ebf2a5ae8",
-    "IFoundationProblemResult.cs": "0cbd1ec3c0f1a4dfc04d005b2fc9aac5587918611739d83d8bb1cc27be9597d8",
+    "FoundationProblemResults.cs": "2377fae5d9825ec6f21adfc48da3a2cf1fa5e6f4ce8a569f00bf056a578a0eff",
+    "IFoundationProblemResult.cs": "81bd5d756032c76dca36d82d426b38949f8660a189274171dbfa2d4d2c05e68a",
     "IProblemDetailsEnricher.cs": "a3f7cb9fe2a7c643c8c78586bbf6ebfb485523dcebd6c6bfa17b050b75605dd6",
     "IProblemRepresentationPolicy.cs": "32ed022d557332935677be796b8860a71a5f50608afc526c65878cdb50931a72"
   }

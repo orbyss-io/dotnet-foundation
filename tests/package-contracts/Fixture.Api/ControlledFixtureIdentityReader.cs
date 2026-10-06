@@ -11,7 +11,7 @@ internal sealed class ControlledFixtureIdentityReader(ShellSettings settings) : 
     {
         var identities = principal.Identities.Take(2).ToArray();
         identity = identities.Length == 1 && identities[0].IsAuthenticated
-            ? new ValidatedAccountIdentity("replacement-fixture", settings.Name + "-replacement") : null;
+            ? new ValidatedAccountIdentity("replacement-fixture", settings.Id.ToString() + "-replacement") : null;
         return identity is not null;
     }
 }

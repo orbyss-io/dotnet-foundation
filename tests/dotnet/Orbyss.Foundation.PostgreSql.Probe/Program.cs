@@ -3,10 +3,14 @@ using System.Text.Json;
 using CShells.DependencyInjection;
 using CShells.Lifecycle;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Orbyss.Foundation.Execution;
 using Orbyss.Foundation.PostgreSql;
 
 DeadlineProbe.Run();
@@ -134,6 +138,134 @@ Require(capturedLogs.Entries.Any(entry => entry.Contains("23505", StringComparis
 Require(capturedLogs.Entries.Any(entry => entry.StartsWith("Microsoft.EntityFrameworkCore.Update|Error|", StringComparison.Ordinal)),
     "native PostgreSQL logging lost category or severity");
 
+// Expiry after the first stage check but before native dispatch must reject a fast mutation.
+// Cancel() alone cannot cancel a command that has not started executing yet.
+foreach (var mode in new[] { "nonquery", "reader", "scalar" })
+foreach (var deliverTimers in new[] { true, false })
+{
+    var clock = new ManualTimeProvider();
+    using (var outer = new TimeProviderDeadlineFactory(clock).Create(TimeSpan.FromSeconds(10)))
+    {
+        await using (var unit = await leases.BeginUnitAsync(operationDeadline: outer))
+        await using (var context = await unit.Factory.CreateDbContextAsync())
+        {
+            await context.Database.OpenConnectionAsync(unit.Deadline.Token);
+            clock.AdvanceOnTimestampAfterTimer(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400), deliverTimers);
+            var canceled = false;
+            try
+            {
+                if (mode == "reader")
+                {
+                    await using var rows = context.Database.SqlQueryRaw<int>("INSERT INTO fixture_notes (\"Name\") VALUES ('dispatch-race-reader') RETURNING \"Id\" AS \"Value\"")
+                        .AsAsyncEnumerable().GetAsyncEnumerator(unit.Deadline.Token);
+                    await rows.MoveNextAsync();
+                }
+                else if (mode == "scalar")
+                    await ExecuteScalarAsync(context, "INSERT INTO fixture_notes (\"Name\") VALUES ('dispatch-race-scalar') RETURNING \"Id\"", unit.Deadline.Token);
+                else
+                    await context.Database.ExecuteSqlRawAsync("INSERT INTO fixture_notes (\"Name\") VALUES ('dispatch-race-nonquery')", unit.Deadline.Token);
+            }
+            catch (OperationCanceledException) { canceled = true; }
+            Require(clock.ScheduledAdvanceOccurred && canceled, "expired pre-dispatch command reported a successful native mutation");
+            Require(!unit.Deadline.IsExpired && !outer.IsExpired && clock.ActiveTimers == 2,
+                "pre-dispatch failure reset its outer deadline or leaked its command timer");
+        }
+        await using (var reconciliation = await leases.BeginUnitAsync())
+        await using (var context = await reconciliation.Factory.CreateDbContextAsync())
+            Require(!await context.Notes.AnyAsync(note => note.Name.StartsWith("dispatch-race-"), reconciliation.Deadline.Token),
+                "an already expired command reached PostgreSQL before native dispatch");
+    }
+    Require(clock.ActiveTimers == 0, "pre-dispatch command failure leaked deadline ownership");
+}
+
+// Sync native commands do not accept cancellation tokens. Expiry must prevent false
+// success, but this cancellation outcome cannot establish rollback: reconcile separately.
+foreach (var mode in new[] { "nonquery", "reader", "scalar" })
+foreach (var deliverTimers in new[] { true, false })
+{
+    var name = $"sync-dispatch-{mode}";
+    var clock = new ManualTimeProvider();
+    using (var outer = new TimeProviderDeadlineFactory(clock).Create(TimeSpan.FromSeconds(10)))
+    {
+        await using (var unit = await leases.BeginUnitAsync(operationDeadline: outer))
+        await using (var context = await unit.Factory.CreateDbContextAsync())
+        {
+            await context.Database.OpenConnectionAsync(unit.Deadline.Token);
+            clock.AdvanceOnTimestampAfterTimer(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400), deliverTimers);
+            var canceled = false;
+            try
+            {
+                if (mode == "reader")
+                    context.Database.SqlQueryRaw<int>("INSERT INTO fixture_notes (\"Name\") VALUES ('sync-dispatch-reader') RETURNING \"Id\" AS \"Value\"")
+                        .AsEnumerable().Single();
+                else if (mode == "scalar")
+                    ExecuteScalar(context, "INSERT INTO fixture_notes (\"Name\") VALUES ('sync-dispatch-scalar') RETURNING \"Id\"");
+                else
+                    context.Database.ExecuteSqlRaw("INSERT INTO fixture_notes (\"Name\") VALUES ('sync-dispatch-nonquery')");
+            }
+            catch (OperationCanceledException) { canceled = true; }
+            Require(clock.ScheduledAdvanceOccurred && canceled && !unit.Deadline.IsExpired && clock.ActiveTimers == 2,
+                "synchronous command reported success after expiry or leaked its stage");
+        }
+        await using (var reconciliation = await leases.BeginUnitAsync())
+        await using (var context = await reconciliation.Factory.CreateDbContextAsync())
+        {
+            Require(await context.Notes.AnyAsync(note => note.Name == name, reconciliation.Deadline.Token),
+                "synchronous cancellation fixture did not establish its uncertain committed outcome");
+            await context.Notes.Where(note => note.Name == name).ExecuteDeleteAsync(reconciliation.Deadline.Token);
+        }
+    }
+    Require(clock.ActiveTimers == 0, "synchronous command failure leaked deadline ownership");
+}
+await using (var unit = await leases.BeginUnitAsync())
+await using (var context = await unit.Factory.CreateDbContextAsync())
+{
+    Require((int?)await ExecuteScalarAsync(context, "SELECT 1", unit.Deadline.Token) == 1
+        && (int?)ExecuteScalar(context, "SELECT 2") == 2, "native scalar results changed after owned stage dispatch");
+}
+Console.WriteLine("Native reader/nonquery/scalar dispatch expiry, synchronous commit uncertainty and separate reconciliation passed.");
+
+// Native close drains unread batches and can fail before EF's DataReaderDisposing callback.
+// The native reader must retain its stage through close, then release it even on this fault.
+foreach (var asynchronous in new[] { true, false })
+{
+    var clock = new ManualTimeProvider();
+    using (var outer = new TimeProviderDeadlineFactory(clock).Create(TimeSpan.FromSeconds(10)))
+    await using (var unit = await leases.BeginUnitAsync(operationDeadline: outer))
+    await using (var context = await unit.Factory.CreateDbContextAsync())
+    {
+        var query = context.Database.SqlQueryRaw<int>("SELECT 1 AS \"Value\"; SELECT 1 / 0 AS \"Value\"");
+        var closeFailed = false;
+        if (asynchronous)
+        {
+            var rows = query.AsAsyncEnumerable().GetAsyncEnumerator(unit.Deadline.Token);
+            try { Require(await rows.MoveNextAsync() && rows.Current == 1, "early-close fixture did not expose its first native result"); }
+            finally
+            {
+                try { await rows.DisposeAsync(); }
+                catch (PostgresException exception) when (exception.SqlState == "22012") { closeFailed = true; }
+            }
+            await rows.DisposeAsync();
+        }
+        else
+        {
+            var rows = query.AsEnumerable().GetEnumerator();
+            try { Require(rows.MoveNext() && rows.Current == 1, "early-close fixture did not expose its first native result"); }
+            finally
+            {
+                try { rows.Dispose(); }
+                catch (PostgresException exception) when (exception.SqlState == "22012") { closeFailed = true; }
+            }
+            rows.Dispose();
+        }
+        Require(closeFailed && clock.ActiveTimers == 2, "native early-close fault leaked its owned command stage");
+        Require(await context.Database.SqlQueryRaw<int>("SELECT 2 AS \"Value\"").SingleAsync(unit.Deadline.Token) == 2
+            && clock.ActiveTimers == 2, "native reader reuse retained its previous close handler or stage");
+    }
+    Require(clock.ActiveTimers == 0, "native early-close fault retained a stage after context/lease disposal");
+}
+Console.WriteLine("Native sync/async early reader-close faults released retained command stages.");
+
 // Native command expiry and caller cancellation remain separate owned outcomes.
 await using (var unit = await leases.BeginUnitAsync())
 await using (var context = await unit.Factory.CreateDbContextAsync())
@@ -250,3 +382,19 @@ static void Require(bool condition, string message)
 {
     if (!condition) throw new Exception(message);
 }
+
+// Exercise EF's actual scalar dispatch path, which ordinary LINQ selects implement as readers.
+static Task<object?> ExecuteScalarAsync(ProbeContext context, string sql, CancellationToken token)
+{
+    var command = context.GetService<IRelationalCommandBuilderFactory>().Create().Append(sql).Build();
+    return command.ExecuteScalarAsync(ScalarParameters(context), token);
+}
+
+static object? ExecuteScalar(ProbeContext context, string sql)
+{
+    var command = context.GetService<IRelationalCommandBuilderFactory>().Create().Append(sql).Build();
+    return command.ExecuteScalar(ScalarParameters(context));
+}
+
+static RelationalCommandParameterObject ScalarParameters(ProbeContext context) => new(
+    context.GetService<IRelationalConnection>(), null, null, context, context.GetService<IRelationalCommandDiagnosticsLogger>());

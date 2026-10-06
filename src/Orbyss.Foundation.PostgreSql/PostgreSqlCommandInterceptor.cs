@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Orbyss.Foundation.PostgreSql;
 
@@ -18,17 +19,57 @@ internal sealed class PostgreSqlCommandInterceptor(ILogger logger) : DbCommandIn
         return result;
     }
     /// <inheritdoc />
-    public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData,
+    public override async ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData,
         InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
     {
-        Begin(command, eventData, cancellationToken);
-        return ValueTask.FromResult(result);
+        var stage = Begin(command, eventData, cancellationToken);
+        if (result.HasResult) return result;
+        try
+        {
+            // EF passes the caller token to its own dispatch. Suppress only that dispatch,
+            // retaining EF's Executed callbacks and its concrete native reader ownership.
+            stage.ThrowIfExpired();
+            return InterceptionResult<DbDataReader>.SuppressWithResult(await command.ExecuteReaderAsync(stage.Token).ConfigureAwait(false));
+        }
+        catch
+        {
+            End(command);
+            throw;
+        }
     }
     /// <inheritdoc />
-    public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result) => result;
+    public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result)
+    {
+        try
+        {
+            Check(command);
+            RetainThroughNativeClose(command, result);
+            return result;
+        }
+        catch
+        {
+            try { result.Dispose(); }
+            finally { End(command); }
+            throw;
+        }
+    }
     /// <inheritdoc />
-    public override ValueTask<DbDataReader> ReaderExecutedAsync(DbCommand command, CommandExecutedEventData eventData,
-        DbDataReader result, CancellationToken cancellationToken = default) => ValueTask.FromResult(ReaderExecuted(command, eventData, result));
+    public override async ValueTask<DbDataReader> ReaderExecutedAsync(DbCommand command, CommandExecutedEventData eventData,
+        DbDataReader result, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            Check(command);
+            RetainThroughNativeClose(command, result);
+            return result;
+        }
+        catch
+        {
+            try { await result.DisposeAsync().ConfigureAwait(false); }
+            finally { End(command); }
+            throw;
+        }
+    }
     /// <inheritdoc />
     public override InterceptionResult DataReaderDisposing(DbCommand command, DataReaderDisposingEventData eventData, InterceptionResult result)
     {
@@ -44,17 +85,27 @@ internal sealed class PostgreSqlCommandInterceptor(ILogger logger) : DbCommandIn
         return result;
     }
     /// <inheritdoc />
-    public override ValueTask<InterceptionResult<int>> NonQueryExecutingAsync(DbCommand command, CommandEventData eventData,
+    public override async ValueTask<InterceptionResult<int>> NonQueryExecutingAsync(DbCommand command, CommandEventData eventData,
         InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
-        Begin(command, eventData, cancellationToken);
-        return ValueTask.FromResult(result);
+        var stage = Begin(command, eventData, cancellationToken);
+        if (result.HasResult) return result;
+        try
+        {
+            stage.ThrowIfExpired();
+            return InterceptionResult<int>.SuppressWithResult(await command.ExecuteNonQueryAsync(stage.Token).ConfigureAwait(false));
+        }
+        catch
+        {
+            End(command);
+            throw;
+        }
     }
     /// <inheritdoc />
     public override int NonQueryExecuted(DbCommand command, CommandExecutedEventData eventData, int result)
     {
-        End(command);
-        return result;
+        try { Check(command); return result; }
+        finally { End(command); }
     }
     /// <inheritdoc />
     public override ValueTask<int> NonQueryExecutedAsync(DbCommand command, CommandExecutedEventData eventData, int result,
@@ -66,17 +117,27 @@ internal sealed class PostgreSqlCommandInterceptor(ILogger logger) : DbCommandIn
         return result;
     }
     /// <inheritdoc />
-    public override ValueTask<InterceptionResult<object>> ScalarExecutingAsync(DbCommand command, CommandEventData eventData,
+    public override async ValueTask<InterceptionResult<object>> ScalarExecutingAsync(DbCommand command, CommandEventData eventData,
         InterceptionResult<object> result, CancellationToken cancellationToken = default)
     {
-        Begin(command, eventData, cancellationToken);
-        return ValueTask.FromResult(result);
+        var stage = Begin(command, eventData, cancellationToken);
+        if (result.HasResult) return result;
+        try
+        {
+            stage.ThrowIfExpired();
+            return InterceptionResult<object>.SuppressWithResult((await command.ExecuteScalarAsync(stage.Token).ConfigureAwait(false))!);
+        }
+        catch
+        {
+            End(command);
+            throw;
+        }
     }
     /// <inheritdoc />
     public override object? ScalarExecuted(DbCommand command, CommandExecutedEventData eventData, object? result)
     {
-        End(command);
-        return result;
+        try { Check(command); return result; }
+        finally { End(command); }
     }
     /// <inheritdoc />
     public override ValueTask<object?> ScalarExecutedAsync(DbCommand command, CommandExecutedEventData eventData, object? result,
@@ -99,7 +160,7 @@ internal sealed class PostgreSqlCommandInterceptor(ILogger logger) : DbCommandIn
     }
 
     /// <summary>Reserves a stage before any native command starts.</summary>
-    private void Begin(DbCommand command, CommandEventData eventData, CancellationToken caller)
+    private PostgreSqlCommandStage Begin(DbCommand command, CommandEventData eventData, CancellationToken caller)
     {
         var stage = new PostgreSqlCommandStage(command, ((FoundationPostgreSqlDbContext)eventData.Context!).Lease, caller, logger);
         if (!stages.TryAdd(command, stage))
@@ -107,6 +168,27 @@ internal sealed class PostgreSqlCommandInterceptor(ILogger logger) : DbCommandIn
             stage.Dispose();
             throw new InvalidOperationException("A context command cannot execute concurrently with itself.");
         }
+        return stage;
+    }
+
+    /// <summary>Rejects completion after expiry; cancellation never establishes rollback.</summary>
+    private void Check(DbCommand command)
+    {
+        if (stages.TryGetValue(command, out var stage)) stage.ThrowIfExpired();
+    }
+
+    /// <summary>Retains cancellation through native drain, including faults before EF's disposing notification.</summary>
+    private void RetainThroughNativeClose(DbCommand command, DbDataReader result)
+    {
+        if (result is not NpgsqlDataReader reader) return;
+        EventHandler? closed = null;
+        closed = (_, _) =>
+        {
+            // Remove our own closure before cleanup can fail; native readers are reused by Npgsql.
+            reader.ReaderClosed -= closed;
+            End(command);
+        };
+        reader.ReaderClosed += closed;
     }
 
     /// <summary>Releases a completed/failed command stage.</summary>

@@ -39,6 +39,7 @@ public sealed class FixtureApiFeature(ShellSettings settings) : IWebShellFeature
         {
             collection => collection.AddJsonResponseContract<SnapshotResponse>(new(FixtureApiKeys.InspectionProfile), new(JsonProfileKeys.TolerantResponse)),
             collection => collection.AddJsonResponseContract<FixtureStorageObservation>(new(FixtureApiKeys.InspectionProfile), new(JsonProfileKeys.TolerantResponse)),
+            collection => collection.AddJsonResponseContract<FixtureCancellationObservation>(new(FixtureApiKeys.InspectionProfile), new(JsonProfileKeys.TolerantResponse)),
             collection => collection.AddJsonResponseContract<ReloadResponse>(new(FixtureApiKeys.InspectionProfile), new(JsonProfileKeys.TolerantResponse))
         }) register(services);
     }

@@ -4,23 +4,49 @@ internal sealed class ManualTimeProvider : TimeProvider
 {
     private readonly List<ManualTimer> timers = [];
     private long timestamp;
+    private TimeSpan? advanceAfterTimer;
+    private TimeSpan scheduledAdvance;
+    private bool advanceOnTimestamp;
+    private bool deliverScheduledTimers;
     private DateTimeOffset utc = DateTimeOffset.Parse("2026-10-06T00:00:00Z", CultureInfo.InvariantCulture);
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-    public override long GetTimestamp() => timestamp;
+    public override long GetTimestamp()
+    {
+        if (advanceOnTimestamp)
+        {
+            advanceOnTimestamp = false;
+            ScheduledAdvanceOccurred = true;
+            Advance(scheduledAdvance, deliverScheduledTimers);
+        }
+        return timestamp;
+    }
     public override DateTimeOffset GetUtcNow() => utc;
     public int ActiveTimers => timers.Count;
+    public bool ScheduledAdvanceOccurred { get; private set; }
+    public void AdvanceOnTimestampAfterTimer(TimeSpan dueTime, TimeSpan advance, bool deliverTimers = true)
+    {
+        advanceAfterTimer = dueTime;
+        scheduledAdvance = advance;
+        deliverScheduledTimers = deliverTimers;
+        ScheduledAdvanceOccurred = false;
+    }
     public void ShiftUtc(TimeSpan change) => utc += change;
-    public void Advance(TimeSpan change)
+    public void Advance(TimeSpan change, bool deliverTimers = true)
     {
         timestamp += change.Ticks;
         utc += change;
-        foreach (var timer in timers.ToArray()) timer.Fire(timestamp);
+        if (deliverTimers) foreach (var timer in timers.ToArray()) timer.Fire(timestamp);
     }
     public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
     {
         var timer = new ManualTimer(this, callback, state);
         timers.Add(timer);
         timer.Change(dueTime, period);
+        if (advanceAfterTimer == dueTime)
+        {
+            advanceAfterTimer = null;
+            advanceOnTimestamp = true;
+        }
         return timer;
     }
     private sealed class ManualTimer(ManualTimeProvider owner, TimerCallback callback, object? state) : ITimer

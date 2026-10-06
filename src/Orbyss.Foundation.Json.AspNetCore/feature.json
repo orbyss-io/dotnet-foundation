@@ -13,7 +13,7 @@
     }
   ],
   "sourceSha256": {
-    "FoundationJsonEndpointExtensions.cs": "975b163ecd2157ea3266458384aae03ee530074dc8a80b1aff4ac44376d8bc98",
+    "FoundationJsonEndpointExtensions.cs": "2b051b476ec7266e3ac4d2c59575cf4d76d8cfee83489563160afb214b75fcfb",
     "FoundationJsonFeature.cs": "e6a75dbc079576ad477a57dd58b3a1dffceba4f572b293f653ff7d29e7dc1e0c",
     "FoundationJsonOptions.cs": "ac87eee0ae1958fe20c17a73c27b2da0a914b87e5a80ee0368253c8e36d82559",
     "FoundationJsonRequestExceptionHandler.cs": "49c01e2ec35783ca4a86e2c96e3b18f78783326f72f3d75f285183994c8d6c0a",

@@ -7,5 +7,5 @@ internal sealed class FixtureProblemEnricher(ShellSettings settings) : IProblemD
 {
     private readonly Guid scopeId = Guid.NewGuid();
     public ProblemDefinition Enrich(HttpContext context, ProblemDefinition definition) => new(definition.StatusCode,
-        definition.Code, settings.Name + ":" + scopeId.ToString("N"), definition.Detail, definition.FieldErrors);
+        definition.Code, settings.Id.ToString() + ":" + scopeId.ToString("N"), definition.Detail, definition.FieldErrors);
 }

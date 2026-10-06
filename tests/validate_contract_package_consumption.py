@@ -25,15 +25,40 @@ FEATURES = {
     "Fixture.PostgreSql": ("Foundation.ContractFixture.PostgreSql", "ContractFixture.PostgreSql", [], []),
     "Fixture.Api": ("Foundation.ContractFixture.Api", "ContractFixture.Api",
                     ["Orbyss.Foundation.Authentication", "Orbyss.Foundation.Json.AspNetCore"],
-                    ["/snapshot/{mode?}", "/echo", "/large", "/bypass", "/invalid-output", "/denied",
+                    ["/snapshot/{mode?}", "/echo", "/large", "/bypass", "/invalid-output",
+                     "/forged-problem/{status:int}", "/ignored-request-fake-problem", "/denied",
                      "/auth/{status:int}", "/status/{status:int}", "/native-conflict", "/argument",
-                     "/problem-large", "/started", "/storage", "/reload/{shell}", "/fixture-cookie/{permissions:int}"]),
+                     "/problem-large", "/started", "/storage", "/storage-stage-cancel", "/reload/{shell}", "/fixture-cookie/{permissions:int}"]),
 }
 PRIVATE_MARKER = "FIXTURE_PRIVATE_SECRET"
+HOST_CONTRACT_PACKAGES = {"cshells.abstractions", "cshells.aspnetcore.abstractions"}
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def preserve_host_payload(host: Path, destination: Path) -> dict[str, str]:
+    files = set(host.parent.glob("*.dll"))
+    files.update(host.parent.glob("*.deps.json"))
+    files.update(host.parent.glob("*.runtimeconfig.json"))
+    files.add(host.parent / "appsettings.json")
+    runtimes = host.parent / "runtimes"
+    if runtimes.is_dir():
+        files.update(path for path in runtimes.rglob("*") if path.is_file())
+    assert all(path.is_file() for path in files), "The complete built Host payload must include its configuration."
+    hashes = {path.relative_to(host.parent).as_posix(): sha256(path) for path in sorted(files)}
+    for relative, expected in hashes.items():
+        source = host.parent / relative
+        copied = destination / relative
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, copied)
+        assert sha256(copied) == expected == sha256(source), "Host payload changed while qualification captured it."
+    return hashes
 
 
 def run_command(command: list[str], cwd: Path, log_path: Path) -> None:
@@ -65,24 +90,29 @@ def write_restore_configuration(repository: Path, feed: Path, destination: Path)
             for entry in sources.findall("add")]
 
 
-def candidate_packages(packages: Path, feed: Path, version: str) -> list[str]:
+def candidate_packages(packages: Path, feed: Path, version: str) -> tuple[list[str], list[dict]]:
     identities = []
+    excluded = []
     for package in sorted(packages.glob("*.nupkg")):
         with zipfile.ZipFile(package) as archive:
             nuspec = next(name for name in archive.namelist() if name.endswith(".nuspec"))
             metadata = ET.fromstring(archive.read(nuspec))
             identity = metadata.find("./{*}metadata/{*}id").text
             package_version = metadata.find("./{*}metadata/{*}version").text
-        if identity.startswith("Orbyss.Foundation.") and package_version == version:
+            types = {entry.attrib.get("name", "").casefold()
+                     for entry in metadata.findall("./{*}metadata/{*}packageTypes/{*}packageType")}
+        if identity.startswith("Orbyss.Foundation.") and package_version == version and types.intersection({"analyzer", "dotnettool"}):
+            excluded.append({"identity": identity, "packageTypes": sorted(types), "sha256": sha256(package)})
+        elif identity.startswith("Orbyss.Foundation.") and package_version == version:
             assert identity not in identities, f"Duplicate candidate package: {identity}"
             identities.append(identity)
             shutil.copy2(package, feed / package.name)
     assert identities, "The supplied feed contains no exact Foundation candidate packages."
-    return identities
+    return identities, excluded
 
 
 def restore_command(dotnet: str, project: Path, config: Path, cache: Path, properties: list[str]) -> list[str]:
-    return [dotnet, "restore", str(project), "--configfile", str(config),
+    return [dotnet, "restore", str(project), "--configfile", str(config), "--no-http-cache",
             "--packages", str(cache), *properties]
 
 
@@ -91,6 +121,8 @@ def restore_runtime_closure(source: Path, identities: list[str], version: str, d
     directory = source / "RuntimeDependencyClosure"
     directory.mkdir()
     project = ET.Element("Project", {"Sdk": "Microsoft.NET.Sdk"})
+    settings = ET.SubElement(project, "PropertyGroup")
+    ET.SubElement(settings, "RestoreEnablePackagePruning").text = "false"
     references = ET.SubElement(project, "ItemGroup")
     for identity in identities:
         ET.SubElement(references, "PackageReference", {"Include": identity, "Version": f"[{version}]"})
@@ -118,6 +150,16 @@ def copy_restored_packages(cache: Path, feed: Path) -> dict[str, str]:
         hashes[package.name] = digest
     assert hashes, "Fresh dependency restore retained no packages."
     return hashes
+
+
+def copy_runtime_feed(feed: Path, target: Path) -> None:
+    target.mkdir()
+    for package in feed.glob("*.nupkg"):
+        with zipfile.ZipFile(package) as archive:
+            nuspec = next(name for name in archive.namelist() if name.endswith(".nuspec"))
+            identity = ET.fromstring(archive.read(nuspec)).find("./{*}metadata/{*}id").text.casefold()
+        if identity not in HOST_CONTRACT_PACKAGES:
+            shutil.copy2(package, target / package.name)
 
 
 def terminate(process: subprocess.Popen) -> None:
@@ -280,10 +322,33 @@ def problem(packet: tuple[int, dict, bytes], expected_status: int, code: str, sh
     return document
 
 
-def qualify(base: str, version: str) -> dict:
+def qualify(base: str, version: str, evidence: Path) -> dict:
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     snapshots = {}
     problem_titles = []
+    adversaries = [("forged200", "/first/forged-problem/200", None, "json_response_profile_bypass"),
+                   ("forged409", "/first/forged-problem/409", None, "json_response_profile_bypass"),
+                   ("ignoredRequest", "/first/ignored-request-fake-problem", b'{"message":"ignored"}', "json_request_profile_bypass")]
+    packets = [(case, request(opener, base, path, payload), code) for case, path, payload, code in adversaries]
+    provenance = [{"case": case, "status": packet[0], "bytes": len(packet[2]),
+                   "boundedSafeFailure": packet[0] == 500 and len(packet[2]) <= 512 and b'"forged"' not in packet[2]}
+                  for case, packet, _ in packets]
+    (evidence / "provenance.json").write_text(json.dumps(provenance, indent=2), encoding="utf-8")
+    cancellations = {}
+    for shell in ("first", "second"):
+        status, _, body = request(opener, base, f"/{shell}/storage-stage-cancel")
+        cancellation = json.loads(body)
+        cancellation["httpStatus"] = status
+        cancellations[shell] = cancellation
+    (evidence / "cancellation.json").write_text(json.dumps(cancellations, indent=2), encoding="utf-8")
+    cancellation_safe = all(item["httpStatus"] == 200 and item.get("stageCanceled")
+        and not item.get("outerExpired") and item.get("elapsedMilliseconds", 99999) < 2500
+        and item.get("followupSucceeded") and item.get("scheduledAdvanceOccurred")
+        and item.get("fastWriteCanceled") and not item.get("fastWriteCommitted") for item in cancellations.values())
+    assert all(item["boundedSafeFailure"] for item in provenance) and cancellation_safe, (
+        "Packaged admission/cancellation guarantees failed", {"provenance": provenance, "cancellation": cancellations})
+    for _, packet, code in packets:
+        problem(packet, 500, code, "first")
     for shell in ("first", "second"):
         status, _, body = request(opener, base, f"/{shell}/snapshot")
         assert status == 200, body
@@ -324,6 +389,7 @@ def qualify(base: str, version: str) -> dict:
         assert status == 200 and storage["plainFactoryRejected"] and storage["closedUnitRejected"]
         assert storage["independentQueriesSucceeded"] and storage["firstContextId"] != storage["secondContextId"]
         snapshot["storage"] = storage
+        snapshot["cancellation"] = cancellations[shell]
     assert snapshots["first"]["labels"][1] != snapshots["second"]["labels"][1]
     assert snapshots["first"]["storage"]["dataSourceId"] != snapshots["second"]["storage"]["dataSourceId"]
     for mode in ("duplicate", "missing", "multiple"):
@@ -353,8 +419,9 @@ def qualify(base: str, version: str) -> dict:
     signed = json.loads(request(opener, base, "/first/bff/user")[2])
     assert signed["authenticated"] is True and signed["subject"] == "first-owner"
     assert json.loads(request(opener, base, "/second/bff/user")[2])["authenticated"] is False
-    assert request(opener, base, "/first/fixture-cookie/100", b"", "POST")[0] == 200
-    problem(request(opener, base, "/first/bff/user"), 500, "json_response_size_exceeded", "first")
+    overflow_browser = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    assert request(overflow_browser, base, "/first/fixture-cookie/100", b"", "POST")[0] == 200
+    problem(request(overflow_browser, base, "/first/bff/user"), 500, "json_response_size_exceeded", "first")
     antiforgery = request(opener, base, "/second/bff/antiforgery")
     assert antiforgery[0] == 200 and json.loads(antiforgery[2])["requestToken"]
     problem(request(opener, base, "/first/bff/logout", b"{}", "POST"), 400, "invalid_antiforgery_token", "first")
@@ -401,7 +468,16 @@ def main() -> None:
     source, feed, runtime = run / "consumer", run / "feed", run / "runtime"
     shutil.copytree(repository / "tests/package-contracts", source)
     feed.mkdir()
-    candidate_identities = candidate_packages(packages, feed, args.version)
+    candidate_identities, candidate_exclusions = candidate_packages(packages, feed, args.version)
+    expected_runtime_identities = {project.stem
+        for project in (repository / "src").glob("Orbyss.Foundation*/*.csproj")
+        if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build",
+            "Orbyss.Foundation.OpenApi.Exporter", "Orbyss.Foundation.Analyzers"}}
+    assert len(expected_runtime_identities) == 29, "The explicit runtime package family requires review."
+    assert set(candidate_identities) == expected_runtime_identities, (
+        "Exact candidate runtime package set mismatch", {
+            "missing": sorted(expected_runtime_identities - set(candidate_identities)),
+            "extra": sorted(set(candidate_identities) - expected_runtime_identities)})
     for project in source.rglob("*.csproj"):
         assert "ProjectReference" not in project.read_text(), "Independent qualification cannot use source ProjectReferences."
     write_descriptors(source, args.cshells_version)
@@ -411,18 +487,24 @@ def main() -> None:
     restore_configuration = run / "NuGet.config"
     restore_sources = write_restore_configuration(repository, feed, restore_configuration)
     cache = run / "package-cache"
+    host_payload = run / "host"
+    host_inventory = preserve_host_payload(host, host_payload)
+    qualified_host = host_payload / host.name
     manifest = {"version": args.version, "host": {"path": str(host), "sha256": sha256(host)},
+                "hostRuntimeFiles": host_inventory, "executedHost": str(qualified_host),
                 "packages": {path.name: sha256(path) for path in sorted(feed.glob("*.nupkg"))},
                 "candidatePackageIdentities": candidate_identities,
+                "excludedNonRuntimeCandidatePackages": candidate_exclusions,
                 "fixtureSources": {path.relative_to(source).as_posix(): sha256(path)
                                    for path in sorted(source.rglob("*.cs"))},
                 "sdkWorkingDirectory": str(sdk_cwd), "sourceProjectReferences": False,
                 "restoreSources": restore_sources, "restoreConfigurationSha256": sha256(restore_configuration),
                 "freshPackageCache": str(cache),
+                "runtimeClosurePackagePruning": False,
                 "postgresql": "actual explicit disposable target; connection supplied only to Host environment"}
     inputs = run / "inputs.json"
     inputs.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    transport = qualify_transport_startup(host, run / "transport-startup", args.dotnet)
+    transport = qualify_transport_startup(qualified_host, run / "transport-startup", args.dotnet)
     restore_runtime_closure(source, candidate_identities, args.version, args.dotnet, restore_configuration,
                             cache, properties, sdk_cwd, run)
     for name in PROJECTS:
@@ -439,20 +521,25 @@ def main() -> None:
         assert "orbyss-foundation/feature.json" not in archive.namelist(), "Contract-only Core was advertised as an activated feature."
     restored_packages = copy_restored_packages(cache, feed)
     runtime.mkdir()
-    shutil.copytree(feed, runtime / "packages")
-    configuration = host.parent / "appsettings.json"
+    copy_runtime_feed(feed, runtime / "packages")
+    configuration = qualified_host.parent / "appsettings.json"
     if not configuration.is_file():
         configuration = repository / "src/Orbyss.Foundation.Host/appsettings.json"
     shutil.copy2(configuration, runtime / "appsettings.json")
     (runtime / "shells.json").write_text(json.dumps(settings(), indent=2), encoding="utf-8")
-    (runtime / "hostsettings.json").write_text(json.dumps({"Foundation": {"Transport": {"MaxRequestBodyBytes": 1024}}}), encoding="utf-8")
+    (runtime / "hostsettings.json").write_text(json.dumps({
+        "Foundation": {"Transport": {"MaxRequestBodyBytes": 1024}},
+        "Nuplane": {"Setup": {"StateFilePath": str(runtime / "nuplane-store-state.json")},
+                    "FeedResolution": {"PackageInstallRoot": str(runtime / "installed")},
+                    "Loading": {"ActiveStoreRoot": str(runtime / "packages/.installed")}}}), encoding="utf-8")
     manifest.update({"packages": {path.name: sha256(path) for path in sorted(feed.glob("*.nupkg"))},
-                     "freshRestoredPackages": restored_packages, "transportStartup": transport})
+                     "freshRestoredPackages": restored_packages, "transportStartup": transport,
+                     "hostProvidedContractPackages": sorted(HOST_CONTRACT_PACKAGES)})
     inputs.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     process = None
     try:
-        process, address, log_path = start_host(host, runtime, args.postgres_connection, args.dotnet)
-        observations = qualify(address, args.version)
+        process, address, log_path = start_host(qualified_host, runtime, args.postgres_connection, args.dotnet)
+        observations = qualify(address, args.version, run)
         (run / "observations.json").write_text(json.dumps(observations, indent=2), encoding="utf-8")
     finally:
         if process is not None:

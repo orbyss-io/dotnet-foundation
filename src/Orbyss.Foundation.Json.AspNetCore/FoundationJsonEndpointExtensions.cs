@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Orbyss.Foundation.Web.ProblemDetails;
@@ -35,7 +34,9 @@ public static class FoundationJsonEndpointExtensions
                 try
                 {
                     var result = await next(invocation).ConfigureAwait(false);
-                    if (admission.Failed || (!admission.RequestAdmitted && result is not (ProblemHttpResult or IFoundationProblemResult or JsonAdmissionResult { IsProblem: true })))
+                    var admittedFailure = FoundationProblemResults.IsAdmittedFailure(result as IResult)
+                        || result is JsonAdmissionResult { IsProblem: true };
+                    if (admission.Failed || (!admission.RequestAdmitted && !admittedFailure))
                         throw new JsonResponseContractException(JsonFailureCodes.RequestProfileBypass);
                     return result;
                 }
@@ -64,8 +65,8 @@ public static class FoundationJsonEndpointExtensions
                 {
                     var result = await next(invocation).ConfigureAwait(false);
                     if (admission.Failed) throw new JsonResponseContractException(JsonFailureCodes.ResponseProfileBypass);
-                    if (result is ProblemHttpResult or IFoundationProblemResult)
-                        return new JsonAdmissionResult((IResult)result, original, admission, problem: true);
+                    if (result is IResult failure && FoundationProblemResults.IsAdmittedFailure(failure))
+                        return new JsonAdmissionResult(failure, original, admission, problem: true);
                     if (result is not IJsonProfileResult admitted || admitted.ContractType != typeof(T) || admitted.Profile != metadata.Profile)
                         throw new JsonResponseContractException(JsonFailureCodes.ResponseProfileBypass);
                     return new JsonAdmissionResult((IResult)result, original, admission, problem: false);

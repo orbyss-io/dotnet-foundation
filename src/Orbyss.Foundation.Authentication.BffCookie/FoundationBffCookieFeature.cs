@@ -18,6 +18,8 @@ using Orbyss.Foundation.Authentication.Core;
 using Orbyss.Foundation.WebDefaults;
 using Orbyss.Foundation.Json;
 using Orbyss.Foundation.Json.AspNetCore;
+using Orbyss.Foundation.Web.ProblemDetails;
+using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 namespace Orbyss.Foundation.Authentication.BffCookie;
 
@@ -284,7 +286,6 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         HttpContext context,
         IOptions<FoundationWebOptions> options,
         IValidatedAccountIdentityReader identityReader,
-        IAuthenticationErrorWriter errorWriter,
         IJsonResponseFactory<BffUserResponse> responses,
         JsonProfileCatalog profiles)
     {
@@ -297,7 +298,8 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         if (!identityReader.TryRead(user, out var account))
         {
             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
-            return new BffAuthenticationErrorResult(errorWriter, StatusCodes.Status401Unauthorized, AuthenticationErrorCodes.IdentityInvalid);
+            return FoundationProblemResults.Problem(new ProblemDefinition(
+                StatusCodes.Status401Unauthorized, AuthenticationErrorCodes.IdentityInvalid));
         }
 
         var permissions = new SortedSet<string>(StringComparer.Ordinal);

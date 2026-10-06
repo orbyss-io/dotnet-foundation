@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 namespace Orbyss.Foundation.Web.ProblemDetails;
@@ -6,6 +7,10 @@ namespace Orbyss.Foundation.Web.ProblemDetails;
 /// <summary>Adapts admitted application definitions to the existing ASP.NET Problem Details result.</summary>
 public static class FoundationProblemResults
 {
+    /// <summary>Recognizes library-owned or native failures that execute through the bounded common writer.</summary>
+    /// <remarks>A public result interface cannot prove admission; arbitrary implementations are not accepted.</remarks>
+    public static bool IsAdmittedFailure(IResult? result) => result is FoundationProblemResult { StatusCode: >= 400 and <= 599 }
+        or ProblemHttpResult { StatusCode: >= 400 and <= 599 };
     /// <summary>Creates a failure result; serialization and DI enrichment remain ASP.NET-owned.</summary>
     public static IResult Problem(ProblemDefinition definition)
     {

@@ -24,7 +24,7 @@ internal sealed class CookieEndpoint(ShellSettings settings, IOptions<Foundation
         var claims = new List<Claim>
         {
             new(AuthenticationClaimTypes.ValidatedIssuer, "fixture-issuer"),
-            new(AuthenticationClaimTypes.ValidatedSubject, settings.Name + "-owner")
+            new(AuthenticationClaimTypes.ValidatedSubject, settings.Id.ToString() + "-owner")
         };
         claims.AddRange(Enumerable.Range(0, permissions).Select(index => new Claim(options.Value.PermissionClaim,
             "fixture.permission." + index.ToString("D3"))));

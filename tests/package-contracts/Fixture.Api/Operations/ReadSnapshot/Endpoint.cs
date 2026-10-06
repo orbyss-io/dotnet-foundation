@@ -25,7 +25,7 @@ internal sealed class SnapshotEndpoint(ShellSettings settings, IValidatedAccount
     {
         // Controlled synthetic ticket input tests the public packaged reader, not an OIDC simulation.
         var claims = new List<Claim> { new(AuthenticationClaimTypes.ValidatedIssuer, "fixture-issuer"),
-            new(AuthenticationClaimTypes.ValidatedSubject, settings.Name + "-owner") };
+            new(AuthenticationClaimTypes.ValidatedSubject, settings.Id.ToString() + "-owner") };
         if (mode == "duplicate") claims.Add(new(AuthenticationClaimTypes.ValidatedSubject, "duplicate-owner"));
         if (mode == "missing") claims.RemoveAll(claim => claim.Type == AuthenticationClaimTypes.ValidatedIssuer);
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, "controlled-qualification-ticket"));
@@ -45,7 +45,7 @@ internal sealed class SnapshotEndpoint(ShellSettings settings, IValidatedAccount
                     || reference.Name == "System.Text.Json" || reference.Name.StartsWith("CShells", StringComparison.Ordinal)),
                 !assembly.GetTypes().Any(type => typeof(IShellFeature).IsAssignableFrom(type))))
             .ToArray();
-        return responses.Create(new(settings.Name, model.Issuer, model.Subject, model.Labels,
+        return responses.Create(new(settings.Id.ToString(), model.Issuer, model.Subject, model.Labels,
             model == new FixtureAccountSnapshot(model.Issuer, model.Subject, new ValueSequence<string>(model.Labels)),
             reader.GetType().Name, canonical.CompleteSha256(), deadline.Remaining.TotalMilliseconds, contracts));
     }

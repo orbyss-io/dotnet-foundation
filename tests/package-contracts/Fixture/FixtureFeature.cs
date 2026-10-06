@@ -9,7 +9,7 @@ public sealed class FixtureFeature(ShellSettings settings) : IShellFeature
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton(new FixtureGeneration(settings.Name));
+        services.AddSingleton(new FixtureGeneration(settings.Id.ToString()));
         services.AddScoped<IFixtureAccountProjection, FixtureAccountProjection>();
     }
 }

@@ -2,5 +2,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace Orbyss.Foundation.Web.ProblemDetails;
 
-/// <summary>Identifies an admitted bounded Foundation failure result for endpoint response policy.</summary>
+/// <summary>Describes a Foundation failure result; this public shape alone is not proof of bounded admission.</summary>
+/// <remarks>Endpoint policy recognizes actual library-owned and native failure results through FoundationProblemResults.</remarks>
 public interface IFoundationProblemResult : IResult, IStatusCodeHttpResult;

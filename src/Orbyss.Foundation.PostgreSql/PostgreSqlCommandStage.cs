@@ -31,8 +31,14 @@ internal sealed class PostgreSqlCommandStage : IDisposable
             throw;
         }
     }
-    /// <summary>Gets stage cancellation for native reader calls.</summary>
+    /// <summary>Gets stage cancellation for native dispatch and retained reader consumption.</summary>
     internal CancellationToken Token { get; }
+    /// <summary>Checks monotonic expiry even if timer callback dispatch is delayed.</summary>
+    internal void ThrowIfExpired()
+    {
+        Token.ThrowIfCancellationRequested();
+        if (deadline.IsExpired) throw new OperationCanceledException("The PostgreSQL command deadline elapsed.", Token);
+    }
     /// <inheritdoc />
     public void Dispose()
     {
@@ -48,7 +54,7 @@ internal sealed class PostgreSqlCommandStage : IDisposable
         catch (Exception exception) when (exception is InvalidOperationException or DbException)
         {
             // A completed/disposed command may race cancellation. This does not establish rollback.
-            // Native timeout and the supplied operation token remain independent fallbacks.
+            // Native timeout and the supplied stage token remain independent fallbacks.
             if (exception is DbException) logger.LogWarning(
                 "PostgreSQL cancellation acknowledgement failed with code {ProviderErrorCode} and failure kind {ProviderFailureKind}.",
                 "postgres_cancellation_acknowledgement_failed", exception.GetType().Name);

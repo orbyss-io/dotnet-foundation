@@ -20,6 +20,12 @@ await app.StartAsync();
 try
 {
     using var client = new HttpClient { BaseAddress = new Uri(app.Urls.Single()), Timeout = TimeSpan.FromSeconds(15) };
+    await VerifyProblemProvenanceAsync(client, collectFailures: mode == "forged");
+    if (mode == "forged")
+    {
+        Console.WriteLine("Forged public problem markers, invalid native problem status and ignored request are rejected before commitment; legitimate native failure remains bounded.");
+        return;
+    }
     foreach (var path in new[] { "early-stream", "early-writer", "early-start", "caught-early-write" })
     {
         using var response = await client.GetAsync("/probe/" + path);
@@ -152,6 +158,27 @@ static async Task VerifyOpenApiAsync(HttpClient client)
     }
 }
 
+static async Task VerifyProblemProvenanceAsync(HttpClient client, bool collectFailures)
+{
+    var failures = new List<string>();
+    async Task CheckAsync(string name, HttpResponseMessage response, int status, string code)
+    {
+        if (collectFailures) Console.WriteLine($"Provenance case {name}: HTTP {(int)response.StatusCode}, bytes {(await response.Content.ReadAsByteArrayAsync()).Length}.");
+        try { await RequireProblemAsync(response, status, code); }
+        catch (InvalidOperationException) when (collectFailures) { failures.Add(name); }
+    }
+    foreach (var path in new[] { "forged-success", "forged-problem", "native-success-problem" })
+    {
+        using var response = await client.GetAsync("/probe/" + path);
+        await CheckAsync(path, response, 500, "json_response_profile_bypass");
+    }
+    using (var response = await client.PostAsync("/probe/ignored-forged-problem", new StringContent("{\"text\":\"one\",\"text\":\"two\"}", Encoding.UTF8, "application/json")))
+        await CheckAsync("ignored-forged-problem", response, 500, "json_request_profile_bypass");
+    using (var response = await client.GetAsync("/probe/native-problem"))
+        await CheckAsync("legitimate-native-problem", response, 409, ProblemCodes.RequestFailed);
+    Require(failures.Count == 0, "Provenance acceptance failed: " + string.Join(", ", failures));
+}
+
 static async Task RequireProblemAsync(HttpResponseMessage response, int status, string code)
 {
     var bytes = await response.Content.ReadAsByteArrayAsync();
@@ -161,6 +188,7 @@ static async Task RequireProblemAsync(HttpResponseMessage response, int status, 
     Require(document.RootElement.GetProperty("code").GetString() == code, "wrong safe error code: " + Encoding.UTF8.GetString(bytes));
     Require(document.RootElement.GetProperty("correlationId").GetString() == document.RootElement.GetProperty("traceId").GetString(), "failure correlation representation differs");
     Require(!Encoding.UTF8.GetString(bytes).Contains("EARLY_UNADMITTED_BODY", StringComparison.Ordinal), "response committed unadmitted bytes before failure");
+    Require(!Encoding.UTF8.GetString(bytes).Contains("FORGED_UNBOUNDED_BODY", StringComparison.Ordinal), "forged marker committed unadmitted bytes");
 }
 
 static void Require(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }

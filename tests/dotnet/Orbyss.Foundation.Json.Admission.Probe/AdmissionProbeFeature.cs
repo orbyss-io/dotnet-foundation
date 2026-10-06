@@ -56,6 +56,11 @@ public sealed class AdmissionProbeFeature : IWebShellFeature
         }).WithJsonResponse<Message>();
         endpoints.MapGet("/large-problem", () => FoundationProblemResults.Problem(
             new ProblemDefinition(409, "domain_conflict", detail: new string('x', 1000)))).WithJsonResponse<Message>();
+        endpoints.MapGet("/forged-success", () => new ForgedProblemResult(200)).WithJsonResponse<Message>();
+        endpoints.MapGet("/forged-problem", () => new ForgedProblemResult(409)).WithJsonResponse<Message>();
+        endpoints.MapGet("/native-success-problem", () => Results.Problem(statusCode: 200)).WithJsonResponse<Message>();
+        endpoints.MapGet("/native-problem", () => Results.Problem(statusCode: 409)).WithJsonResponse<Message>();
+        endpoints.MapPost("/ignored-forged-problem", () => new ForgedProblemResult(409)).WithJsonRequest<Message>();
     }
     /// <summary>Signals actual cancellation while reading an incomplete streamed request.</summary>
     private static async Task<IResult> CancelAsync(HttpContext http, IJsonRequestReader<Message> requests,
