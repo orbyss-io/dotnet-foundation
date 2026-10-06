@@ -2,15 +2,27 @@
   "schemaVersion": 1,
   "packageId": "Orbyss.Foundation.Json",
   "sourceSha256": {
+    "BoundedJsonBuffer.cs": "42a8fed226c1f9e150e8210a07227fdc246c4f0e949db227757e8150105be8aa",
+    "BoundedStringJsonConverter.cs": "9a3e74c190bf8123254171f94cf825c24834c37ef15ca1496414113e523e290c",
+    "CanonicalUtf8Writer.cs": "399e1ff38f0c416357ca8e2e1574abe6a187cd1327b8b901ee04ef0b439299c8",
     "GuardedJsonTypeInfoResolver.cs": "796fc5264ed316555091a38e9d0014ff911122984a01c4b80e2bff0455b510e9",
     "IJsonProfileExtension.cs": "1e588bb6dd552d500e727c52ee13d3522651a665c67e94c9386b35081affb423",
-    "JsonCanonicalizer.cs": "500ea52096741a05a7795577aaa7c07e9d20ee72b7221479ccc089e56d560fcb",
-    "JsonProfile.cs": "2b61bb90be7ce64927798a6ec73dae9313cbe7ddbc21daac35c1f21ac43999e3",
-    "JsonProfileCatalog.cs": "4933e698636e5157935734589b856cf41eb1abf2d12a3ed7b29cec8278843b71",
+    "JsonCanonicalizer.cs": "bfad6ba1bcc0d709367a2388c7734f8faa0ce0d14ad4a48e7a07b998e1a022fc",
+    "JsonFailureCodes.cs": "35918142a1742b91f794293db825cc3c9ec22cbbe57bf73f864ed212b3dad6dd",
+    "JsonOutputLimitException.cs": "d0d56badf47b3d3fd657cef25c093b335d69d1688ee5f5ea2a76cb1b0e9d70ad",
+    "JsonProfile.cs": "22d96ae37b673ed4a2693dbf4621d5cae73e36d3acdc97875a720ac2f1688b1b",
+    "JsonProfileCatalog.cs": "8c7a8689284472637b180139215fbaa4e1bec12aff27c9318ae3c97a7a3bc544",
     "JsonProfileException.cs": "e4a010341d94cfe12777baa0a664f246c46009381ce782f5808ba5b337f73258",
-    "JsonProfileSettings.cs": "09eca592b7ce30939ae42f9014463e081e3827fd89d9ad04020edd7bad2f2a21",
+    "JsonProfileKey.cs": "4314e0bb610a9a1ab895b6214d868741c626e4a690e3fc601aa7064047cffb39",
+    "JsonProfileKeys.cs": "88b78861a4f6a6b6f741810b92d0a28ea4f53a293cf567ad9aa31c46d39ee6ff",
+    "JsonProfileRequirement.cs": "22b1a6881e437c6923038bbc5b30827493e9b7486dd79180f809abcaf9b395ea",
+    "JsonProfileSettings.cs": "afdce8c5489ccc86cfb8fd5845fb7fca1210986cf0c453b9e72f48ed72769d21",
+    "JsonResponseContractException.cs": "4359c334f78f42c9d776c3bda9f4eed51b42508a84b56b38931d12c486ce4510",
     "RawJsonNumber.cs": "ac04414581bb6ad01d3df7dd57947210a39cbbbafef1f26b65701231275ba2ca",
-    "RawJsonNumberConverter.cs": "b415dd752f25c840f37c74214ffebd26894eae2c327c65ad77d6e8d17896cab4"
+    "RawJsonNumberConverter.cs": "b415dd752f25c840f37c74214ffebd26894eae2c327c65ad77d6e8d17896cab4",
+    "ValueSequenceJsonConverter.cs": "011d58b549a4e9418b5036e8197389b1c51be0c0b9ed81827552488a456a3db5",
+    "ValueSequenceJsonConverterFactory.cs": "a5a6f77f48d2ce4ece75e65b5bb2139a718f9a3899bbd11f60e3479c357aad88",
+    "ValueSequenceJsonExtension.cs": "16c5e3f78b1a10adae8a999b88f3350f2511ed5db7e7f98573287a3828614559"
   },
   "contracts": [
     {

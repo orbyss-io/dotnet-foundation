@@ -20,7 +20,8 @@
       "additionalProperties": {
         "type": "string",
         "pattern": "^[a-f0-9]{64}$"
-      }
+      },
+      "maxProperties": 512
     },
     "contracts": {
       "type": "array",
@@ -37,11 +38,13 @@
         "properties": {
           "scope": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 4096
           },
           "typeName": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 4096
           },
           "complete": {
             "type": "boolean"
@@ -64,11 +67,13 @@
               "properties": {
                 "property": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 },
                 "path": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 },
                 "required": {
                   "type": "boolean"
@@ -81,16 +86,19 @@
                 },
                 "binding": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 },
                 "precedence": {
                   "type": "array",
                   "uniqueItems": true,
                   "items": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 4096
                   },
-                  "minItems": 1
+                  "minItems": 1,
+                  "maxItems": 128
                 },
                 "reload": {
                   "enum": [
@@ -101,23 +109,28 @@
                 },
                 "description": {
                   "type": "string",
-                  "minLength": 1
+                  "minLength": 1,
+                  "maxLength": 4096
                 }
               },
               "additionalProperties": false
-            }
+            },
+            "maxItems": 256
           },
           "semanticConstraints": {
             "type": "array",
             "uniqueItems": true,
             "items": {
               "type": "string",
-              "minLength": 1
-            }
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "maxItems": 128
           }
         },
         "additionalProperties": false
-      }
+      },
+      "maxItems": 32
     }
   },
   "additionalProperties": false,

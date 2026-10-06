@@ -89,6 +89,94 @@ public static class Startup {
         assert hashlib.sha256(packed.read_bytes()).hexdigest()==before and emitted.read_bytes()==previous,name
     (work/'Options.cs').write_text(source,encoding='utf-8',newline='\n');path.write_text(json.dumps(metadata))
     fixture.run(command,work,work/'source-restored.log',env=environment)
+    # The final packed DLL, rather than obj's intermediate DLL, is the authority.
+    bin_assembly=work/'bin/Release/net10.0/SettingsProbe.dll'
+    obj_assembly=work/'obj/Release/net10.0/SettingsProbe.dll'
+    bin_before=bin_assembly.read_bytes();obj_before=obj_assembly.read_bytes()
+    current_packed=hashlib.sha256(packed.read_bytes()).hexdigest();current_metadata=emitted.read_bytes()
+    bin_assembly.write_bytes(bin_before+b'bin-only mutation')
+    output=fixture.run(command+['--no-build'],work,work/'changed-bin.log',env=environment,expected=1)
+    assert 'PKSM001' in output and 'rebuild' in output
+    assert obj_assembly.read_bytes()==obj_before
+    assert hashlib.sha256(packed.read_bytes()).hexdigest()==current_packed and emitted.read_bytes()==current_metadata
+    bin_assembly.write_bytes(bin_before)
+    fixture.run(command+['--no-build'],work,work/'restored-bin.log',env=environment)
+
+    # Constant defaults resolve statically from reviewed source without executing initializers.
+    const_source=source.replace('= 2;','= Defaults.Limit;')+'public static class Defaults { public const int Limit = 7; }\n'
+    (work/'Options.cs').write_text(const_source,encoding='utf-8',newline='\n')
+    constant=copy.deepcopy(metadata);constant['sourceSha256']['Options.cs']=sha(const_source);path.write_text(json.dumps(constant))
+    fixture.run(command,work,work/'constant-default.log',env=environment)
+    assert json.loads(emitted.read_text())['contracts'][0]['settings'][0]['default']==7
+
+    # FEATURE actually compiles default 9; unsupported conditional metadata is rejected.
+    conditional_source=source.replace(' public int Limit { get; set; } = 2;', '#if FEATURE\n public int Limit { get; set; } = 9;\n#else\n public int Limit { get; set; } = 2;\n#endif')
+    conditional_source=conditional_source.replace('= Poison();','= string.Empty;').replace('[System.Runtime.CompilerServices.ModuleInitializer]','')
+    conditional_source+='public static class Program { public static void Main() => System.Console.WriteLine(new Options().Limit); }\n'
+    (work/'Options.cs').write_text(conditional_source,encoding='utf-8',newline='\n')
+    conditional=copy.deepcopy(metadata);conditional['sourceSha256']['Options.cs']=sha(conditional_source);path.write_text(json.dumps(conditional))
+    packed_before_condition=packed.read_bytes();metadata_before_condition=emitted.read_bytes()
+    output=fixture.run(command+['-p:DefineConstants=FEATURE','-p:OutputType=Exe'],work,work/'conditional-feature.log',env=environment,expected=1)
+    assert 'Conditional/preprocessor settings semantics are unsupported' in output
+    actual=fixture.run(['dotnet',str(bin_assembly)],work,work/'conditional-runtime.log',env=environment)
+    assert actual.strip()=='9',actual
+    assert packed.read_bytes()==packed_before_condition and emitted.read_bytes()==metadata_before_condition
+
+    # Direct invocation still compiles/copies the updated source; compiler skipping cannot refresh.
+    (work/'Options.cs').write_text(source,encoding='utf-8',newline='\n');path.write_text(json.dumps(metadata))
+    fixture.run(command,work,work/'before-skip.log',env=environment)
+    skip_source=source.replace('= 2;','= 3;');(work/'Options.cs').write_text(skip_source,encoding='utf-8',newline='\n')
+    skip=copy.deepcopy(metadata);skip['sourceSha256']['Options.cs']=sha(skip_source);path.write_text(json.dumps(skip))
+    skip_bin=bin_assembly.read_bytes();skip_metadata=emitted.read_bytes();skip_pack=packed.read_bytes()
+    for name,args in [('skip-build',['dotnet','build',str(project),'-c','Release','--no-restore','-p:SkipCompilerExecution=true']),
+                      ('skip-direct',['dotnet','msbuild',str(project),'-t:FoundationCompileSettingsMetadata','-p:Configuration=Release','-p:SkipCompilerExecution=true'])]:
+        output=fixture.run(args,work,work/(name+'.log'),env=environment,expected=1)
+        assert 'SkipCompilerExecution cannot authorize' in output,name
+        assert emitted.read_bytes()==skip_metadata and packed.read_bytes()==skip_pack,name
+    fixture.run(command+['--no-build'],work,work/'skip-pack.log',env=environment,expected=1)
+    assert emitted.read_bytes()==skip_metadata and packed.read_bytes()==skip_pack and bin_assembly.read_bytes()==skip_bin
+    output=fixture.run(['dotnet','msbuild',str(project),'-t:FoundationCompileSettingsMetadata','-p:Configuration=Release','-p:DesignTimeBuild=true'],work,work/'design-time.log',env=environment,expected=1)
+    assert 'Design-time compilation cannot authorize' in output
+    assert emitted.read_bytes()==skip_metadata and packed.read_bytes()==skip_pack
+    fixture.run(command+['--no-build'],work,work/'design-time-pack.log',env=environment,expected=1)
+    assert emitted.read_bytes()==skip_metadata and packed.read_bytes()==skip_pack
+    direct_source=source.replace('= 2;','= 4;');(work/'Options.cs').write_text(direct_source,encoding='utf-8',newline='\n')
+    direct=copy.deepcopy(metadata);direct['sourceSha256']['Options.cs']=sha(direct_source);path.write_text(json.dumps(direct))
+    fixture.run(['dotnet','msbuild',str(project),'-t:FoundationCompileSettingsMetadata','-p:Configuration=Release'],work,work/'direct-compile.log',env=environment)
+    assert json.loads(emitted.read_text())['contracts'][0]['settings'][0]['default']==4
+    assert json.loads(emitted.read_text())['assembly']['sha256']==hashlib.sha256(bin_assembly.read_bytes()).hexdigest()
+    assert bin_assembly.read_bytes()!=skip_bin
+    fixture.run(command+['--no-build'],work,work/'direct-pack.log',env=environment)
+    with zipfile.ZipFile(packed) as archive:
+        assert hashlib.sha256(archive.read('lib/net10.0/SettingsProbe.dll')).hexdigest()==json.loads(emitted.read_text())['assembly']['sha256']
+
+    # Bounded admission rejects large declarations/inventories/defaults before replacing output.
+    (work/'Options.cs').write_text(source,encoding='utf-8',newline='\n');path.write_text(json.dumps(metadata))
+    fixture.run(command,work,work/'before-limits.log',env=environment)
+    limit_pack=packed.read_bytes();limit_metadata=emitted.read_bytes()
+    limits=[]
+    for name,mutate in [
+        ('declaration-bytes',lambda v:v['contracts'][0]['settings'][0].update(description='x'*1_048_576)),
+        ('contract-count',lambda v:v.update(contracts=[copy.deepcopy(v['contracts'][0]) for _ in range(33)])),
+        ('setting-count',lambda v:v['contracts'][0].update(settings=[copy.deepcopy(v['contracts'][0]['settings'][0]) for _ in range(257)])),
+        ('semantic-count',lambda v:v['contracts'][0].update(semanticConstraints=['x'+str(n) for n in range(129)])),
+        ('constraints-bytes',lambda v:v['contracts'][0]['settings'][0].update(constraints={'pattern':'x'*16385}))]:
+        value=copy.deepcopy(metadata);mutate(value);path.write_text(json.dumps(value))
+        output=fixture.run(command+['--no-build'],work,work/(name+'.log'),env=environment,expected=1)
+        assert 'PKSM001' in output and ('limit' in output or '1 to 32' in output),name
+        assert packed.read_bytes()==limit_pack and emitted.read_bytes()==limit_metadata,name
+        limits.append(name)
+    for name,text in [
+        ('source-bytes',source+'//'+('x'*1_048_576)),
+        ('default-array',source.replace('["one", "two"]','['+','.join('"x"' for _ in range(257))+']')),
+        ('default-string',source.replace('public string[] Names { get; set; } = ["one", "two"];','public string Names { get; set; } = "'+('x'*16385)+'";'))]:
+        (work/'Options.cs').write_text(text,encoding='utf-8',newline='\n');value=copy.deepcopy(metadata);value['sourceSha256']['Options.cs']=sha(text);path.write_text(json.dumps(value))
+        output=fixture.run(command,work,work/(name+'.log'),env=environment,expected=1)
+        assert 'PKSM001' in output and 'limit' in output,name
+        assert packed.read_bytes()==limit_pack and emitted.read_bytes()==limit_metadata,name
+        limits.append(name)
+    (work/'Options.cs').write_text(source,encoding='utf-8',newline='\n');path.write_text(json.dumps(metadata))
+    fixture.run(command,work,work/'limits-restored.log',env=environment)
     # A reviewed source change updates the extracted default; it cannot retain a manually copied value.
     changed=source.replace('= 2;','= 3;');(work/'Options.cs').write_text(changed,encoding='utf-8',newline='\n')
     metadata['sourceSha256']['Options.cs']=sha(changed);path.write_text(json.dumps(metadata))
@@ -100,6 +188,6 @@ public static class Startup {
     metadata['contracts'][0]['complete']=False;metadata['contracts'][0]['settings'].pop();path.write_text(json.dumps(metadata))
     fixture.run(command,work,work/'partial.log',env=environment)
     assert json.loads(emitted.read_text())['contracts'][0]['complete'] is False
-    (work/'results.json').write_text(json.dumps(dict(package=str(package),packageSha256=hashlib.sha256(package.read_bytes()).hexdigest(),rejected=[n for n,_ in invalid]+list(source_cases),publisherNeverStarted=True,changedDefaultDerived=True,outputsPreserved=True),indent=2)+'\n')
+    (work/'results.json').write_text(json.dumps(dict(package=str(package),packageSha256=hashlib.sha256(package.read_bytes()).hexdigest(),rejected=[n for n,_ in invalid]+list(source_cases),publisherNeverStarted=True,changedDefaultDerived=True,outputsPreserved=True,binMutationRejected=True,constantDefaultDerived=True,conditionalFeatureCompiledDefault=9,conditionalMetadataRejected=True,skipCompilerRejected=True,designTimeRejected=True,directTargetCompiles=True,limitsRejected=limits),indent=2)+'\n')
     print(f'Installed settings task: source-derived defaults, secret omission, independent multi-feature descriptor, {len(invalid)+len(source_cases)} rejection cases and output preservation passed. Evidence: {work}/results.json')
 if __name__=='__main__':main()

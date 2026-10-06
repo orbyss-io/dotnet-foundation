@@ -50,3 +50,49 @@ qualification; no existing immutable runtime/tool version may be overwritten. Re
 of host-provided dependencies are not covered by this bundled-package seam; their owners must
 supply metadata bound to the exact host/artifact authority. This branch changes no runtime
 behavior, Foundation runtime version, real application or external provider repository.
+
+
+## Independent review repair
+
+The concurrent owner identified three blockers in 0cd7947: current Json uses a const
+initializer and 21-source inventory; conditional parsing ignored compiler symbols;
+assembly provenance hashed obj while NuGet normally packs bin. Repair is isolated on
+codex/settings-metadata-companion-repair, based on the owner's committed runtime source
+6d9c1b73b0428ec24f6481779958e6c7449d7501 plus cherry-picked companion 27f544c.
+The original pushed candidate remains intact. No dirty owner files are imported.
+
+Constant evaluation uses compiler language version/references without runtime execution.
+Conditional/preprocessor source is explicitly rejected instead of ignoring compiler symbols.
+Final TargetPath and NuGet's actual FinalOutputPath are checked; obj is no longer the
+assembly authority. Json's current full source inventory is reviewed/rebound, while the
+contract still claims only JsonProfileSettings, not new ASP.NET/provider/Host settings.
+Focused repair acceptance pending. Build 0.1.0 remains immutable; 0.2.0 unpublished.
+
+Repair acceptance completed with exact final package hashes verified against results:
+- artifacts/settings-build/tmpkv37fu7i/results.json: 23 base rejection cases, eight finite
+  limit negatives, real constant default7, FEATURE compiler default9 with metadata rejection,
+  bin-only mutation rejection, skipped build/direct target rejection, design-time rejection,
+  later no-build packing rejection, fresh direct compilation default4 and final packed DLL hash.
+  Metadata/packed output remains unchanged on rejection; no publisher initialization executes.
+- artifacts/feature-build/tmpj2up7yc7/descriptor-validation.json: all 31 legacy/current
+  descriptor negatives preserve output and valid schemas1/2 pack with this same final nupkg.
+- artifacts/settings-owner/tmp2ah8l2io/results.json: actual current Json default values,
+  admission, unknown extension denial and final DLL binding match the packed owner.
+- artifacts/settings-metadata/repair-evidence.json binds final Build/Json/Collections source
+  archives. These are private source candidates, not available or republished versions.
+- Program Kit repair integration validates the actual bounded publisher schema and exact
+  selected Json/Collections packages and runs the stdlib verifier with Python -I outside source.
+- Program Kit bounded Development: 70/70 pass, chromium,webkit, journal
+  artifacts/validation-runs/20261006T120358Z-02d878c1/journal.json (in Program Kit).
+  Source/receiver metadata count/default constraints remain explicit and W3 remains partial.
+
+The initial design-time fixture assertion was overly strict about unchanged bin bytes:
+design-time SDK compilation can produce a DLL, but cannot refresh metadata here. Its failed
+run remains at artifacts/settings-build/tmpjz6wa_hw/. Corrected acceptance preserves metadata
+and packed output, rejects no-build publication, and then compiles fresh source through the
+direct target. The earlier old23-case artifacts remain available alongside final evidence.
+
+The concurrent owner's newer runtime fixes after6d9 must be overlaid and reviewed before
+its runtime/Host/F6 release qualification. Only this companion amendment is proposed here;
+no full-framework coverage, new provider/ASP.NET/Host metadata, publication, stable tag,
+paid worker, complete Release suite or original/dirty consumer modification is claimed.
