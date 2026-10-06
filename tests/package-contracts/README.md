@@ -9,6 +9,8 @@ PackageReference. Its local props/targets isolate it from Foundation source buil
 fresh retained artifact directory, performs locked restores, and loads them through actual Nuplane
 and Foundation Host. Repository-configured CShells/Nuplane preview sources and source mappings are
 preserved alongside the private candidate feed. The entire candidate runtime dependency closure is
+admitted only when all 29 current runtime package identities are present; the independently packaged
+Analyzer is excluded from runtime consumption and recorded separately. The dependency closure is
 restored into a fresh run-owned cache, and its external package bytes are hashed and copied into the
 retained runtime feed. That generated closure project explicitly disables SDK package pruning:
 Nuplane resolves nuspec edges even when the .NET10 SDK would omit a framework-provided dependency.

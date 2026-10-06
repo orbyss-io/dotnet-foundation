@@ -26,6 +26,12 @@ Use the deadline token for database calls and pass an existing outer deadline to
 units. Caller cancellation does not establish rollback or commit certainty. The package owns no schema,
 entities, transaction contents, retry policy or domain outcome mapping. `PostgreSqlFailureInfo` exposes
 only SQLSTATE and constraint identity for consumer-owned classification; it excludes provider messages and SQL.
+Pass `unit.Deadline.Token` explicitly to `BeginTransactionAsync`, `CommitAsync` and `RollbackAsync`.
+Native transaction dispatch has no automatic command-stage cap; a consumer may own a narrower stage
+when its policy requires one. Async EF command dispatch receives the capped stage token, and sync
+completion checks elapsed time. A canceled sync command may already have committed; reconcile its
+receipt through a fresh unit instead of inferring rollback. Native reader-close events release command
+stages after drain/cleanup even when EF's later disposal notification is skipped by a close fault.
 
 Provider-owned EF and Npgsql logging preserves native categories, event IDs and severity plus safe
 exception type/SQLSTATE classifications. It discards native SQL/parameter state, raw exception text and
