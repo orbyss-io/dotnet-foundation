@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -35,10 +36,6 @@ HOST_CONTRACT_PACKAGES = {"cshells.abstractions", "cshells.aspnetcore.abstractio
 HOST_SHARED_PACKAGES = {
     "cshells.abstractions": "CShells.Abstractions.dll",
     "cshells.aspnetcore.abstractions": "CShells.AspNetCore.Abstractions.dll",
-    "orbyss.foundation.web.problemdetails": "Orbyss.Foundation.Web.ProblemDetails.dll",
-    "orbyss.foundation.web.problemdetails.core": "Orbyss.Foundation.Web.ProblemDetails.Core.dll",
-    "orbyss.foundation.json": "Orbyss.Foundation.Json.dll",
-    "orbyss.foundation.collections.core": "Orbyss.Foundation.Collections.Core.dll",
 }
 
 
@@ -194,6 +191,19 @@ def copy_runtime_feed(feed: Path, target: Path, host: Path, version: str, cshell
     return [bindings[identity] for identity in sorted(bindings)]
 
 
+def verify_neutral_host(host: Path) -> None:
+    """The platform Host supplies transport/contracts, never a selected Foundation feature."""
+    assert not any(path.name.startswith("Orbyss.Foundation.") and path.name != host.name
+                   for path in host.parent.glob("*.dll")), "Host contains an unconditional Foundation feature dependency."
+    dependencies = json.loads(host.with_suffix(".deps.json").read_text(encoding="utf-8"))
+    assert not any(identity.startswith("Orbyss.Foundation.") and not identity.startswith("Orbyss.Foundation.Host/")
+                   for identity in dependencies["libraries"]), "Host references Foundation feature packages."
+    configuration = json.loads((host.parent / "appsettings.json").read_text(encoding="utf-8"))
+    shared = configuration["Nuplane"]["Loading"]["SharedAssemblies"]
+    assert len(shared) == 2 and {entry["Name"].casefold() for entry in shared} == HOST_CONTRACT_PACKAGES, (
+        "Neutral Host must share exactly its native CShells contracts", shared)
+
+
 def terminate(process: subprocess.Popen) -> None:
     if process.poll() is None:
         process.terminate()
@@ -336,7 +346,8 @@ def write_runtime_configuration(host: Path, runtime: Path, shell_configuration: 
 def request(opener: urllib.request.OpenerDirector, base: str, path: str, payload: bytes | None = None,
             method: str | None = None) -> tuple[int, dict, bytes]:
     packet = urllib.request.Request(base + path, data=payload, method=method,
-                                    headers={"Content-Type": "application/json"} if payload is not None else {})
+                                    headers={"Accept": "application/problem+json",
+                                             **({"Content-Type": "application/json"} if payload is not None else {})})
     try:
         response = opener.open(packet, timeout=15)
     except urllib.error.HTTPError as error:
@@ -395,13 +406,17 @@ def qualify_native_statuses(base: str, evidence: Path, first_root: bool = False)
     name = "native-status-root.json" if first_root else "native-status.json"
     (evidence / name).write_text(json.dumps(observations, indent=2), encoding="utf-8")
     for packet, expected, headers, shell, scoped in packets:
-        document = problem(packet, expected, "request_failed", shell, enriched=scoped,
-                           maximum=512 if shell == "first" or not scoped else 65536)
-        if not scoped:
-            assert document["title"] == {404: "Not Found", 405: "Method Not Allowed"}[expected], document
-        assert document["fieldErrors"] == [] and document.get("detail") is None, document
-        assert "no-store" in headers.get("cache-control", "").casefold(), headers
-        assert headers.get("content-length") == str(len(packet[2])), headers
+        if scoped:
+            document = problem(packet, expected, "request_failed", shell,
+                               maximum=512 if shell == "first" else 65536)
+            assert document["fieldErrors"] == [] and document.get("detail") is None, document
+            assert "no-store" in headers.get("cache-control", "").casefold(), headers
+            assert headers.get("content-length") == str(len(packet[2])), headers
+        else:
+            assert packet[0] == expected, packet
+            assert headers.get("content-type", "").startswith("text/plain"), headers
+            reason = {404: "Not Found", 405: "Method Not Allowed"}[expected]
+            assert packet[2].decode("utf-8") == f"Status Code: {expected}; {reason}", packet
         if expected == 405:
             assert "POST" in {value.strip().upper() for value in headers.get("allow", "").split(",")}, headers
     return observations
@@ -581,6 +596,7 @@ def main() -> None:
     host_payload = run / "host"
     host_inventory = preserve_host_payload(host, host_payload)
     qualified_host = host_payload / host.name
+    verify_neutral_host(qualified_host)
     manifest = {"version": args.version, "host": {"path": str(host), "sha256": sha256(host)},
                 "hostRuntimeFiles": host_inventory, "executedHost": str(qualified_host),
                 "packages": {path.name: sha256(path) for path in sorted(feed.glob("*.nupkg"))},
@@ -627,8 +643,8 @@ def main() -> None:
     finally:
         if process is not None:
             terminate(process)
-    # Omitting WebRouting matches the endpoint-owned root topology used by Notes.
-    # Explicit Path="" instead installs a path fallback and would conceal the native gap.
+    # Omitting WebRouting leaves native root failures unowned. The neutral Host uses
+    # the platform status response there; Foundation representation requires shell selection.
     root_runtime = run / "runtime-root-routing"
     root_runtime.mkdir()
     root_bindings = copy_runtime_feed(feed, root_runtime / "packages", qualified_host, args.version, args.cshells_version)
@@ -650,11 +666,15 @@ def main() -> None:
     manifest["rootRouting"] = {"firstShellExplicitWebRouting": False,
         "shellConfigurationSha256": sha256(root_runtime / "shells.json"), "ownedRuntime": str(root_runtime)}
     inputs.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    run_command([sys.executable, str(repository / "tests/validate_host_composition.py"),
+                 "--packages", str(feed), "--host", str(qualified_host), "--dotnet", args.dotnet],
+                sdk_cwd, run / "custom-problem-composition.log")
     assert PRIVATE_MARKER not in output, "Private password/SQL/body reached native host diagnostics."
     assert "Framework request failure System.InvalidOperationException" in output, "Committed native failure diagnostics were suppressed instead of redacted."
     (run / "result.json").write_text(json.dumps({"status": "passed", "version": args.version,
         "actualHost": True, "actualNugetPackages": True, "actualPostgreSql": True,
-        "twoShells": True, "historicalEvidencePreserved": True}, indent=2), encoding="utf-8")
+        "twoShells": True, "neutralHost": True, "actualCustomProblemComposition": True,
+        "historicalEvidencePreserved": True}, indent=2), encoding="utf-8")
     print(f"Actual Nuplane/package/Core/native-handler/profile/BFF/PostgreSQL shell qualification passed. Evidence: {run}")
 
 

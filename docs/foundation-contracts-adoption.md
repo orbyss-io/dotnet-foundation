@@ -38,24 +38,34 @@ from the request provider. Programming defects retain safe 500 handling; arbitra
 do not become client 400. Cancellation does not fabricate a completed error response, and a started
 response cannot be replaced. The Host and provider retain classified, redacted native diagnostics.
 
-The managed Host uses native status-code pages for uncommitted empty routing failures.
-Unowned 404/405 responses use the common bounded policy; requests selected into a shell
-retain its scoped enrichment and configured problem budget, even without the optional
-global exception feature. Existing bodies, cancellation, started output and native `Allow`
-headers retain their meaning.
+The managed Host composes native ASP.NET status-code pages and registers no problem service or
+writer globally. It has no Foundation representation or optional exception-feature dependency.
+For unowned 404/405, ASP.NET uses its native text fallback. These platform responses do not promise Foundation's `code`, correlation
+aliases, diagnostic fields or configured problem budget. This explicitly narrows the original
+common-envelope acceptance to requests selecting Foundation mechanisms. Selected Authentication,
+Json.AspNetCore and ProblemDetails features retain the bounded Foundation representation,
+request-scoped enrichment and configured problem budget, even with the optional global exception
+feature disabled. An independently selected custom native `IProblemDetailsService` or writer can
+own its format without selecting Foundation mechanisms. Register an ordinary custom writer before
+calling the shell's `AddProblemDetails`; no inherited Host writer needs removal. Custom output remains that application's
+responsibility; it cannot bypass selected Foundation typed JSON guarantees.
 
-The new Host owns six shared assembly identities: `CShells.Abstractions`,
-`CShells.AspNetCore.Abstractions`, `Orbyss.Foundation.Web.ProblemDetails`,
-`Orbyss.Foundation.Web.ProblemDetails.Core`, `Orbyss.Foundation.Json` and
-`Orbyss.Foundation.Collections.Core`. Preserve those shared-assembly settings when composing
-deployment configuration. Keep all exact archives in qualification evidence; omit these six
-from loader roots only after their selected versions and net10 DLL hashes match the retained
-Host payload. An old two-name shared-assembly override is not qualified for this new Host.
-Historical profiles continue to select their historical Host.
+Native status-code pages resolve the current request's service. A shell's explicit
+`WebRouting:Path` opt-in owns unmatched paths and wrong-method responses under that prefix.
+An explicit empty path opts into root fallback; an omitted WebRouting setting leaves unmatched
+root failures without a shell owner. Existing bodies, cancellation, started output and native
+`Allow` headers retain their meaning. Feature discovery comes only from the native package catalog;
+the Host never appends a Foundation feature assembly or enables a global exception feature.
+
+The Host shares only `CShells.Abstractions` and `CShells.AspNetCore.Abstractions`. Keep exact archives
+in qualification evidence and omit these two loader roots only after their selected versions and
+net10 DLL hashes match the retained Host payload. Foundation runtime assemblies remain normal
+deployment package roots and their feature activation is explicitly configured. Historical
+qualified profiles and their recorded payloads retain their original meaning.
 
 Release images copy the portable Host payload produced by no-build publish and qualification,
-including effective JSON configuration and native runtime assets. They do not rebuild shared
-assemblies after package qualification. The tagged workflow verifies these bytes against the
+including effective JSON configuration and native runtime assets. They do not rebuild the payload
+after package qualification. The tagged workflow verifies these bytes against the
 actual packaged shell/PostgreSQL run before package and image publication.
 
 ## Typed JSON and transport

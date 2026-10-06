@@ -4,7 +4,6 @@
     <Description>Application-neutral Nuplane, CShells, and secure web runtime host for Orbyss Foundation applications.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
     <PackageReference Include="CShells.AspNetCore" />
     <PackageReference Include="Nuplane" />
     <PackageReference Include="Nuplane.Loading" />

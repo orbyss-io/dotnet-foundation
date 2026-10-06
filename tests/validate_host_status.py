@@ -80,10 +80,11 @@ def main() -> None:
                 raise AssertionError("Native Host startup timed out; inspect " + str(log_path))
 
             def request(method: str, path: str, status: int, shell_title: str | None = None,
-                        code: str = "request_failed", cookie: str | None = None) -> None:
+                        code: str = "request_failed", cookie: str | None = None, platform: bool = False,
+                        accept: str = "text/html") -> None:
                 connection = http.client.HTTPConnection("127.0.0.1", port, timeout=15)
                 try:
-                    headers = {"Accept": "text/html"}
+                    headers = {"Accept": accept}
                     if cookie:
                         headers["Cookie"] = cookie
                     connection.request(method, path, headers=headers)
@@ -96,6 +97,13 @@ def main() -> None:
                     observations.append(record)
                     (root / "observations.json").write_text(json.dumps(observations, indent=2), encoding="utf-8")
                     assert response.status == status, record
+                    if platform:
+                        assert len(body) <= 65_536, record
+                        assert response.getheader("Content-Type", "").startswith("text/plain"), record
+                        assert "Status Code: " + str(status) in record["body"], record
+                        if status == 405:
+                            assert "GET" in response.getheader("Allow", ""), record
+                        return
                     assert response.getheader("Content-Type") == "application/problem+json", record
                     assert response.getheader("Cache-Control") == "no-store", record
                     assert response.getheader("Content-Length") == str(len(body)), record
@@ -114,10 +122,11 @@ def main() -> None:
                 finally:
                     connection.close()
 
-            # Native method rejection occurs before selection: no shell feature can repair it.
-            request("DELETE", "/snapshot", 405)
-            request("GET", "/unmatched-route", 404)
-            request("GET", "/outside-all-shells", 404)
+            # With no root-path opt-in, these requests have no selected shell.
+            # The neutral Host uses negotiated ASP.NET formatting and native text fallback.
+            request("DELETE", "/snapshot", 405, platform=True, accept="application/json")
+            request("GET", "/unmatched-route", 404, platform=True, accept="application/json")
+            request("GET", "/outside-all-shells", 404, platform=True)
             # Shell-produced problems retain their request-scoped policy, including global feature off.
             request("GET", "/status/409", 409, "first")
             request("GET", "/second/auth/403", 403, "second", "authorization_denied")
@@ -142,7 +151,7 @@ def main() -> None:
             request("GET", "/second/unmatched-route", 404, "second", cookie=cookie)
             assert all(packaged.sha256(root / "host" / relative) == digest for relative, digest in hashes.items())
             assert "Framework request failure" not in log_path.read_text(encoding="utf-8", errors="replace")
-            (root / "result.json").write_text(json.dumps({"status": "qualified",
+            (root / "result.json").write_text(json.dumps({"status": "qualified", "neutralHost": True,
                 "hostRuntimeFiles": hashes, "sharedHostAssemblies": sorted(shared),
                 "observations": len(observations)}, indent=2), encoding="utf-8")
             print("Actual managed Host 404/405 and shell enrichment passed: " + str(root))

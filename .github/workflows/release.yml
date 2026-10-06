@@ -74,7 +74,7 @@ jobs:
         run: python tests/run_contract_package_qualification.py --host artifacts/host-runtime/Orbyss.Foundation.Host.dll
 
       - name: Verify the exact qualified image payload
-        run: python tests/validate_host_release_payload.py --payload artifacts/host-runtime --qualification-root artifacts/contract-package-consumption --packages artifacts/nuget
+        run: python tests/validate_host_release_payload.py --payload artifacts/host-runtime --qualification-root artifacts/contract-package-consumption
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
