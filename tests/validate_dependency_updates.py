@@ -96,7 +96,7 @@ class UpdateTests(unittest.TestCase):
         observed=[]
         def scanner(command,**kwargs):
             platform=command[command.index('--platform')+1]
-            layout=Path(command[command.index('--input')+1])
+            layout=Path(kwargs['cwd'])/command[command.index('--input')+1]
             selected=m.read_json(layout/'index.json')['manifests']
             self.assertEqual(1,len(selected))
             self.assertEqual(platform.split('/')[1],selected[0]['platform']['architecture'])

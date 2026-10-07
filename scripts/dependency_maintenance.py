@@ -396,10 +396,10 @@ def scan(root, image):
                 if len(selected)!=1: raise ValueError('OCI archive must contain exactly one image for '+platform)
                 write_json(layout/'index.json',{'schemaVersion':2,'manifests':selected})
             # OCI input uses ':' for a tag; a Windows drive letter is not a tag.
-            target = ["--input", os.path.relpath(layout).replace('\\','/')] if archived else [image]
+            target = ["--input", layout.relative_to(root).as_posix()] if archived else [image]
             result = subprocess.run(["trivy", "image", "--platform", platform, "--scanners", "vuln",
                 "--format", "json", "--output", str(path), "--exit-code", "1", "--severity", "HIGH,CRITICAL",
-                "--timeout", "15m", *target], timeout=960, check=False)
+                "--timeout", "15m", *target], cwd=root, timeout=960, check=False)
             results.append({"image":image, "platform":platform, "exitCode":result.returncode,
                             "manifestDigest":selected[0]['digest'] if archived else None,
                             "report":path.relative_to(root).as_posix(), "sha256":digest(path) if path.exists() else None})
