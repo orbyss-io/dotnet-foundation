@@ -44,15 +44,15 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.json.aspnetcore": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": "[10.0.12, )",
-          "Orbyss.Foundation.Json": "[0.3.0, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.0, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.openapi": {
@@ -64,8 +64,8 @@
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.0, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {

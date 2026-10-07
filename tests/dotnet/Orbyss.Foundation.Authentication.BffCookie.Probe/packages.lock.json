@@ -112,17 +112,17 @@
       "orbyss.foundation.authentication": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Authentication.Core": "[0.3.0, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.0, )"
+          "Orbyss.Foundation.Authentication.Core": "[0.3.1, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.1, )"
         }
       },
       "orbyss.foundation.authentication.bffcookie": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.OpenIdConnect": "[10.0.12, )",
-          "Orbyss.Foundation.Authentication": "[0.3.0, )",
-          "Orbyss.Foundation.Json.AspNetCore": "[0.3.0, )",
-          "Orbyss.Foundation.WebDefaults": "[0.3.0, )"
+          "Orbyss.Foundation.Authentication": "[0.3.1, )",
+          "Orbyss.Foundation.Json.AspNetCore": "[0.3.1, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.1, )"
         }
       },
       "orbyss.foundation.authentication.core": {
@@ -134,22 +134,22 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.json.aspnetcore": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": "[10.0.12, )",
-          "Orbyss.Foundation.Json": "[0.3.0, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.0, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.0, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {

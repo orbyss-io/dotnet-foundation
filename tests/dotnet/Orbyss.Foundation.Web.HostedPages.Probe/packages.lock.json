@@ -39,14 +39,14 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.hostedpages": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.0, )",
-          "Orbyss.Foundation.WebDefaults": "[0.3.0, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.1, )"
         }
       },
       "orbyss.foundation.webdefaults": {

@@ -8,7 +8,7 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.1, )"
         }
       }
     }

@@ -46,7 +46,7 @@
       "orbyss.foundation.execution": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Execution.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Execution.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.execution.core": {
@@ -58,7 +58,7 @@
           "Microsoft.EntityFrameworkCore": "[10.0.12, )",
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
-          "Orbyss.Foundation.Execution": "[0.3.0, )"
+          "Orbyss.Foundation.Execution": "[0.3.1, )"
         }
       },
       "CShells.Abstractions": {

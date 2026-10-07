@@ -154,7 +154,7 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.12, )",
-          "Orbyss.Foundation.Execution.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Execution.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.execution.core": {

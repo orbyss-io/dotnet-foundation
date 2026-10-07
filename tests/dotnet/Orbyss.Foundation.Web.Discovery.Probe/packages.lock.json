@@ -23,15 +23,15 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.0, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.discovery": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.0, )",
-          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.3.0, )",
-          "Orbyss.Foundation.WebDefaults": "[0.3.0, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.3.1, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.discovery.abstractions": {

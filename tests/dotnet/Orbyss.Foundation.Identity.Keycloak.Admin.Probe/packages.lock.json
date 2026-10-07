@@ -22,7 +22,7 @@
       "orbyss.foundation.identity.keycloak.admin": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Identity.Admin.Abstractions": "[0.3.0, )"
+          "Orbyss.Foundation.Identity.Admin.Abstractions": "[0.3.1, )"
         }
       }
     }
