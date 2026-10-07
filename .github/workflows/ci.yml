@@ -26,20 +26,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.13"
+          python-version-file: .python-version
 
       - name: Validate independent tool release boundaries
         run: python tests/validate_tool_release.py
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
 
       - name: Set up Node for independent canonicalization vectors
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
 
       - name: Restore locked dependency graph
         run: dotnet restore Orbyss.Foundation.slnx --locked-mode --configfile NuGet.config
@@ -82,17 +82,14 @@ jobs:
 
       - name: Verify installed descriptor build package and legacy Assurance export
         run: |
-          python tests/validate_feature_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.3.0.nupkg
-          python tests/validate_settings_build.py --package artifacts/tools/Orbyss.Foundation.Build.0.3.0.nupkg
-          python tests/validate_settings_graph.py --package artifacts/tools/Orbyss.Foundation.Build.0.3.0.nupkg
+          python scripts/validate_installed_tools.py --packages artifacts/tools
           python tests/validate_settings_owner.py
-          python tests/validate_legacy_assurance_export.py --package artifacts/tools/Orbyss.Foundation.OpenApi.Exporter.0.2.4.nupkg
 
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
 
       - name: Upload packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: orbyss-foundation-${{ github.sha }}-${{ runner.os }}
           path: artifacts/nuget/*.nupkg
@@ -100,7 +97,7 @@ jobs:
 
       - name: Preserve qualification evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: foundation-qualification-${{ github.sha }}-${{ runner.os }}
           path: |

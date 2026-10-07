@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' == 'true'">false</IsPackable>
-    <ExporterVersion>0.2.4</ExporterVersion>
+    <ExporterVersion>0.2.5</ExporterVersion>
     <Version>$(ExporterVersion)</Version><PackageVersion>$(ExporterVersion)</PackageVersion>
     <OutputType>Exe</OutputType>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Nuplane.Builder;
 using Nuplane.Feeds.Setup;
+using Nuplane.Setup;
 using Nuplane.Sources.Directory.Builder;
 
 namespace Nuplane.Sources.Directory.Configuration;
@@ -27,31 +28,39 @@ public static class NuplaneDirectoryFeedSetupConfiguration
 
         var setupSection = GetSetupSectionOrSelf(configuration);
 
-        foreach (var declaration in NuplaneFeedSetupDeclarationReader.Read(setupSection).Declarations)
+        foreach (var feedSection in setupSection.GetSection(nameof(NuplaneSetupOptions.Feeds)).GetChildren())
         {
-            var feedOptions = declaration.Options;
-            var directoryPath = feedOptions.DirectoryPath;
+            var directoryPath = feedSection[nameof(NuplaneFeedSetupOptions.DirectoryPath)];
             if (string.IsNullOrWhiteSpace(directoryPath))
             {
                 continue;
             }
 
-            var feedName = declaration.Name;
+            var feedName = feedSection[nameof(NuplaneFeedSetupOptions.Name)];
+            if (string.IsNullOrWhiteSpace(feedName))
+            {
+                continue;
+            }
+
+            var directorySection = feedSection.GetSection(nameof(NuplaneFeedSetupOptions.Directory));
 
             builder.AddDirectoryFeed(feedName, directoryPath, feed =>
             {
-                feed.Role = feedOptions.Directory.Role;
-                feed.Watch = feedOptions.Directory.Watch;
-                feed.DebounceWindow = feedOptions.Directory.DebounceWindow;
+                feed.Watch = directorySection.GetValue<bool?>(nameof(NuplaneDirectoryFeedSetupOptions.Watch)) ?? true;
+                feed.DebounceWindow = directorySection.GetValue<TimeSpan?>(nameof(NuplaneDirectoryFeedSetupOptions.DebounceWindow))
+                    ?? TimeSpan.FromSeconds(1);
 
-                if (feedOptions.IncludeAll)
+                if (feedSection.GetValue<bool?>(nameof(NuplaneFeedSetupOptions.IncludeAll)) is true)
                 {
                     feed.IncludeAll();
                 }
                 else
                 {
-                    foreach (var pattern in feedOptions.IncludePatterns
-                                 .Where(static value => !string.IsNullOrWhiteSpace(value)))
+                    foreach (var pattern in feedSection
+                                 .GetSection(nameof(NuplaneFeedSetupOptions.IncludePatterns))
+                                 .GetChildren()
+                                 .Select(static child => child.Value ?? string.Empty)
+                                 .Where(static v => !string.IsNullOrWhiteSpace(v)))
                     {
                         feed.Include(pattern);
                     }

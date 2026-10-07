@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "inputs": [
+    "scripts/dependency_maintenance.py",
+    ".github/workflows/*.yml",
+    "global.json",
+    "Directory.Packages.props",
+    "src/Orbyss.Foundation.Host/Dockerfile",
+    "src/Orbyss.Foundation.Host/Dockerfile.qualified",
+    "src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj",
+    "src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj",
+    "tests/validate_postgresql.py",
+    ".python-version",
+    ".nvmrc"
+  ],
+  "additionalPins": [],
+  "metadataOverrides": {
+    "CShells.Abstractions": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.abstractions/index.json",
+    "CShells.AspNetCore": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.aspnetcore/index.json",
+    "CShells.AspNetCore.Abstractions": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.aspnetcore.abstractions/index.json",
+    "Nuplane": "https://f.feedz.io/valence-works/nuplane/nuget/v3/packages/nuplane/index.json",
+    "Nuplane.Loading": "https://f.feedz.io/valence-works/nuplane/nuget/v3/packages/nuplane.loading/index.json",
+    "Nuplane.Sources.Directory": "https://f.feedz.io/valence-works/nuplane/nuget/v3/packages/nuplane.sources.directory/index.json",
+    "image:postgres": {
+      "tag": "latest",
+      "omitTag": true,
+      "versionEnvironment": "PG_VERSION"
+    },
+    "image:docker/dockerfile": {
+      "tag": "1"
+    }
+  }
+}

@@ -4,21 +4,21 @@
     "net10.0": {
       "CShells.AspNetCore": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "CUzLVZqfhRsWS+LXUIjQ5JjfmNy2Nwxwa9xTklDAagsrMIMgwfELnWj7Fl12g5Ja2fc9ZdoqKvFAkQP1g+Uhxw==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "A8Ekcd7WHN/rVWLEEMtfA/P2UbJ2pbGLbkOtx7pwIx2kBYmzx5DwpzTyK+LBiCuGIAXODsZW8YUFwD9Yfk4Z5A==",
         "dependencies": {
-          "CShells": "0.0.29-preview.147",
-          "CShells.AspNetCore.Abstractions": "0.0.29-preview.147",
+          "CShells": "0.0.30-preview.159",
+          "CShells.AspNetCore.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "CShells": {
         "type": "Transitive",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "nrZok61nM9vkYaB/2xqbwuRLRT1OckncieD2q77VvGIOtxwsf/dmDqMFvY73OPIJXvSV7YAUtIcW2X0ZwwHhKA==",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "x6qrRjUbjj9FbgeeqgUWrDoSxbW48zna/cvXhZYJGsKBmnS0cErPY/+QiFSmuAzXrcwuf9nDBod5DK7BbpIReA==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.29-preview.147",
+          "CShells.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4",
           "Microsoft.Extensions.DependencyModel": "10.0.1"
         }
@@ -30,13 +30,13 @@
       },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "6auJR+9+9VunznKfH7WGrHMrnrmA0F7JZ22EXzwXvVhjfnbu9Xq7NSIWaOf3KJsOanM2qf5ajJ2JR5TlcPZTLA=="
+        "resolved": "10.0.12",
+        "contentHash": "kDrux7T6C3V/YYYe2LXr7x6AEsVyq5Y2YoTE9er1SwbDtap3z1g8RgxNh5eKQVyB4T+DKvBBJ4Ezd/VZzJQJZg=="
       },
       "Microsoft.EntityFrameworkCore.Analyzers": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "Bv7X4wSSnzCQED9WYXKJ8fwgyvKwf0xZM1GO8xkf6CF9zl+UBnvjxmcPnokJRy0JKjc1SlHSzzhx1HcL4jitTQ=="
+        "resolved": "10.0.12",
+        "contentHash": "Kd4o2oO1A6dfKxjz5LS16QyLtpCFTUiFWwmBABETAXRsSImBdRdWeKjSgbbRhAMiV3a3/nWr95ZtzClT4uaADQ=="
       },
       "Microsoft.Extensions.DependencyModel": {
         "type": "Transitive",
@@ -46,7 +46,7 @@
       "orbyss.foundation.execution": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Execution.Core": "[0.2.4, )"
+          "Orbyss.Foundation.Execution.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.execution.core": {
@@ -55,48 +55,48 @@
       "orbyss.foundation.postgresql": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "[10.0.11, )",
+          "Microsoft.EntityFrameworkCore": "[10.0.12, )",
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
-          "Orbyss.Foundation.Execution": "[0.2.4, )"
+          "Orbyss.Foundation.Execution": "[0.3.1, )"
         }
       },
       "CShells.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "0fBss0kPNYAdUovGowMP1iq6m4U1DWgNb0KvgIriINrZ1OX2p/CXmHzIdkY3NFedSrMbc5pWvsSxE4IFFEvPKA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "es495Gvvqx1t0DJomzsfoxlIE/k8ZMEj3OaL/uKvdUd5cXpfQowko63T03LlRhTBS7Nhm6xoPoQW1cZAx6e8uQ==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "CShells.AspNetCore.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "QyrV5tebsfl07v053N1T6DinwDhCr4tICrDwpqPDP6IUSL72ZvumTO2ZurBlbTNgD5wmdCfmHQXduLfLI7iPhA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "13PD+8QJBhWA9gwU3Io4bFRzSDpMJrvwjfKiW7AvfSY+EaSI5Aa7Jsa26O4N7n49eN/fWXMtRhbOibYUqnom1A==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.29-preview.147",
+          "CShells.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "CentralTransitive",
-        "requested": "[10.0.11, )",
-        "resolved": "10.0.11",
-        "contentHash": "VOSGU8en6HZJs8t7UMFN+9vGcRgVOOn6fA44Ngcg2NyvJ3P1KE94iAb0XzaVaGhXGtt+qaM/VtEn0/hzluQJeg==",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "e7OrVN8U5yr4kuwdTHWBHGVQIVsGfMkAr0Ej1/BnrS989Q0XBVANpIzNZ2bc1GvMZ0/XwMt5InTnmKskxGy99Q==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.11",
-          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.11"
+          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.12",
+          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.12"
         }
       },
       "Microsoft.EntityFrameworkCore.Relational": {
         "type": "CentralTransitive",
-        "requested": "[10.0.11, )",
-        "resolved": "10.0.11",
-        "contentHash": "grznnTJgEYxaWpdKAsTzg6j+89jHgCXWYp+QGtlX5O92+w/VuhWM6JLPYb+uw8M9VhGUvOTsO76dYOy9vNPd5Q==",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "OiHmr8XzX96dbgMsYGe8qoqg4KxibdZG2r0QUVJBGktFInOp8IrABe8jvcbo5hrqeWfbwpK7fCEBiEPbY/ik4A==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.11"
+          "Microsoft.EntityFrameworkCore": "10.0.12"
         }
       },
       "Npgsql": {

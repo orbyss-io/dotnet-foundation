@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <BuildToolsVersion>0.3.0</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
+    <BuildToolsVersion>0.3.1</BuildToolsVersion><Version>$(BuildToolsVersion)</Version><PackageVersion>$(Version)</PackageVersion>
     <Description>Publisher-owned feature descriptors and source-bound settings metadata for Foundation-compatible packages.</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput><SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>

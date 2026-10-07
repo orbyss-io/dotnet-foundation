@@ -5,7 +5,7 @@ on:
     tags: ["exporter-v*.*.*", "build-v*.*.*"]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
   attestations: write
 
@@ -17,8 +17,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.13"
-      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+          python-version-file: .python-version
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
       - name: Validate independent release selection
@@ -36,6 +36,13 @@ jobs:
           dotnet restore "$PROJECT" --locked-mode --configfile NuGet.config
           dotnet pack "$PROJECT" -c Release --no-restore --output artifacts/nuget
           python scripts/tool_release.py verify --tag "$TAG"
+      - name: Export independently versioned tool knowledge
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#*-v}"
+          python scripts/build_release_knowledge.py --packages artifacts/nuget --version "$version" --source-commit "$SOURCE_COMMIT" --output artifacts/foundation-knowledge.json
       - name: Validate exact exporter and legacy Assurance
         if: steps.selected.outputs.kind == 'exporter'
         env:
@@ -51,7 +58,8 @@ jobs:
           python tests/validate_feature_build.py --package "$PACKAGE"
           python tests/validate_settings_build.py --package "$PACKAGE"
           python tests/validate_settings_graph.py --package "$PACKAGE"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+          python tests/validate_settings_no_build.py --package "$PACKAGE"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: tool-validation-${{ github.sha }}
@@ -72,3 +80,7 @@ jobs:
           python scripts/tool_release.py verify --tag "$TAG"
           dotnet nuget push "$PACKAGE" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
       - run: python scripts/verify_nuget_publication.py --packages artifacts/nuget --timeout-seconds 900
+      - name: Publish independently versioned tool knowledge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" artifacts/foundation-knowledge.json --verify-tag --title "Foundation $GITHUB_REF_NAME" --notes "Qualified independently versioned tool and exact publisher schemas/interfaces/source guidance."

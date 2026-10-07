@@ -4,9 +4,9 @@
     "net10.0": {
       "CShells.Abstractions": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "0fBss0kPNYAdUovGowMP1iq6m4U1DWgNb0KvgIriINrZ1OX2p/CXmHzIdkY3NFedSrMbc5pWvsSxE4IFFEvPKA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "es495Gvvqx1t0DJomzsfoxlIE/k8ZMEj3OaL/uKvdUd5cXpfQowko63T03LlRhTBS7Nhm6xoPoQW1cZAx6e8uQ==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4",
           "Microsoft.Extensions.Configuration": "10.0.0",
@@ -16,9 +16,9 @@
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Direct",
-        "requested": "[10.0.11, )",
-        "resolved": "10.0.11",
-        "contentHash": "/a1aJz4m7ylhEDf25ugQChLQoN5XwoGjWw/BoR/ZWWKsO1v4DdJElS1uyngahz4B/eOzjFk1KNTkarRLE5wsIg=="
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "9/qymSh7hVDMGTGwrLz8MRp5zRyXy9adGDOs4HwRdnLil3oZGYuWeZjbmHgCQ9BL1qBroVfgUK3U/nb61617Cw=="
       },
       "JetBrains.Annotations": {
         "type": "Transitive",

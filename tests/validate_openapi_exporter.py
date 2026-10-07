@@ -44,7 +44,7 @@ def package_version(package: Path) -> str:
     return next(item.text for item in metadata.iter() if item.tag.rsplit("}", 1)[-1] == "version")
 
 
-def create_feature(work: Path) -> Path:
+def create_feature(work: Path, *, refresh_lock: bool = False, historical_lock: Path | None = None) -> Path:
     fixture = work / "feature"
     fixture.mkdir()
     # Keep this generated project independent of repository build/analyzer injection.
@@ -53,6 +53,11 @@ def create_feature(work: Path) -> Path:
     (work / "Directory.Packages.props").write_text("<Project />\n", encoding="utf-8")
     versions = {item.attrib["Include"]: item.attrib["Version"] for item in
                 ElementTree.parse(ROOT / "Directory.Packages.props").iter("PackageVersion")}
+    if historical_lock is not None:
+        if refresh_lock: raise ValueError('Historical public regression locks must remain frozen')
+        dependencies=json.loads(historical_lock.read_text())['dependencies']['net10.0']
+        for identity in ('CShells.Abstractions','CShells.AspNetCore.Abstractions','Microsoft.AspNetCore.OpenApi'):
+            versions[identity]=dependencies[identity]['resolved']
     references = "\n".join(
         f'<PackageReference Include="{name}" Version="{versions[name]}" />'
         for name in ("CShells.Abstractions", "CShells.AspNetCore.Abstractions", "Microsoft.AspNetCore.OpenApi"))
@@ -74,13 +79,15 @@ def create_feature(work: Path) -> Path:
 </Project>
 ''', encoding="utf-8")
     shutil.copy2(ROOT / "tests/openapi-exporter/VersionProbeFeature.cs", fixture)
-    shutil.copy2(ROOT / "tests/openapi-exporter/packages.lock.json", fixture)
+    shutil.copy2(historical_lock or ROOT / "tests/openapi-exporter/packages.lock.json", fixture / 'packages.lock.json')
     write_json(fixture / "feature.json", {
         "schemaVersion": 1, "identity": FEATURE_ID, "packageId": FEATURE_PACKAGE,
         "featureDependencies": [], "routes": ["/probe"],
     })
-    run(["dotnet", "restore", str(project), "--locked-mode", "--configfile", str(ROOT / "NuGet.config")],
+    run(["dotnet", "restore", str(project), "--force-evaluate" if refresh_lock else "--locked-mode", "--configfile", str(ROOT / "NuGet.config")],
         ROOT, work / "feature-restore.log")
+    if refresh_lock:
+        shutil.copy2(fixture / 'packages.lock.json', ROOT / 'tests/openapi-exporter/packages.lock.json')
     closure = work / "closure"
     run(["dotnet", "pack", str(project), "-c", "Release", "--no-restore", "--output", str(closure)],
         ROOT, work / "feature-pack.log")

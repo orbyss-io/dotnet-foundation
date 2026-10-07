@@ -4,11 +4,11 @@
     "net10.0": {
       "CShells.AspNetCore.Abstractions": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "QyrV5tebsfl07v053N1T6DinwDhCr4tICrDwpqPDP6IUSL72ZvumTO2ZurBlbTNgD5wmdCfmHQXduLfLI7iPhA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "13PD+8QJBhWA9gwU3Io4bFRzSDpMJrvwjfKiW7AvfSY+EaSI5Aa7Jsa26O4N7n49eN/fWXMtRhbOibYUqnom1A==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.29-preview.147",
+          "CShells.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4"
         }
       },
@@ -23,15 +23,15 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.2.4, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.discovery": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.2.4, )",
-          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.2.4, )",
-          "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
+          "Orbyss.Foundation.Json": "[0.3.1, )",
+          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.3.1, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.1, )"
         }
       },
       "orbyss.foundation.web.discovery.abstractions": {
@@ -42,9 +42,9 @@
       },
       "CShells.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "0fBss0kPNYAdUovGowMP1iq6m4U1DWgNb0KvgIriINrZ1OX2p/CXmHzIdkY3NFedSrMbc5pWvsSxE4IFFEvPKA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "es495Gvvqx1t0DJomzsfoxlIE/k8ZMEj3OaL/uKvdUd5cXpfQowko63T03LlRhTBS7Nhm6xoPoQW1cZAx6e8uQ==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }
