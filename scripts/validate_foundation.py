@@ -4,6 +4,9 @@ import subprocess
 import sys
 
 VALIDATORS = (
+    "validate_dependency_updates.py",
+    "validate_release_knowledge.py",
+    "validate_update_workflow.py",
     "validate_analyzer.py",
     "validate_authentication_provider_boundary.py",
     "validate_bff_cookie_options.py",

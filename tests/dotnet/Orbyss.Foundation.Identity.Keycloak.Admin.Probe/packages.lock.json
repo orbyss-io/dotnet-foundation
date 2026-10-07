@@ -4,9 +4,9 @@
     "net10.0": {
       "CShells.Abstractions": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "0fBss0kPNYAdUovGowMP1iq6m4U1DWgNb0KvgIriINrZ1OX2p/CXmHzIdkY3NFedSrMbc5pWvsSxE4IFFEvPKA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "es495Gvvqx1t0DJomzsfoxlIE/k8ZMEj3OaL/uKvdUd5cXpfQowko63T03LlRhTBS7Nhm6xoPoQW1cZAx6e8uQ==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }
@@ -22,7 +22,7 @@
       "orbyss.foundation.identity.keycloak.admin": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Identity.Admin.Abstractions": "[0.2.4, )"
+          "Orbyss.Foundation.Identity.Admin.Abstractions": "[0.3.0, )"
         }
       }
     }

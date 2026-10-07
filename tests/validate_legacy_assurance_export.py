@@ -16,7 +16,7 @@ def main():
     artifacts = fixture.ROOT / 'artifacts/assurance-export'
     artifacts.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(dir=artifacts))
-    original = fixture.create_feature(root)
+    original = fixture.create_feature(root,historical_lock=fixture.ROOT/'tests/openapi-exporter/legacy-public/packages.lock.json')
     public = root / 'Orbyss.Foundation.OpenApi.Exporter.0.2.3.nupkg'
     with urllib.request.urlopen('https://api.nuget.org/v3-flatcontainer/orbyss.foundation.openapi.exporter/0.2.3/orbyss.foundation.openapi.exporter.0.2.3.nupkg') as response:
         public.write_bytes(response.read())

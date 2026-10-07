@@ -4,28 +4,28 @@
     "net10.0": {
       "CShells.Abstractions": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "0fBss0kPNYAdUovGowMP1iq6m4U1DWgNb0KvgIriINrZ1OX2p/CXmHzIdkY3NFedSrMbc5pWvsSxE4IFFEvPKA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "es495Gvvqx1t0DJomzsfoxlIE/k8ZMEj3OaL/uKvdUd5cXpfQowko63T03LlRhTBS7Nhm6xoPoQW1cZAx6e8uQ==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "CShells.AspNetCore.Abstractions": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "QyrV5tebsfl07v053N1T6DinwDhCr4tICrDwpqPDP6IUSL72ZvumTO2ZurBlbTNgD5wmdCfmHQXduLfLI7iPhA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "13PD+8QJBhWA9gwU3Io4bFRzSDpMJrvwjfKiW7AvfSY+EaSI5Aa7Jsa26O4N7n49eN/fWXMtRhbOibYUqnom1A==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.29-preview.147",
+          "CShells.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Direct",
-        "requested": "[10.0.11, )",
-        "resolved": "10.0.11",
-        "contentHash": "Dy9yElSej0rVQL8LBpCLatWTKXNH6h6VBVFmGndTCf1Wge0jSvH9U8mml6ddVDAQ089q1/fDYlhyukHSgx8unQ==",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "DeE+Bq2OqB3FikFkZk+7gFBeLOQhkSolejLrbi+a9zpfvXtW1Ff6Nd6DIvHXIm+pc4aM4+52vDy3jnuau0qoUQ==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.19.2"
         }
@@ -99,8 +99,8 @@
       "orbyss.foundation.authentication": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Authentication.Core": "[0.2.4, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.2.4, )"
+          "Orbyss.Foundation.Authentication.Core": "[0.3.0, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.0, )"
         }
       },
       "orbyss.foundation.authentication.core": {
@@ -109,9 +109,9 @@
       "orbyss.foundation.authentication.spapkce": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.11, )",
-          "Orbyss.Foundation.Authentication": "[0.2.4, )",
-          "Orbyss.Foundation.WebDefaults": "[0.2.4, )"
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.12, )",
+          "Orbyss.Foundation.Authentication": "[0.3.0, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.0, )"
         }
       },
       "orbyss.foundation.collections.core": {
@@ -120,14 +120,14 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.2.4, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.0, )"
         }
       },
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.2.4, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.2.4, )"
+          "Orbyss.Foundation.Json": "[0.3.0, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.0, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {

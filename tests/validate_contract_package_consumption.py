@@ -445,7 +445,10 @@ def qualify(base: str, version: str, evidence: Path) -> dict:
     cancellations = {}
     for shell in ("first", "second"):
         status, _, body = request(opener, base, f"/{shell}/storage-stage-cancel")
-        cancellation = json.loads(body)
+        try:
+            cancellation = json.loads(body)
+        except json.JSONDecodeError as error:
+            raise AssertionError('Cancellation probe returned a non-JSON response: '+repr((shell,status,body[:512]))) from error
         cancellation["httpStatus"] = status
         cancellations[shell] = cancellation
     (evidence / "cancellation.json").write_text(json.dumps(cancellations, indent=2), encoding="utf-8")
@@ -563,7 +566,9 @@ def main() -> None:
     parser.add_argument("--version", required=True)
     parser.add_argument("--host", type=Path, required=True)
     parser.add_argument("--dotnet", default="dotnet", help="Installed pinned dotnet executable; defaults to PATH for CI.")
-    parser.add_argument("--cshells-version", default="0.0.29-preview.147")
+    selected_packages={node.get('Include'):node.get('Version') for node in
+        ET.parse(repository/'Directory.Packages.props').iter('PackageVersion')}
+    parser.add_argument("--cshells-version", default=selected_packages['CShells.Abstractions'])
     parser.add_argument("--postgres-connection", default=os.environ.get("FOUNDATION_POSTGRES_TEST_CONNECTION"))
     parser.add_argument("--artifacts", type=Path, default=repository / "artifacts/contract-package-consumption")
     parser.add_argument("--sdk-working-directory", type=Path, default=repository,

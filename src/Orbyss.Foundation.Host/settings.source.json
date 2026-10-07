@@ -7,11 +7,12 @@
     "Diagnostics/FoundationRequestDiagnosticLoggerFactory.cs": "24dfc4a31933434c74785e9e9bcf315282f78582045d564b5cc2d05a609005a3",
     "Diagnostics/FoundationRequestDiagnosticRedactionExtensions.cs": "da9e4ff8ed0b5b5a0326716c423c7b3f67abc92a1e3073d4c512bbc3fb9fd3a0",
     "Diagnostics/FoundationRequestDiagnosticRedactionRegistration.cs": "2aec2fb08271ba111c7f652697c5f655811d0ed00a27c2c5f82c36ae8314887e",
-    "Feed/NuplaneAssemblyProvider.cs": "e1b3deac9f5279e31974f7693f6f77c793dc07d831e8311b1f70fcbb410b762e",
-    "Program.cs": "4d1fff2d302b0632d41e8e4b3e323464b6b886e1fd7db2a772fb5631cd0dcee6",
+    "Feed/NuplaneAssemblyProvider.cs": "d007ecd01de375e70f78dcef7a3691766fd9b73b649f0e741f67ae05da0b1abf",
+    "Program.cs": "8d594382bde7f1884d17f9673a4ba7137296aee45b33fef97e92e4507459cc41",
     "Shells/EagerShellActivationHostedService.cs": "365cee121a2245e06f169d61c1d754e68a4e04516ae99402e48f16461ce31e04",
     "Shells/FoundationBootOptions.cs": "5e1a1845c43f5c0f103d141edf3b39e6bad780a17a34ef0cd325c2ab521a7186",
-    "Transport/FoundationTransportOptions.cs": "4d3cf053174973aeacd9418fe6088fac59cec7f568aaa5f17696206b986430fb"
+    "Transport/FoundationTransportOptions.cs": "4d3cf053174973aeacd9418fe6088fac59cec7f568aaa5f17696206b986430fb",
+    "Feed/InitialPackageReconciliationHostedService.cs": "12e171c8fc976bfdde31e277db624742b040f94855340192af7524cfbd184d27"
   },
   "imports": [],
   "contracts": [

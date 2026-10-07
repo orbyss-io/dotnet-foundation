@@ -4,56 +4,54 @@
     "net10.0": {
       "CShells.AspNetCore": {
         "type": "Direct",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "CUzLVZqfhRsWS+LXUIjQ5JjfmNy2Nwxwa9xTklDAagsrMIMgwfELnWj7Fl12g5Ja2fc9ZdoqKvFAkQP1g+Uhxw==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "A8Ekcd7WHN/rVWLEEMtfA/P2UbJ2pbGLbkOtx7pwIx2kBYmzx5DwpzTyK+LBiCuGIAXODsZW8YUFwD9Yfk4Z5A==",
         "dependencies": {
-          "CShells": "0.0.29-preview.147",
-          "CShells.AspNetCore.Abstractions": "0.0.29-preview.147",
+          "CShells": "0.0.30-preview.159",
+          "CShells.AspNetCore.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "Nuplane": {
         "type": "Direct",
-        "requested": "[0.0.9-preview.61, )",
-        "resolved": "0.0.9-preview.61",
-        "contentHash": "zQ4yTEeUZAs/Cwhga7xB4IOhpK2WAVsCZRbzUeo8j7WFStHHOrZlTqhZzozHMbzHDaZQFKvCMgnc5PVYwXNbPA==",
+        "requested": "[1.0.0-preview.10, )",
+        "resolved": "1.0.0-preview.10",
+        "contentHash": "2ihQ+TiiRS43kw49vrnvpgETtWgJ7Mr8iX/8iv7JIG0/78oqYqjra71UKGUBkgGjXbzhy+vOm3/ANEHIyjjZiA==",
         "dependencies": {
           "Microsoft.Extensions.Resilience": "10.1.0",
-          "NuGet.Frameworks": "6.13.1",
           "NuGet.Protocol": "6.13.1",
-          "NuGet.Resolver": "6.13.1",
           "NuGet.Versioning": "6.13.1",
-          "Nuplane.Abstractions": "0.0.9-preview.61",
+          "Nuplane.Abstractions": "1.0.0-preview.10",
           "Polly.Extensions": "8.6.5"
         }
       },
       "Nuplane.Loading": {
         "type": "Direct",
-        "requested": "[0.0.9-preview.61, )",
-        "resolved": "0.0.9-preview.61",
-        "contentHash": "n5MlYyxUmdhMFfL060UU1XZlefnr79qmaq65YGiue8vY0LvHf1LzOqcAaNkG+jGbuqLIvCSR6S9RKid6y1MSMg==",
+        "requested": "[1.0.0-preview.10, )",
+        "resolved": "1.0.0-preview.10",
+        "contentHash": "DAwtel5ecX1JcuyjhOQok9KpeXuoLM0+mJ7GDPt2B7ymj3KR3HYWkRZmct/2g1TnKdgvhzWSfpvfDqx76YfhdA==",
         "dependencies": {
-          "Nuplane": "0.0.9-preview.61",
-          "Nuplane.Abstractions": "0.0.9-preview.61",
-          "Nuplane.Loading.Abstractions": "0.0.9-preview.61"
+          "Nuplane": "1.0.0-preview.10",
+          "Nuplane.Abstractions": "1.0.0-preview.10",
+          "Nuplane.Loading.Abstractions": "1.0.0-preview.10"
         }
       },
       "Nuplane.Sources.Directory": {
         "type": "Direct",
-        "requested": "[0.0.9-preview.61, )",
-        "resolved": "0.0.9-preview.61",
-        "contentHash": "2qtDmjBuMcLETIoCtuKuzaXw8jg3D4btPHINwMlkKgxNf+4QRtvDp6qZWxbq6PC37EABvjk6A96cNVIRHfiJYw==",
+        "requested": "[1.0.0-preview.10, )",
+        "resolved": "1.0.0-preview.10",
+        "contentHash": "S8ifO+8zqO4IcR8s+PMcJWZNdExUtwusFry0i8qa5GmezYx5Rva6OM4lVGtgVo+DwXtKeMbc1RkawzfEfBzjyw==",
         "dependencies": {
-          "Nuplane": "0.0.9-preview.61"
+          "Nuplane": "1.0.0-preview.10"
         }
       },
       "CShells": {
         "type": "Transitive",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "nrZok61nM9vkYaB/2xqbwuRLRT1OckncieD2q77VvGIOtxwsf/dmDqMFvY73OPIJXvSV7YAUtIcW2X0ZwwHhKA==",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "x6qrRjUbjj9FbgeeqgUWrDoSxbW48zna/cvXhZYJGsKBmnS0cErPY/+QiFSmuAzXrcwuf9nDBod5DK7BbpIReA==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.29-preview.147",
+          "CShells.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4",
           "Microsoft.Extensions.DependencyModel": "10.0.1"
         }
@@ -143,14 +141,6 @@
           "NuGet.Packaging": "6.13.1"
         }
       },
-      "NuGet.Resolver": {
-        "type": "Transitive",
-        "resolved": "6.13.1",
-        "contentHash": "UfSFydxpaEJEQlOIbm/mznNlcLPhHkdxHQTFIJLhfawvH0F13bcMyEd/avWm6cPS6pfUUcgE0/Az2sNFc0YM9w==",
-        "dependencies": {
-          "NuGet.Protocol": "6.13.1"
-        }
-      },
       "NuGet.Versioning": {
         "type": "Transitive",
         "resolved": "6.13.1",
@@ -158,15 +148,15 @@
       },
       "Nuplane.Abstractions": {
         "type": "Transitive",
-        "resolved": "0.0.9-preview.61",
-        "contentHash": "oSy/veU6KZSLJ2UQV6TiJURkq9cfH3MuOGBMMmq2H0AUgNTg/NHolOwZSt2I+aj7TdlGY9RTO1ARkI4EXAhcYw=="
+        "resolved": "1.0.0-preview.10",
+        "contentHash": "sGU5ye7DvGYiZZHq1us0uEZY7cI3q1d3azRyDZSmbMYzcP1Dc7Hb8hWhjrB3DwtCnjMd0ZwjAoW2LIFBonpnfw=="
       },
       "Nuplane.Loading.Abstractions": {
         "type": "Transitive",
-        "resolved": "0.0.9-preview.61",
-        "contentHash": "Mkyi+IE7M/PJaew4xFzNQtx0Vsm7fDpVjYSdK/3nHwmQTFxqL72EpodmWnCLidrCR4Tx4H6T2fp3aj5FANrIcw==",
+        "resolved": "1.0.0-preview.10",
+        "contentHash": "A02QtWTVkA0w8IbMBvUn+hQaZn6HeUA7a47F0e4H50s2B59g8KkC0ZOUZD3uk1CNDvWFFf18UUnCJjAS3tGqBA==",
         "dependencies": {
-          "Nuplane.Abstractions": "0.0.9-preview.61"
+          "Nuplane.Abstractions": "1.0.0-preview.10"
         }
       },
       "Polly.Core": {
@@ -202,20 +192,20 @@
       },
       "CShells.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "0fBss0kPNYAdUovGowMP1iq6m4U1DWgNb0KvgIriINrZ1OX2p/CXmHzIdkY3NFedSrMbc5pWvsSxE4IFFEvPKA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "es495Gvvqx1t0DJomzsfoxlIE/k8ZMEj3OaL/uKvdUd5cXpfQowko63T03LlRhTBS7Nhm6xoPoQW1cZAx6e8uQ==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }
       },
       "CShells.AspNetCore.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[0.0.29-preview.147, )",
-        "resolved": "0.0.29-preview.147",
-        "contentHash": "QyrV5tebsfl07v053N1T6DinwDhCr4tICrDwpqPDP6IUSL72ZvumTO2ZurBlbTNgD5wmdCfmHQXduLfLI7iPhA==",
+        "requested": "[0.0.30-preview.159, )",
+        "resolved": "0.0.30-preview.159",
+        "contentHash": "13PD+8QJBhWA9gwU3Io4bFRzSDpMJrvwjfKiW7AvfSY+EaSI5Aa7Jsa26O4N7n49eN/fWXMtRhbOibYUqnom1A==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.29-preview.147",
+          "CShells.Abstractions": "0.0.30-preview.159",
           "JetBrains.Annotations": "2025.2.4"
         }
       }

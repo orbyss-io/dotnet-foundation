@@ -65,8 +65,7 @@ var defaults = new Dictionary<string,object> {
  [typeof(ConvergenceOptions).FullName!] = new ConvergenceOptions(),
  [typeof(Nuplane.Sources.ManifestOptions).FullName!] = new Nuplane.Sources.ManifestOptions(),
  [typeof(StoreRegistryOptions).FullName!] = new StoreRegistryOptions(),
- [typeof(LoadingOptions).FullName!] = new LoadingOptions(),
- [typeof(PackageLoadModeOverrideOptions).FullName!] = new PackageLoadModeOverrideOptions()
+ [typeof(LoadingOptions).FullName!] = new LoadingOptions()
 };
 var binder = new List<object>();
 foreach (var token in new string?[] { null, "", "0123456789abcdef", "not-a-token" }) {
@@ -77,18 +76,17 @@ foreach (var token in new string?[] { null, "", "0123456789abcdef", "not-a-token
  Check((errors.Count==0)==(token is null||token=="0123456789abcdef"),"record token validation differs");
  binder.Add(new{token,count=options.SharedAssemblies.Count,errors});
 }
-var time = new LoadingOptions(); Config(new(){["DeactivationTimeout"]="00:00:07.125",["DefaultLoadMode"]="HostIntegrated"}).Bind(time);
-Check(time.DeactivationTimeout==TimeSpan.FromMilliseconds(7125)&&time.DefaultLoadMode==PackageLoadMode.HostIntegrated,"native TimeSpan/enum binder differs");
-Config(new(){["DefaultLoadMode"]="1"}).Bind(time); Check(time.DefaultLoadMode==PackageLoadMode.HostIntegrated,"integral enum binder differs");
+var time = new LoadingOptions(); Config(new(){["DeactivationTimeout"]="00:00:07.125"}).Bind(time);
+Check(time.DeactivationTimeout==TimeSpan.FromMilliseconds(7125),"native TimeSpan binder differs");
+var resolution=new FeedResolutionOptions(); Config(new(){["PolicyMode"]="Strict"}).Bind(resolution);
+Check(resolution.PolicyMode==FeedResolutionPolicyMode.Strict,"native named enum binder differs");
+Config(new(){["PolicyMode"]="1"}).Bind(resolution); Check(resolution.PolicyMode==FeedResolutionPolicyMode.Strict,"integral enum binder differs");
 time.DeactivationTimeout=TimeSpan.Zero; Check(new LoadingOptionsValidator().Validate(time).Count>0,"zero native timeout admitted");
 time.DeactivationTimeout=TimeSpan.FromTicks(1); Check(new LoadingOptionsValidator().Validate(time).Count==0,"positive native timeout rejected");
-time.DefaultLoadMode=(PackageLoadMode)12345; Check(new LoadingOptionsValidator().Validate(time).Count>0,"undefined native load mode admitted");
-var feeds=NuplaneFeedSetupDeclarationReader.Read(Config(new(){
- ["Setup:Feeds:0:Name"]="local",["Setup:Feeds:0:DirectoryPath"]="legacy",
- ["Setup:Feeds:local:DirectoryPath"]="selected"}));
-Check(feeds.Declarations.Count==1&&feeds.Declarations[0].Options.DirectoryPath=="selected"&&feeds.Diagnostics.Any(),"named feed precedence differs");
-var mismatch=NuplaneFeedSetupDeclarationReader.Read(Config(new(){["Setup:Feeds:named:Name"]="other",["Setup:Feeds:named:DirectoryPath"]="path"}));
-Check(mismatch.Diagnostics.Any(x=>x.Severity==NuplaneFeedSetupDiagnosticSeverity.Error),"named feed mismatch admitted");
+// Nuplane 1.0 removed the named-map reader and per-package load-mode policy.
+// Probe the selected publisher's direct Setup binder with explicit feed names.
+var feeds=new NuplaneSetupOptions(); Config(new(){["Feeds:0:Name"]="local",["Feeds:0:DirectoryPath"]="selected"}).Bind(feeds);
+Check(feeds.Feeds.Count==1&&feeds.Feeds[0].Name=="local"&&feeds.Feeds[0].DirectoryPath=="selected","indexed feed declaration binding differs");
 
 // These native registrations are inspected only through IOptions. No hosted service is resolved or started.
 var configuration=Config(new(){
@@ -127,7 +125,7 @@ try { _=await malformed.GetAsync("0"); throw new Exception("numeric shell map ad
 var construction=defaults.ToDictionary(x=>x.Key,x=>x.Value.GetType().GetProperties()
  .ToDictionary(property=>property.Name,property=>property.GetValue(x.Value)));
 Console.WriteLine(JsonSerializer.Serialize(new{defaults=construction,binder,checks=new{
- nativeTimeSpanAndEnum=true,loadingBoundsAndEnums=true,namedFeedPrecedence=true,namedFeedMismatchRejected=true,
+ nativeTimeSpanAndEnum=true,loadingTimeoutBounds=true,indexedFeedDeclaration=true,
  setupOverridesDedicatedOptions=true,loadingNotEnabledByDefault=true,optionsSnapshotStable=true,
  namedShellIdentity=true,featureSettingsOverrideConfiguration=true,composeRereadsSnapshotIsolated=true,
  numericShellMapRejected=true,hostStarted=false,applicationInitialized=false}},json));
@@ -193,7 +191,7 @@ def verify_defaults(metadata: dict, native: dict, graph: dict) -> int:
     assert entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]["required"] is True
     assert "default" not in entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]
     assert entries["Nuplane:Loading:DeactivationTimeout"]["constraints"]["format"] == "dotnetTimeSpan"
-    for prefix in ("Nuplane:Setup:Feeds:{feed}", "Nuplane:FeedResolution:Feeds:{index}"):
+    for prefix in ("Nuplane:Setup:Feeds:{index}", "Nuplane:FeedResolution:Feeds:{index}"):
         assert entries[prefix + ":Credentials"]["secret"] is True and "default" not in entries[prefix + ":Credentials"]
     assert all(value is True for key,value in native["checks"].items() if key not in ("hostStarted","applicationInitialized"))
     assert native["checks"]["hostStarted"] is False and native["checks"]["applicationInitialized"] is False

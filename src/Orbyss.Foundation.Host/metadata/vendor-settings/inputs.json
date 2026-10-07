@@ -3,18 +3,18 @@
   "origins": [
     {
       "packageId": "CShells",
-      "packageVersion": "0.0.29-preview.147",
+      "packageVersion": "0.0.30-preview.159",
       "archive": {
-        "name": "cshells.0.0.29-preview.147.nupkg",
-        "sha256": "d5bc158159aaba1d29ddb376e2416b3b407860cd61929adf5ed768c5610be998"
+        "name": "cshells.0.0.30-preview.159.nupkg",
+        "sha256": "60e34e92494256f8e7002e166a094619a89d9b45e580758cca9833384226f5d2"
       },
       "assembly": {
         "name": "CShells.dll",
-        "sha256": "d22dcd23c9227afc4946580251f7b5ea7df022b96540a9bfef2e8646faa4fb87"
+        "sha256": "c633e2900b8b670ab2a4b3693c2e276f2f6f2ed9a11c68e7d59c8f262c66c29f"
       },
       "source": {
-        "repository": "https://github.com/sfmskywalker/cshells",
-        "commit": "6dd505d2ee0d40fb222b079e81acca8bdbab17c5",
+        "repository": "https://github.com/valence-works/cshells",
+        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
         "files": {
           "CShells/DependencyInjection/CShellsBuilderExtensions.cs.txt": "194073a11dd778e927720b1100ee431cabd34c1811963a6b5a8db01a3c777e79",
           "CShells/Configuration/CShellsOptions.cs.txt": "e1d5749e10581e0edee2b94eb0f967411654125327af033e2a8c494d17d8cd92",
@@ -23,7 +23,7 @@
           "CShells/Configuration/FeatureEntry.cs.txt": "9aaf0579446ee839aa1840c5be6714c63ea4531abddcac74e2fcc904ab69750e",
           "CShells/Features/SharedAssemblySelector.cs.txt": "65ef54a1cd4c9d1ad9312f14aeb172282d806e389598594eaa8cca7c5577483c",
           "CShells/Lifecycle/Providers/ConfigurationShellBlueprintProvider.cs.txt": "053b2349acfa70f2053c692da757322ff184ec2678c331082e68828702d5d11e",
-          "CShells/Lifecycle/Blueprints/ConfigurationShellBlueprint.cs.txt": "4320bd3cf3747af75bcd61e167ead5d5b8d37301d973419beafac48605de0aa5",
+          "CShells/Lifecycle/Blueprints/ConfigurationShellBlueprint.cs.txt": "a344e44fa68a5c3d40a3f381c20b7ac2b5f09009ff5262dfc7c7cf6144d072e2",
           "CShells/Directory.Build.props.txt": "13585498f482dca22e36d8853ea11c240c354ea7b71e4a707e871b4b2de44b2f",
           "CShells/LICENSE.txt": "9447cc96460b01c8c6ed647705a3423d15b3a9936cb67154cdf26d1dddfb598d"
         }
@@ -31,18 +31,18 @@
     },
     {
       "packageId": "CShells.Abstractions",
-      "packageVersion": "0.0.29-preview.147",
+      "packageVersion": "0.0.30-preview.159",
       "archive": {
-        "name": "cshells.abstractions.0.0.29-preview.147.nupkg",
-        "sha256": "4191cb931317d52f0b7532ac16c2bc22f71f6a37653685730207fd2f52fab945"
+        "name": "cshells.abstractions.0.0.30-preview.159.nupkg",
+        "sha256": "30682ce840b9532333f09d4ffaa7ed7e8cdc4294a12b54ed6def72eba21c9db0"
       },
       "assembly": {
         "name": "CShells.Abstractions.dll",
-        "sha256": "c2741f1a8eb4954ca75ac07da9d21c451cf96e20149eba1b5124a1d2108d0445"
+        "sha256": "67f4fed5866ee505ddb12ed9a3e57d7e1765d8905b948186e27700ba7beea740"
       },
       "source": {
-        "repository": "https://github.com/sfmskywalker/cshells",
-        "commit": "6dd505d2ee0d40fb222b079e81acca8bdbab17c5",
+        "repository": "https://github.com/valence-works/cshells",
+        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
         "files": {
           "CShells.Abstractions/ShellSettingsExtensions.cs.txt": "cb58626729ec6303d35cadda72b26f0c9722076c1f64b1009b91b2288d68dab7",
           "CShells.Abstractions/ShellSettings.cs.txt": "a7ae14b61219308e216bdefcd5e01ebf4d1a23ca61dd00f1aa73ce01f20725fe",
@@ -54,26 +54,26 @@
     },
     {
       "packageId": "CShells.AspNetCore",
-      "packageVersion": "0.0.29-preview.147",
+      "packageVersion": "0.0.30-preview.159",
       "archive": {
-        "name": "cshells.aspnetcore.0.0.29-preview.147.nupkg",
-        "sha256": "70f34dd164da13f5d38d692ec91a61b1146e4a5977df5c39aa3fc2cef6b82bba"
+        "name": "cshells.aspnetcore.0.0.30-preview.159.nupkg",
+        "sha256": "1fc2ab9fe64195867f6e000ea93146f6e2ed2dd6fa13b2e5c56397ceb08c938f"
       },
       "assembly": {
         "name": "CShells.AspNetCore.dll",
-        "sha256": "8d9839623244465537701eda4bed18fd03436626738d33638650b4ba8ecce266"
+        "sha256": "f8741e94ccae40561278ac51b0da0287c2b6c1a7354688c8133a6d1652c3d6ff"
       },
       "source": {
-        "repository": "https://github.com/sfmskywalker/cshells",
-        "commit": "6dd505d2ee0d40fb222b079e81acca8bdbab17c5",
+        "repository": "https://github.com/valence-works/cshells",
+        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
         "files": {
           "CShells.AspNetCore/WebRoutingShellOptions.cs.txt": "2a2ce850aa8333e0157137521bc7cb246b25c83cb0b8c3277eab2f0fe3f416ae",
           "CShells.AspNetCore/Resolution/WebRoutingShellResolverOptions.cs.txt": "13882193fc790c1c5874fb04bf8403c81ae0705d77b7f10a398ce6d0b109ce95",
-          "CShells.AspNetCore/Configuration/CShellsBuilderExtensions.cs.txt": "1016230134fe1db842be914c8f1fd62045e92c18d96d6d59efa7d93d47476b8a",
+          "CShells.AspNetCore/Configuration/CShellsBuilderExtensions.cs.txt": "4d9cd127d5746e042fdd2196df266c00f849387d269e874cc592da9e7ca7de06",
           "CShells.AspNetCore/Resolution/WebRoutingShellResolver.cs.txt": "f521016f064737052d6786512a865c71a863ca661bdff8e1e112686f0159e900",
           "CShells.AspNetCore/Routing/ShellRouteIndexBuilder.cs.txt": "a913304393adc0f5d8c70549b8eb7c16d33277877cf63e95b58c031f76d1b1dd",
           "CShells.AspNetCore/Routing/DefaultShellRouteIndex.cs.txt": "87119a7aa4570a27dd488ba9d9996afc170042036af1ed456d12f421bc73147c",
-          "CShells.AspNetCore/Notifications/ShellEndpointRegistrationHandler.cs.txt": "09a575398a9d38e971bf3eb786247a39b211325f1cb81d0989b0fe0c1dc00991",
+          "CShells.AspNetCore/Notifications/ShellEndpointRegistrationHandler.cs.txt": "6f3cd589f849d076ad5d9a691916718654f92d161e54f9a1f780f37e8252985e",
           "CShells.AspNetCore/Directory.Build.props.txt": "13585498f482dca22e36d8853ea11c240c354ea7b71e4a707e871b4b2de44b2f",
           "CShells.AspNetCore/LICENSE.txt": "9447cc96460b01c8c6ed647705a3423d15b3a9936cb67154cdf26d1dddfb598d"
         }
@@ -81,18 +81,18 @@
     },
     {
       "packageId": "CShells.AspNetCore.Abstractions",
-      "packageVersion": "0.0.29-preview.147",
+      "packageVersion": "0.0.30-preview.159",
       "archive": {
-        "name": "cshells.aspnetcore.abstractions.0.0.29-preview.147.nupkg",
-        "sha256": "ae3ab1fd4cdb49212f39104a0d798bf89bb9fd85361d72d6f529b56a66e5f482"
+        "name": "cshells.aspnetcore.abstractions.0.0.30-preview.159.nupkg",
+        "sha256": "99ad6c208f15b3d4bb252214502c45ea994cf204a8a525c937ae4eed3d183200"
       },
       "assembly": {
         "name": "CShells.AspNetCore.Abstractions.dll",
-        "sha256": "7048903ce260b3d5a85531b2d08e3ddbdb39b1207b4073e100b000a551dec391"
+        "sha256": "4a3ae1409dce9547c5abc96f3d7366431fd0851e3bac1ec664252cf6177dfa05"
       },
       "source": {
-        "repository": "https://github.com/sfmskywalker/cshells",
-        "commit": "6dd505d2ee0d40fb222b079e81acca8bdbab17c5",
+        "repository": "https://github.com/valence-works/cshells",
+        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
         "files": {
           "CShells.AspNetCore.Abstractions/Routing/ShellRouteCriteria.cs.txt": "d6653507037ff6b81c4f2796cb67370c4303b8235da4e5f52ff392b6cc6c4a28",
           "CShells.AspNetCore.Abstractions/Routing/ShellRoutingMode.cs.txt": "5c2da1ed48856362d26ff73a2eef95f7a7b1bddd606e575654ebf11c496e92ac",
@@ -103,37 +103,33 @@
     },
     {
       "packageId": "Nuplane",
-      "packageVersion": "0.0.9-preview.61",
+      "packageVersion": "1.0.0-preview.10",
       "archive": {
-        "name": "nuplane.0.0.9-preview.61.nupkg",
-        "sha256": "5c94947b3d726446585f72c877aeaa8f99b0eb798f0c55da9256bab76089a702"
+        "name": "nuplane.1.0.0-preview.10.nupkg",
+        "sha256": "734a311891aee58083d39a3aa345c7ba04bbe9bb4e42c7ee876b3aeac9b2ef9d"
       },
       "assembly": {
         "name": "Nuplane.dll",
-        "sha256": "38f9f57079da3033bd8ad61fada6264e25f91dacd75537ce84008967284e62d2"
+        "sha256": "1afbf14bc79cfd44465207a914380c47363e29bafd6632f416cfecbd5b9ca3cc"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "c292a10390ada26da54865d46820d3ec327c8888",
+        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
         "files": {
           "Nuplane/NuplaneServiceCollectionExtensions.cs.txt": "4b357968a38d50eada5917a8e228252b89419503aec6907c4297992a2e7acb89",
-          "Nuplane/Registration/NuplaneOptionsRegistrationServices.cs.txt": "a6aa719f59d5464b65842f37df55241dffcbc604c24735d3542871834ce0ead3",
+          "Nuplane/Registration/NuplaneOptionsRegistrationServices.cs.txt": "5abbb8b35be60c6acced7187e6530b8f5063dc1b50e82791dfb754158da31b38",
           "Nuplane/Registration/NuplaneSetupConfigurationServices.cs.txt": "7cea7f665e9f31bb434ba5bdc346840f52e9a58a69c952583e0d170d6852e59a",
           "Nuplane/Builder/NuplaneBuilder.cs.txt": "c72f39bb54c38c2dd6bf8516a1d48d23a9cad97614dd91e5e9a1b111a26a258a",
           "Nuplane/Setup/NuplaneSetupOptions.cs.txt": "b8d7528cf7a6b1ee9d4812679238a1ce8cf818da28e8e9bb5e6a99fa98510cee",
-          "Nuplane/Setup/NuplaneSetupOptionsValidator.cs.txt": "3d2349c16a186f826c24a413b471a0e40766cf575b631a5a6df1425ca0802ee4",
+          "Nuplane/Setup/NuplaneSetupOptionsValidator.cs.txt": "7537c9c844aae5bfa7011f9c026c521b5feb186b973589bfaca1ebba7e8d23e1",
           "Nuplane/Feeds/Setup/NuplaneFeedSetupOptions.cs.txt": "fc59650d7e5dbd63b0ff3de6bb26931beb2a7b38679f7d5af2224be714b4e880",
-          "Nuplane/Feeds/Setup/NuplaneDirectoryFeedSetupOptions.cs.txt": "073aa37f0de7149a48210e7409a09386a57640c4d104260ed8596375ca3edb53",
-          "Nuplane/Feeds/Setup/DirectoryFeedRole.cs.txt": "4a0e6d9615d7f0640c0344d6f1516dedfd45d6dd56c3a9dbcce86e712f29573d",
-          "Nuplane/Feeds/Setup/NuplaneFeedSetupDeclarationReader.cs.txt": "c1883e23751c45770f6aee2240afb8036dd95fc9e2ff4ffcebaa9c4e9a2cce52",
-          "Nuplane/Feeds/Setup/NuplaneFeedSetupConfiguration.cs.txt": "fabae0473ae177b51c940377b31baf9222ba5f4f4d5b1a4219b6864710f3d10d",
-          "Nuplane/Feeds/Configuration/FeedResolutionOptions.cs.txt": "346ad30540a68f4e32b29e5e769a810729185fefc2d188829ce40f2e832585ef",
-          "Nuplane/Feeds/Configuration/FeedResolutionOptionsValidator.cs.txt": "f807df84f21cd7fc1e819b6abab46c475d2eda1bdf0f620aaaf8de696e19d2b7",
+          "Nuplane/Feeds/Setup/NuplaneDirectoryFeedSetupOptions.cs.txt": "5cbd60c5480702c2c510d6a758e7cebef3871afee6c45e99805ee8d50fbf5295",
+          "Nuplane/Feeds/Setup/NuplaneFeedSetupConfiguration.cs.txt": "76fa6ff2f6b5adf229041e4eae32055bbc1377d8e4717454a26ec908aea26b2e",
+          "Nuplane/Feeds/Configuration/FeedResolutionOptions.cs.txt": "573b3eb90aaa1d633e20703e28f9be27179bb193df80f8f4ab9a2c1fb21bf514",
+          "Nuplane/Feeds/Configuration/FeedResolutionOptionsValidator.cs.txt": "9d140837f9132cf54ea7ac466a60f6d494d6a1ce5f3131904d95fef470936d1d",
           "Nuplane/Feeds/Configuration/FeedCredentialOptionsValidator.cs.txt": "f267a8f1236598bce395bf7b397d603ed1e131dde1b6121a06f524e88a138696",
           "Nuplane/Feeds/Configuration/FeedResolutionPolicyMode.cs.txt": "811b84b6ac81802e58eb4e09dbe235aa768f01c601c8e420f96645d51d85a44c",
-          "Nuplane/Feeds/Configuration/RemoteFallbackMode.cs.txt": "a5355a2259c68c71a308746e94d32b86422643756c7949e3ba64db0ccaa152bb",
-          "Nuplane/Reconciliation/Configuration/ReconciliationOptions.cs.txt": "58d9fbcfaed37a2ec17cdb0abd4e4e5e9b9b3e9269bae3c5c9773fa194f2f15d",
-          "Nuplane/Reconciliation/Configuration/StartupFailurePolicy.cs.txt": "89fa6cff0e1852391ea0c4344f391a2d39ee330b1884c3fbeedd1f31d69e44b9",
+          "Nuplane/Reconciliation/Configuration/ReconciliationOptions.cs.txt": "7b107a1e7a16116787d9670bab670989069c439bb11c62e18a4bf7268e7a0430",
           "Nuplane/Reconciliation/Validation/ReconciliationOptionsValidator.cs.txt": "dfb68f53e7e9d1b3be9ac8c48327f9831022aadd1e7a75b860e91ab3b39f710e",
           "Nuplane/Reconciliation/Convergence/ConvergenceOptions.cs.txt": "27fb6ddbc68adde169df88383cc303a4e31bb78e691712d5c074fbe980dd0b05",
           "Nuplane/Reconciliation/Validation/ConvergenceOptionsValidator.cs.txt": "8a84b941d73c5a08c2874d68cb177490f92944e2f02468acb807734cf1b3c75a",
@@ -154,18 +150,18 @@
     },
     {
       "packageId": "Nuplane.Abstractions",
-      "packageVersion": "0.0.9-preview.61",
+      "packageVersion": "1.0.0-preview.10",
       "archive": {
-        "name": "nuplane.abstractions.0.0.9-preview.61.nupkg",
-        "sha256": "7a3c657162f53af31387612205b14f48d44560534774b6a5ebb1d031674b7c44"
+        "name": "nuplane.abstractions.1.0.0-preview.10.nupkg",
+        "sha256": "60d72c0e69f4f88d07f06754ecffcbe27a0b36d41c7f0adbefbfa859a8b66eab"
       },
       "assembly": {
         "name": "Nuplane.Abstractions.dll",
-        "sha256": "5c5903478d5b4d8b95161f61b73262902e49adbd0735095e3510bb830e8121b5"
+        "sha256": "4f369487d46162a4a1932fd3c4e96c75d636c1cf5966a8d28dcbe63ff5838349"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "c292a10390ada26da54865d46820d3ec327c8888",
+        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
         "files": {
           "Nuplane.Abstractions/FeedDefinition.cs.txt": "071fba26769483e4024966c26426dea73645a9c8a20fb75bf2f6ca222d2571be",
           "Nuplane.Abstractions/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
@@ -175,24 +171,23 @@
     },
     {
       "packageId": "Nuplane.Loading",
-      "packageVersion": "0.0.9-preview.61",
+      "packageVersion": "1.0.0-preview.10",
       "archive": {
-        "name": "nuplane.loading.0.0.9-preview.61.nupkg",
-        "sha256": "0b28c0ad6f64060d7659a9e8d14cda2f20deba2304cbffad4a5fb72b6fb37580"
+        "name": "nuplane.loading.1.0.0-preview.10.nupkg",
+        "sha256": "4f4525a248c01b524f1c770c2432adb9f544759f2292292b9ccf2af9a23914b7"
       },
       "assembly": {
         "name": "Nuplane.Loading.dll",
-        "sha256": "01cd21051d4ed2aefb4b27909f5880a6ace1b8c179802ef3a7d2967a412a8900"
+        "sha256": "307750037e6fe114bbb921078bd12d6213edc1b45850624d2fe34f73128c6032"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "c292a10390ada26da54865d46820d3ec327c8888",
+        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
         "files": {
-          "Nuplane.Loading/LoadingOptions.cs.txt": "af99b3eccfc507d098c1a517d2c09db01567ad54be99c342c0ce62d4f8af3a3c",
-          "Nuplane.Loading/LoadingOptionsValidator.cs.txt": "6762b1a6654aaaa3804fb23578bc19f4bf8c77aa10fa1089f8548640e4b8a014",
-          "Nuplane.Loading/PackageLoadModeOverrideOptions.cs.txt": "a2293c3d33314ed79bc9a1d640566a46ef6fce7c6fbbd440d2ac7a312a021bac",
-          "Nuplane.Loading/Builder/NuplaneBuilderLoadingExtensions.cs.txt": "cc49867365c9fe5f3d5c213e325c8052413fa53c900aa7dfbc179d550de57977",
-          "Nuplane.Loading/Registration/LoadingRegistrationServices.cs.txt": "868ee0cfab0f15ea468260b5d48aa9fc13377af40d1b48831c71009ceb0d52da",
+          "Nuplane.Loading/LoadingOptions.cs.txt": "e9c086b568e17e1311c84921d48224dba6cf3df30c68b682ec2dea4cb9278f0d",
+          "Nuplane.Loading/LoadingOptionsValidator.cs.txt": "77a3fb7977db1866c58974079179afad80f42a81e314596123a482f9257a5c28",
+          "Nuplane.Loading/Builder/NuplaneBuilderLoadingExtensions.cs.txt": "36312cd42ee6aaacba83448175c25f99d8959f725498358ad164c5df3135304b",
+          "Nuplane.Loading/Registration/LoadingRegistrationServices.cs.txt": "e96869370f8d6e8ec717159e289c8020b842354bf5e0a7b98d15f1a2abc856d9",
           "Nuplane.Loading/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
           "Nuplane.Loading/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"
         }
@@ -200,22 +195,20 @@
     },
     {
       "packageId": "Nuplane.Loading.Abstractions",
-      "packageVersion": "0.0.9-preview.61",
+      "packageVersion": "1.0.0-preview.10",
       "archive": {
-        "name": "nuplane.loading.abstractions.0.0.9-preview.61.nupkg",
-        "sha256": "4c0b2c3e2f40b4bc596e84f4942b759ce8a15cfb11885b2552276993f336b607"
+        "name": "nuplane.loading.abstractions.1.0.0-preview.10.nupkg",
+        "sha256": "9ec6c64b627962adf43bb3d889cce34cccaf93f4c18e2ac892dece52fac1d105"
       },
       "assembly": {
         "name": "Nuplane.Loading.Abstractions.dll",
-        "sha256": "94eaf65937508b9d0d172269833c0a6b707359165585439144c426f5cbff0f15"
+        "sha256": "02db626c1e823a9bff3ec25e5b69858493bff4428470abe56ae335402f2a2858"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "c292a10390ada26da54865d46820d3ec327c8888",
+        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
         "files": {
           "Nuplane.Loading.Abstractions/SharedAssemblyIdentity.cs.txt": "3b6b2935b2aa25e1c2176027772ac019577b77b96f878a814dabdcd8a0cd27b7",
-          "Nuplane.Loading.Abstractions/PackageLoadMode.cs.txt": "37e87ee108679c3c49ea0b63c52c5eba7e67b69d2ccc56a03ca770617583ff28",
-          "Nuplane.Loading.Abstractions/PackageLoadModeSelectionPolicy.cs.txt": "29747ac60de9b32b40cb6fff9cf1861da85de2b7af7085a58ad5d838a273e5b4",
           "Nuplane.Loading.Abstractions/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
           "Nuplane.Loading.Abstractions/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"
         }
@@ -223,22 +216,22 @@
     },
     {
       "packageId": "Nuplane.Sources.Directory",
-      "packageVersion": "0.0.9-preview.61",
+      "packageVersion": "1.0.0-preview.10",
       "archive": {
-        "name": "nuplane.sources.directory.0.0.9-preview.61.nupkg",
-        "sha256": "a64dffeac893b1c6dfa4163e3df2c79725e242e45c54939b5ff909a70bf2203e"
+        "name": "nuplane.sources.directory.1.0.0-preview.10.nupkg",
+        "sha256": "8d5d067579a1c39d9df26bb323be2e515f23886cf225d96b4c1ec19466ea591f"
       },
       "assembly": {
         "name": "Nuplane.Sources.Directory.dll",
-        "sha256": "c7fbd61d45f2303499efd649e4dee9c05227a4901c8ea68aee8db225f7fa73ee"
+        "sha256": "afde462dcd4960eb84f6af1f2af673e0d2986c7a4dc854b63a941d4551c29f86"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "c292a10390ada26da54865d46820d3ec327c8888",
+        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
         "files": {
-          "Nuplane.Sources.Directory/Configuration/NuplaneDirectoryFeedSetupConfiguration.cs.txt": "83447038e89cdc2ab8e2b7404c6794bc37ee1e9b95869618536dd21dc302b620",
-          "Nuplane.Sources.Directory/Registration/DirectorySourceRegistrationServices.cs.txt": "ac6e2e12ba615ee9ed441a56de021b615923b334462de065cc0324f4677433e1",
-          "Nuplane.Sources.Directory/Builder/NuplaneDirectoryFeedOptions.cs.txt": "15588a27d283fde053798f5d8600a73f82a89fd5d03fa3046d5fca06e9055907",
+          "Nuplane.Sources.Directory/Configuration/NuplaneDirectoryFeedSetupConfiguration.cs.txt": "99ba07e985c64936ddd5120389f2ffe98c837ce93541a8d4199adc214daf15b6",
+          "Nuplane.Sources.Directory/Registration/DirectorySourceRegistrationServices.cs.txt": "666ce978db587a0e4532201155079776f3033310138ca5d3ff081414e2be9c8b",
+          "Nuplane.Sources.Directory/Builder/NuplaneDirectoryFeedOptions.cs.txt": "6b9a2522008347db3c2d62d9884cc9bf0d63361a7f198108a1fe458b37bae0c3",
           "Nuplane.Sources.Directory/DirectorySourceOptions.cs.txt": "5c98b426ed017814290cfcd9e42d3bdca0389c0cdb1b4094d2375cabb333ddac",
           "Nuplane.Sources.Directory/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
           "Nuplane.Sources.Directory/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"

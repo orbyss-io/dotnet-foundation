@@ -15,10 +15,9 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
-SHARED_HOST = {
-    "CShells.Abstractions": "0.0.29-preview.147",
-    "CShells.AspNetCore.Abstractions": "0.0.29-preview.147",
-}
+SHARED_HOST = {node.get('Include'):node.get('Version') for node in
+    ET.parse(Path(__file__).resolve().parents[1]/'Directory.Packages.props').iter('PackageVersion')
+    if node.get('Include') in {'CShells.Abstractions','CShells.AspNetCore.Abstractions'}}
 REQUIRED_FILES = {
     "Orbyss.Foundation.Host.dll", "Orbyss.Foundation.Host.deps.json",
     "Orbyss.Foundation.Host.runtimeconfig.json", "appsettings.json", "shells.json",
