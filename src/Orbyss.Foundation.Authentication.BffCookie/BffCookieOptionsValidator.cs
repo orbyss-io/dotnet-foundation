@@ -15,6 +15,9 @@ internal sealed class BffCookieOptionsValidator : IValidateOptions<FoundationWeb
             failures.Add("Foundation:Web:ClientSecret is required by the BFF-cookie profile.");
         }
 
+        if (options.RemoteAuthenticationTimeoutSeconds < 1)
+            failures.Add("Foundation:Web:RemoteAuthenticationTimeoutSeconds must be positive for the BFF-cookie profile.");
+
         ValidatePath(options.CallbackPath, "CallbackPath", failures);
         ValidatePath(options.SignedOutCallbackPath, "SignedOutCallbackPath", failures);
         ValidatePath(options.RemoteSignOutPath, "RemoteSignOutPath", failures);

@@ -40,3 +40,5 @@ Server-held ticket keys are bound to the owning shell even when shells share a d
 Foreign keys cannot be read, renewed or removed through another shell's ticket store. Existing
 validated claim URNs remain compatible. Older unbound session keys cannot establish shell ownership
 and therefore require a new login after this update; no account or persisted application identity changes.
+
+`RemoteAuthenticationTimeoutSeconds` must be positive; invalid values fail shell configuration admission before the OIDC handler is challenged. The value remains operational and fixed per shell activation.

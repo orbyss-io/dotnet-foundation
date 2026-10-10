@@ -18,6 +18,7 @@ VALIDATORS = (
     "validate_jwks_rotation.py",
     "validate_domain_events.py",
     "validate_keycloak_admin.py",
+    "validate_web_policy_feed.py",
     "validate_web_policies.py",
     "validate_json.py",
     "validate_problem_details.py",

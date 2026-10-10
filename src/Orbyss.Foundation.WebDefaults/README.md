@@ -47,7 +47,10 @@ no-store; its handler never runs.
 One response-start writer owns CSP, framing, nosniff, referrer, Permissions-Policy and cache headers.
 Private responses, errors, unclassified/static middleware responses and responses with cookies are
 `no-store`. Only explicitly admitted immutable public GET/HEAD resources with status 200/206/304 get
-public caching. Resource `NoIndex` and policy denial override indexing permission. Discovery retains
+public caching. Resource `NoIndex` / `NoFollow` and policy `AllowIndexing` / `AllowFollowing` denial override permission.
+Private responses and errors always emit `noindex, nofollow`. `AllowFollowing` defaults to true for
+compatibility; `AllowIndexing` defaults to false. The final writer replaces authored crawler headers
+and removes them when both permissions are admitted. Use response metadata for application restrictions. Discovery retains
 its standalone protection when this feature is not selected. Request authorization and same-origin
 admission remain independent. Shell policies cover requests inside that shell pipeline, not proxy or
 pre-shell failures. Embedding, unsafe-inline and unsafe-eval policies are not supported.
@@ -55,3 +58,27 @@ pre-shell failures. Embedding, unsafe-inline and unsafe-eval policies are not su
 Run `python tests/validate_web_policies.py` after the Release solution build. Its real CShells probe
 exercises two isolated policy catalogs, error response clearing, endpoint overrides, private responses,
 public caching and header conflicts.
+
+## Response-local editor styles
+
+`WebResponsePolicyOptions.AllowStyleNonce` defaults to false. Admit it only in a named policy for
+an editor that requires generated style elements. After application session/permission admission,
+call `context.TryGetStyleNonce(out var nonce)`. False means the capability is denied or the Foundation
+writer is absent/the response has already started. Do not render nonce-dependent editor controls when denied.
+A successful call returns one cryptographic 32-byte value for that response; repeated calls return the
+same value. Encode it as the style element's `nonce` attribute, or as a public bootstrap attribute used
+only to construct that response's editor styles. Never log it or configure reusable nonce bytes.
+
+The final writer adds the value to effective `style-src-elem`, `style-src`, or a new `style-src`
+using `default-src` fallback. Explicit effective `'none'` remains denial, including a stricter
+`style-src-elem`. No script directive or framing/object/base restriction is changed. Static nonce sources,
+mixed `'none'` source lists, unsafe-inline and unsafe-eval are rejected at shell activation. A late
+endpoint policy change is rechecked before the final write; later denial or an error discards the nonce.
+Responses that issued a nonce are always no-store, even when a late policy denies its CSP contribution
+and the resource is marked as an immutable public asset. Markup may already contain the issued value.
+
+For explicit adoption, replace consumer nonce generation and CSP rewrite middleware with this request
+seam, select a policy with `AllowStyleNonce: true`, and keep private route metadata. Preserve product
+session/permission admission and editor denial tests. Recreate the shell after policy changes. Public
+Foundation 0.3.1 remains unchanged; this additional API requires the explicitly qualified development
+candidate until its publication and exact composition qualification gates complete.

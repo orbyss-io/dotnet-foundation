@@ -7,4 +7,8 @@ namespace Orbyss.Foundation.WebDefaults;
 /// <param name="ImmutablePublicAsset">Whether immutable public content was explicitly admitted.</param>
 /// <param name="NoIndex">Whether resource-specific indexing is forbidden.</param>
 public sealed record WebResponseMetadata(string? Policy = null, string? Feature = null,
-    bool Private = false, bool ImmutablePublicAsset = false, bool NoIndex = false);
+    bool Private = false, bool ImmutablePublicAsset = false, bool NoIndex = false)
+{
+    /// <summary>Gets whether resource-specific crawler link following is forbidden.</summary>
+    public bool NoFollow { get; init; }
+}

@@ -16,6 +16,7 @@ import re
 import subprocess
 import tarfile
 import tempfile
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -136,10 +137,10 @@ def inventory(root, policy):
             "pins": sorted(pins.values(), key=lambda p: p["id"])}
 
 
-def fetch(url):
+def fetch(url, *, use_github_token=True):
     headers = {"User-Agent": "dependency-maintenance", "Accept": "application/json"}
     # Never send a GitHub token to another host or through redirects.
-    if urllib.parse.urlparse(url).hostname == "api.github.com" and os.environ.get("GH_TOKEN"):
+    if use_github_token and urllib.parse.urlparse(url).hostname == "api.github.com" and os.environ.get("GH_TOKEN"):
         headers["Authorization"] = "Bearer " + os.environ["GH_TOKEN"]
     request = urllib.request.Request(url, headers=headers)
     class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -225,12 +226,17 @@ def observe(pin, overrides):
                 "newestSupportedSdk": newest["latest-sdk"], "channelSource": index_url}
     else:
         url = url or "https://api.github.com/repos/" + name + "/releases/latest"
-        release = fetch(url)
+        # Explicit public publisher policy; never retry a failed authenticated lookup.
+        def publisher_fetch(endpoint):
+            if name in overrides.get("anonymousGithubMetadata", []):
+                return fetch(endpoint, use_github_token=False)
+            return fetch(endpoint)
+        release = publisher_fetch(url)
         latest = release["tag_name"] if kind == "github-action" else release["tag_name"].removeprefix("v")
         if kind == "github-action":
-            reference = fetch("https://api.github.com/repos/" + name + "/git/ref/tags/" + urllib.parse.quote(latest, safe=""))["object"]
+            reference = publisher_fetch("https://api.github.com/repos/" + name + "/git/ref/tags/" + urllib.parse.quote(latest, safe=""))["object"]
             while reference["type"] == "tag":
-                reference = fetch(reference["url"])["object"]
+                reference = publisher_fetch(reference["url"])["object"]
             if reference["type"] != "commit":
                 raise ValueError("Action tag does not resolve to a commit")
             return {"latest": reference["sha"], "release": latest, "source": url}
@@ -244,7 +250,10 @@ def collect(root, policy, observer=observe):
         try:
             return {**pin, **observer(pin, policy.get("metadataOverrides", {}))}
         except Exception as error:
-            return {**pin, "latest": None, "source": "unavailable", "error": type(error).__name__}
+            failure = {**pin, "latest": None, "source": "unavailable", "error": type(error).__name__}
+            if isinstance(error, urllib.error.HTTPError):
+                failure["httpStatus"] = error.code
+            return failure
     with ThreadPoolExecutor(max_workers=6) as executor:
         value["pins"] = list(executor.map(query, value["pins"]))
     return {"schemaVersion": 1, "observedAt": datetime.now(timezone.utc).isoformat(), **value}
