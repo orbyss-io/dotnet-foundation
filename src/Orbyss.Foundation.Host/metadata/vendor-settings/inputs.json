@@ -3,18 +3,18 @@
   "origins": [
     {
       "packageId": "CShells",
-      "packageVersion": "0.0.30-preview.159",
+      "packageVersion": "0.0.30-preview.174",
       "archive": {
-        "name": "cshells.0.0.30-preview.159.nupkg",
-        "sha256": "60e34e92494256f8e7002e166a094619a89d9b45e580758cca9833384226f5d2"
+        "name": "cshells.0.0.30-preview.174.nupkg",
+        "sha256": "4ce7b8f818c31d9e3f2358ea98fe47c6235a3e858ce67f43f258199ac8ec732d"
       },
       "assembly": {
         "name": "CShells.dll",
-        "sha256": "c633e2900b8b670ab2a4b3693c2e276f2f6f2ed9a11c68e7d59c8f262c66c29f"
+        "sha256": "7b8de2e0b33b0d276c1e460d32515c33643f6b6760f16fc47d2229e0aa4ecc16"
       },
       "source": {
         "repository": "https://github.com/valence-works/cshells",
-        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
+        "commit": "c596ca2b0c6cd3deb069db4071adc132c954731d",
         "files": {
           "CShells/DependencyInjection/CShellsBuilderExtensions.cs.txt": "194073a11dd778e927720b1100ee431cabd34c1811963a6b5a8db01a3c777e79",
           "CShells/Configuration/CShellsOptions.cs.txt": "e1d5749e10581e0edee2b94eb0f967411654125327af033e2a8c494d17d8cd92",
@@ -31,18 +31,18 @@
     },
     {
       "packageId": "CShells.Abstractions",
-      "packageVersion": "0.0.30-preview.159",
+      "packageVersion": "0.0.30-preview.174",
       "archive": {
-        "name": "cshells.abstractions.0.0.30-preview.159.nupkg",
-        "sha256": "30682ce840b9532333f09d4ffaa7ed7e8cdc4294a12b54ed6def72eba21c9db0"
+        "name": "cshells.abstractions.0.0.30-preview.174.nupkg",
+        "sha256": "e813a3012fdf53b2100c16da5ac4e0dba0d4e5cc9b632e395f69ed51099aeb6c"
       },
       "assembly": {
         "name": "CShells.Abstractions.dll",
-        "sha256": "67f4fed5866ee505ddb12ed9a3e57d7e1765d8905b948186e27700ba7beea740"
+        "sha256": "21fd1cc9a1451a14b32f59decd67e370dfe4256e9a34652319d2bce56e2cb9eb"
       },
       "source": {
         "repository": "https://github.com/valence-works/cshells",
-        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
+        "commit": "c596ca2b0c6cd3deb069db4071adc132c954731d",
         "files": {
           "CShells.Abstractions/ShellSettingsExtensions.cs.txt": "cb58626729ec6303d35cadda72b26f0c9722076c1f64b1009b91b2288d68dab7",
           "CShells.Abstractions/ShellSettings.cs.txt": "a7ae14b61219308e216bdefcd5e01ebf4d1a23ca61dd00f1aa73ce01f20725fe",
@@ -54,18 +54,18 @@
     },
     {
       "packageId": "CShells.AspNetCore",
-      "packageVersion": "0.0.30-preview.159",
+      "packageVersion": "0.0.30-preview.174",
       "archive": {
-        "name": "cshells.aspnetcore.0.0.30-preview.159.nupkg",
-        "sha256": "1fc2ab9fe64195867f6e000ea93146f6e2ed2dd6fa13b2e5c56397ceb08c938f"
+        "name": "cshells.aspnetcore.0.0.30-preview.174.nupkg",
+        "sha256": "7419242576521db4c8414e9973d00d94d2b20ada08ead3c662f20f8783664d21"
       },
       "assembly": {
         "name": "CShells.AspNetCore.dll",
-        "sha256": "f8741e94ccae40561278ac51b0da0287c2b6c1a7354688c8133a6d1652c3d6ff"
+        "sha256": "ef9a12235e2a5b666cb8b4b41189980a88598caa03370366d5bebb1816af0b89"
       },
       "source": {
         "repository": "https://github.com/valence-works/cshells",
-        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
+        "commit": "c596ca2b0c6cd3deb069db4071adc132c954731d",
         "files": {
           "CShells.AspNetCore/WebRoutingShellOptions.cs.txt": "2a2ce850aa8333e0157137521bc7cb246b25c83cb0b8c3277eab2f0fe3f416ae",
           "CShells.AspNetCore/Resolution/WebRoutingShellResolverOptions.cs.txt": "13882193fc790c1c5874fb04bf8403c81ae0705d77b7f10a398ce6d0b109ce95",
@@ -81,18 +81,18 @@
     },
     {
       "packageId": "CShells.AspNetCore.Abstractions",
-      "packageVersion": "0.0.30-preview.159",
+      "packageVersion": "0.0.30-preview.174",
       "archive": {
-        "name": "cshells.aspnetcore.abstractions.0.0.30-preview.159.nupkg",
-        "sha256": "99ad6c208f15b3d4bb252214502c45ea994cf204a8a525c937ae4eed3d183200"
+        "name": "cshells.aspnetcore.abstractions.0.0.30-preview.174.nupkg",
+        "sha256": "75d88a7d620fa3afb3846aa94e971ea1484e58ee3b2bcd602748c752a2881328"
       },
       "assembly": {
         "name": "CShells.AspNetCore.Abstractions.dll",
-        "sha256": "4a3ae1409dce9547c5abc96f3d7366431fd0851e3bac1ec664252cf6177dfa05"
+        "sha256": "6916690447ce7b634c2973efe5e25d5dd856248f4ac90ac1697308fc9355e610"
       },
       "source": {
         "repository": "https://github.com/valence-works/cshells",
-        "commit": "49c912633d968197ddd430c5bd826acd9cfcb15d",
+        "commit": "c596ca2b0c6cd3deb069db4071adc132c954731d",
         "files": {
           "CShells.AspNetCore.Abstractions/Routing/ShellRouteCriteria.cs.txt": "d6653507037ff6b81c4f2796cb67370c4303b8235da4e5f52ff392b6cc6c4a28",
           "CShells.AspNetCore.Abstractions/Routing/ShellRoutingMode.cs.txt": "5c2da1ed48856362d26ff73a2eef95f7a7b1bddd606e575654ebf11c496e92ac",

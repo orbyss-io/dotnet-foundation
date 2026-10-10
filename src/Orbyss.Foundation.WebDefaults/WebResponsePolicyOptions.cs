@@ -13,4 +13,8 @@ public sealed class WebResponsePolicyOptions
     public int PublicAssetMaxAgeSeconds { get; set; }
     /// <summary>Gets or sets whether search indexing is permitted.</summary>
     public bool AllowIndexing { get; set; }
+    /// <summary>Gets or sets whether crawlers may follow links; private resources and errors always deny it.</summary>
+    public bool AllowFollowing { get; set; } = true;
+    /// <summary>Gets or sets admission for Foundation-created response-local style element nonces.</summary>
+    public bool AllowStyleNonce { get; set; }
 }

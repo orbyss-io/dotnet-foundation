@@ -24,7 +24,7 @@ internal static class OptionsBindingProbe
         CheckScopes(omitted, ["openid", "profile", "offline_access", "orbyss-foundation-api"]);
         using var minimal = Provider("\"Scopes\":[\"openid\"]");
         CheckScopes(minimal, ["openid"]);
-        foreach (var selection in new[] { "[]", "null", "\"\"", "\"openid\"", "[\"profile\"]", "[\"openid\",\"\"]", "[\"openid\",null]", "[\"openid\",\"two scopes\"]", "[\"openid\",\"bad\\\\scope\"]", "[\"openid\",\"é\"]", "[\"openid\",\"openid\"]", "{\"unexpected\":\"openid\"}", "{\"1\":\"openid\"}", "[\"openid\",{\"nested\":\"scope\"}]" })
+        foreach (var selection in new[] { "[]", "null", "\"\"", "\"openid\"", "[\"profile\"]", "[\"openid\",\"\"]", "[\"openid\",null]", "[\"openid\",\"two scopes\"]", "[\"openid\",\"bad\\\\scope\"]", "[\"openid\",\"ÃƒÂ©\"]", "[\"openid\",\"openid\"]", "{\"unexpected\":\"openid\"}", "{\"1\":\"openid\"}", "[\"openid\",{\"nested\":\"scope\"}]" })
         {
             using var invalid = Provider("\"Scopes\":" + selection);
             try
@@ -34,6 +34,9 @@ internal static class OptionsBindingProbe
             }
             catch (OptionsValidationException) { }
         }
+        using var shortest = Provider("\"RemoteAuthenticationTimeoutSeconds\":1");
+        Require(shortest.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>()
+            .Get(OpenIdConnectDefaults.AuthenticationScheme).RemoteAuthenticationTimeout == TimeSpan.FromSeconds(1), "positive remote timeout did not bind to native OIDC");
         using var security = Provider("""
             "Scopes":["openid"],"AllowedOrigins":["https://consumer.example"],
             "RolePermissions":{"reader":["records.read"]},"ScopePermissions":{"records":["records.read"]},
@@ -66,6 +69,7 @@ internal static class OptionsBindingProbe
         }
         foreach (var selection in new[]
         {
+            "\"RemoteAuthenticationTimeoutSeconds\":0", "\"RemoteAuthenticationTimeoutSeconds\":-1",
             "\"RoleClaim\":\"urn:orbyss-foundation:authentication:validated-issuer\"",
             "\"PermissionClaim\":\"urn:orbyss-foundation:authentication:validated-subject\"",
             "\"CallbackPath\":null", "\"CallbackPath\":\"//other.example/callback\"",

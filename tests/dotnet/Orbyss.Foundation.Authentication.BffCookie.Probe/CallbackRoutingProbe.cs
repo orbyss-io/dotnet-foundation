@@ -55,6 +55,14 @@ internal static class CallbackRoutingProbe
                 configuration[$"{web}:AccessDeniedPath"] = "/oidc/error";
             }
         }
+        var invalidRoot = "CShells:Shells:invalid";
+        configuration[$"{invalidRoot}:Features:Orbyss.Foundation.Authentication.BffCookie"] = "true";
+        configuration[$"{invalidRoot}:Configuration:WebRouting:Path"] = "invalid";
+        configuration[$"{invalidRoot}:Configuration:Foundation:Web:Authority"] = "https://identity.example/invalid";
+        configuration[$"{invalidRoot}:Configuration:Foundation:Web:ClientId"] = "invalid";
+        configuration[$"{invalidRoot}:Configuration:Foundation:Web:ClientSecret"] = "fictional";
+        configuration[$"{invalidRoot}:Configuration:Foundation:Web:Audience"] = "invalid";
+        configuration[$"{invalidRoot}:Configuration:Foundation:Web:RemoteAuthenticationTimeoutSeconds"] = "0";
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = Environments.Development });
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Error);
@@ -66,6 +74,13 @@ internal static class CallbackRoutingProbe
         app.MapShells();
         foreach (var shell in new[] { "default", "a", "b", "tiny" })
             await app.Services.GetRequiredService<IShellRegistry>().GetOrActivateAsync(shell);
+        try
+        {
+            _ = await app.Services.GetRequiredService<IShellRegistry>().GetOrActivateAsync("invalid");
+        }
+        catch (ShellGenerationActivationException exception) when (exception.InnerException is OptionsValidationException) { }
+        Require(!((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints)
+            .OfType<RouteEndpoint>().Any(endpoint => endpoint.RoutePattern.RawText == "/invalid/bff/login"), "invalid timeout published a challenge endpoint");
         await app.StartAsync();
         try
         {
@@ -94,8 +109,10 @@ internal static class CallbackRoutingProbe
                     Require(response.StatusCode == HttpStatusCode.Redirect, $"{method} {prefix + callback}: callback did not reach OIDC ({response.StatusCode})");
                     Require(response.Headers.Location?.OriginalString == failure + "?code=authentication_callback_invalid", "callback failure escaped its shell");
                     Require(response.Headers.CacheControl?.NoStore == true, "callback failure must be no-store");
+                    RequireManagedPolicy(response);
                     using var error = await client.GetAsync(response.Headers.Location);
                     Require(error.StatusCode == HttpStatusCode.BadRequest, "invalid callback did not fail closed");
+                    RequireManagedPolicy(error);
                 }
                 using var login = await client.GetAsync(prefix + "/bff/login");
                 Require(login.StatusCode == HttpStatusCode.Redirect, $"challenge failed for {prefix}: {login.StatusCode}");
@@ -283,6 +300,17 @@ internal static class CallbackRoutingProbe
             && problem.RootElement.GetProperty("correlationId").GetString() == problem.RootElement.GetProperty("traceId").GetString(), "BFF output failure lost shared problem representation");
         Require(!text.Contains(oidc.Authority!, StringComparison.Ordinal) && !text.Contains(oidc.ClientId!, StringComparison.Ordinal)
             && !text.Contains("authenticated", StringComparison.Ordinal), "BFF output failure exposed raw identity or partial success");
+    }
+
+    private static void RequireManagedPolicy(HttpResponseMessage response)
+    {
+        var csp = response.Headers.GetValues("Content-Security-Policy").Single();
+        foreach (var directive in new[] { "default-src 'self'", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'" })
+            Require(csp.Contains(directive, StringComparison.Ordinal), "actual BFF callback/error lost final CSP restriction " + directive);
+        Require(!csp.Contains("'nonce-", StringComparison.Ordinal), "BFF callback/error acquired an editor nonce");
+        Require(response.Headers.GetValues("X-Robots-Tag").Single() == "noindex, nofollow", "actual private BFF callback/error lost final crawler denial");
+        Require(response.Headers.GetValues("X-Frame-Options").Single() == "DENY", "actual BFF callback/error lost final framing denial");
+        Require(response.Headers.CacheControl?.NoStore == true, "actual BFF callback/error cached");
     }
 
     private static void RequireProperties(JsonElement wire, params string[] expected)

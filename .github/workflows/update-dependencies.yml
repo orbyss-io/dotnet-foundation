@@ -29,13 +29,30 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           global-json-file: global.json
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version-file: .nvmrc
-      - name: Refresh metadata and run all deterministic tests
+      - name: Prepare exact source inputs and commit the candidate before qualification
+        id: candidate
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/update_dependencies.py
+        run: |
+          python scripts/update_dependencies.py --prepare-source
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            branch="codex/dependencies-${GITHUB_RUN_ID}"
+            git switch -c "$branch"
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add -A
+            git commit -m "Update external dependencies and regenerated publisher metadata"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run all deterministic tests and export exact candidate knowledge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/update_dependencies.py --export-knowledge
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
       - name: Build both candidate image platforms
         run: |
@@ -47,17 +64,13 @@ jobs:
       - name: Scan candidate images
         run: python scripts/dependency_maintenance.py scan --image artifacts/host-candidate.tar
       - name: Prepare the tested update pull request
+        if: steps.candidate.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then exit 0; fi
-          branch="codex/dependencies-${GITHUB_RUN_ID}"
-          git switch -c "$branch"
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -A
-          git commit -m "Update external dependencies and regenerated publisher metadata"
-          git push origin "$branch"
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+          git push origin "$(git branch --show-current)"
           gh pr create --title "Update external dependencies" --body "Upgraded active tooling and packages, refreshed native publisher metadata, passed all deterministic checks, and scanned both candidate image platforms. See this workflow's preserved evidence."
       - name: Preserve update evidence
         if: always()
@@ -67,4 +80,5 @@ jobs:
           path: |
             artifacts/dependency-update*.json
             artifacts/dependency-update-tests/
+            artifacts/dependency-update-payloads/*/foundation-knowledge-candidate.json
             artifacts/dependency-security/

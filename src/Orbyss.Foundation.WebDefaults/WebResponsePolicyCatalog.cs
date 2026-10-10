@@ -27,7 +27,8 @@ public sealed class WebResponsePolicyCatalog
                 value is null) throw Invalid("Policies", "has an invalid identity");
             Validate(name, value);
             compiled.Add(name, new(value.ContentSecurityPolicy, value.ReferrerPolicy, value.PermissionsPolicy,
-                value.PublicAssetMaxAgeSeconds, value.AllowIndexing));
+                value.PublicAssetMaxAgeSeconds, value.AllowIndexing)
+            { AllowFollowing = value.AllowFollowing, AllowStyleNonce = value.AllowStyleNonce });
         }
         policies = compiled.ToFrozenDictionary(StringComparer.Ordinal);
         defaultPolicy = options.DefaultPolicy;
@@ -75,6 +76,13 @@ public sealed class WebResponsePolicyCatalog
             var split = directive.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
             if (split.Length != 2 || !directives.TryAdd(split[0], split[1].Trim()))
                 throw Invalid(path, "has an invalid or duplicate CSP directive");
+        }
+        foreach (var sources in directives.Values)
+        {
+            var tokens = sources.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Any(token => token.StartsWith("'nonce-", StringComparison.OrdinalIgnoreCase)) ||
+                tokens.Any(token => token.Equals("'none'", StringComparison.OrdinalIgnoreCase)) && tokens.Length != 1)
+                throw Invalid(path, "must not contain static nonces or mixed none source lists");
         }
         if (!directives.TryGetValue("frame-ancestors", out var frames) || frames != "'none'" ||
             !directives.TryGetValue("object-src", out var objects) || objects != "'none'" ||

@@ -7,4 +7,10 @@ namespace Orbyss.Foundation.WebDefaults;
 /// <param name="PublicAssetMaxAgeSeconds">Public immutable asset freshness.</param>
 /// <param name="AllowIndexing">Whether indexing is permitted.</param>
 public sealed record WebResponsePolicy(string ContentSecurityPolicy, string ReferrerPolicy,
-    string PermissionsPolicy, int PublicAssetMaxAgeSeconds, bool AllowIndexing);
+    string PermissionsPolicy, int PublicAssetMaxAgeSeconds, bool AllowIndexing)
+{
+    /// <summary>Gets whether crawler link following is admitted.</summary>
+    public bool AllowFollowing { get; init; } = true;
+    /// <summary>Gets whether response-local style element nonces are admitted.</summary>
+    public bool AllowStyleNonce { get; init; }
+}

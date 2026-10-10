@@ -11,10 +11,20 @@ package consumption and PostgreSQL, and scans both candidate image platforms.
 Only a passing job opens an update PR. Failed lookups or checks stop the update and
 preserve diagnostics; fix the failure and rerun. No dependency review forms are needed.
 
-Use `python scripts/update_dependencies.py --upgrade` locally with Docker, Node,
-Python and the selected .NET SDK available. Add new external inputs to
-maintenance-policy.json in the same change. Linux CI supplies symlink support
-needed by HostedPages; Windows hosts without that privilege cannot pass its link leg.
+For local release preparation, run
+`python scripts/update_dependencies.py --upgrade --prepare-source` with Docker,
+Node, Python and the selected .NET SDK available. This refreshes source inputs and
+locks; it grants no qualification. Review and commit those inputs, then run
+`python scripts/update_dependencies.py --export-knowledge` from the clean candidate.
+The latter builds, packages and qualifies the exact commit, exports versioned
+`foundation-knowledge-candidate.json` beside its payload, and refuses dirty source.
+The maintained workflow follows these stages before scanning both platforms and
+pushing an update PR. Failed checks retain the unpushed candidate and diagnostics.
+The existing unflagged/local `--upgrade` commands remain available for dependency
+checks; release selection additionally requires the clean candidate export and scans.
+Add new external inputs to maintenance-policy.json in the same change. Linux CI
+supplies symlink support needed by HostedPages; Windows hosts without that
+privilege cannot pass its link leg.
 
 Runtime and independently released tools retain their own versions. Tagged Release
 workflows publish exact package schemas, descriptors, interfaces and frozen source
