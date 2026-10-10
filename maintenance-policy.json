@@ -28,6 +28,10 @@
     },
     "image:docker/dockerfile": {
       "tag": "1"
-    }
+    },
+    "anonymousGithubMetadata": [
+      "aquasecurity/setup-trivy",
+      "aquasecurity/trivy"
+    ]
   }
 }

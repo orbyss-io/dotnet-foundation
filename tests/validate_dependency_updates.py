@@ -76,6 +76,58 @@ class UpdateTests(unittest.TestCase):
         self.assertTrue(all(p['latest'] is None and p['error']=='OSError' for p in observations['pins']))
         self.assertNotIn('credential diagnostic', json.dumps(observations))
 
+    def test_explicit_anonymous_policy_covers_release_tag_and_annotated_commit(self):
+        calls = []
+        def metadata(url, **kwargs):
+            calls.append((url, kwargs))
+            if url.endswith("/releases/latest"):
+                return {"tag_name": "v0.3.1"}
+            if "/git/ref/tags/" in url:
+                return {"object": {"type": "tag", "url": "https://api.github.com/repos/aquasecurity/setup-trivy/git/tags/exact"}}
+            return {"object": {"type": "commit", "sha": "a" * 40}}
+        pin = {"kind": "github-action", "name": "aquasecurity/setup-trivy"}
+        with patch.object(m, "fetch", side_effect=metadata):
+            result = m.observe(pin, {"anonymousGithubMetadata": [pin["name"]]})
+        self.assertEqual("a" * 40, result["latest"])
+        self.assertEqual(3, len(calls))
+        self.assertTrue(all(kwargs == {"use_github_token": False} for _, kwargs in calls))
+        calls.clear()
+        with patch.object(m, "fetch", side_effect=metadata): m.observe(pin, {})
+        self.assertTrue(all(not kwargs for _, kwargs in calls))
+        with patch.object(m, "fetch", side_effect=OSError("publisher unavailable")) as lookup:
+            with self.assertRaises(OSError): m.observe(pin, {"anonymousGithubMetadata": [pin["name"]]})
+        self.assertEqual(1, lookup.call_count)
+
+    def test_token_headers_remain_scoped_to_github_and_explicit_policy(self):
+        requests = []
+        class Response:
+            def __init__(self, request): self.url = request.full_url
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def read(self, maximum): return b"{}"
+        class Opener:
+            def open(self, request, **kwargs):
+                requests.append(request)
+                return Response(request)
+        with patch.dict(m.os.environ, {"GH_TOKEN": "fixture-credential"}), patch.object(m.urllib.request, "build_opener", return_value=Opener()):
+            m.fetch("https://api.github.com/repos/actions/checkout/releases/latest")
+            m.fetch("https://api.github.com/repos/aquasecurity/trivy/releases/latest", use_github_token=False)
+            m.fetch("https://example.test/releases/latest")
+        self.assertEqual("Bearer fixture-credential", requests[0].get_header("Authorization"))
+        self.assertIsNone(requests[1].get_header("Authorization"))
+        self.assertIsNone(requests[2].get_header("Authorization"))
+
+    def test_http_status_is_safe_evidence_and_failure_still_blocks_upgrade(self):
+        def failure(*args):
+            raise m.urllib.error.HTTPError("https://api.github.com/repos/example/publisher", 403,
+                                          "credential diagnostic must not be recorded", None, None)
+        observations = m.collect(self.root, self.policy, failure)
+        self.assertTrue(all(p["latest"] is None and p["httpStatus"] == 403 for p in observations["pins"]))
+        self.assertNotIn("credential diagnostic", json.dumps(observations))
+        before = (self.root / "package.json").read_bytes()
+        with self.assertRaisesRegex(ValueError, "lookup failed"): m.upgrade(self.root, self.policy, observations)
+        self.assertEqual(before, (self.root / "package.json").read_bytes())
+
     def test_oci_scan_selects_both_real_platforms_from_nested_index(self):
         payloads={}
         def blob(value):

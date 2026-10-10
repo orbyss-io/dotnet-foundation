@@ -33,6 +33,16 @@ qualify and adopt that release without guessing which older documentation applie
 Published versions remain immutable; update jobs open PRs and do not publish or
 rewrite existing tags.
 
+The policy explicitly selects anonymous GitHub metadata for the public
+`aquasecurity/setup-trivy` and `aquasecurity/trivy` repositories. Authenticated
+Actions-token lookups failed before mutation in the preserved maintenance run
+38066180808; current public endpoints are checked through the same maintained
+lookup mechanism. Other GitHub publishers retain authentication. This is a
+publisher-specific request policy, not a retry or error fallback: failed releases,
+unresolved action tags, lookups and image security scans still block the update.
+HTTP failure evidence retains only its numeric status and error class, never a
+response body or credential diagnostic.
+
 Sources: [.NET image maintenance](https://github.com/dotnet/dotnet-docker/blob/main/documentation/vulnerability-reporting.md),
 [Dependabot configuration](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference),
 [Trivy scanning](https://trivy.dev/docs/dev/guide/scanner/vulnerability/).
