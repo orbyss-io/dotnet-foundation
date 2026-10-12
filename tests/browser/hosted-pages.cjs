@@ -84,7 +84,9 @@ async function run() {
 }
 run().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   server.kill();
-  await new Promise(resolve => { if (server.exitCode !== null) resolve(); else server.once('exit', resolve); });
+  const shutdownDeadline = setTimeout(() => server.kill('SIGKILL'), 10000);
+  await new Promise(resolve => { if (server.exitCode !== null || server.signalCode !== null) resolve(); else server.once('exit', resolve); });
+  clearTimeout(shutdownDeadline);
   fs.writeFileSync(path.join(evidence, 'browser-host.log'), output);
   fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify({ engines, results, status: process.exitCode ? 'failed' : 'passed' }, null, 2) + '\n');
 });

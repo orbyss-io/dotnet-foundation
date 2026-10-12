@@ -210,7 +210,7 @@ internal static class AuthenticatedPagesProbe
         if (serve)
         {
             Console.WriteLine("PRIVATE_BROWSER_PROBE_URL=" + app.Urls.Single());
-            await Task.Delay(Timeout.Infinite);
+            await app.WaitForShutdownAsync();
         }
         await app.StopAsync();
     }
