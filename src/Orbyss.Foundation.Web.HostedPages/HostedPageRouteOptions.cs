@@ -16,4 +16,3 @@ public sealed class HostedPageRouteOptions
     /// <summary>Gets or sets the explicit bootstrap selection, added to the page admission.</summary>
     public HostedPageAccessOptions? Bootstrap { get; set; }
 }
-

@@ -12,4 +12,3 @@ public sealed class HostedPageAccessOptions
     /// <summary>Gets or sets the named shell response policy, which must exist at activation.</summary>
     public string ResponsePolicy { get; set; } = WebResponsePolicyNames.Default;
 }
-

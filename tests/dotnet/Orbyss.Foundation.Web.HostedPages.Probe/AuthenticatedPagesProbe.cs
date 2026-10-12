@@ -286,4 +286,3 @@ internal static class AuthenticatedPagesProbe
         Console.WriteLine("18 invalid route/access/policy/revision/BFF/unknown-settings compositions rejected before publishing shell endpoints.");
     }
 }
-
