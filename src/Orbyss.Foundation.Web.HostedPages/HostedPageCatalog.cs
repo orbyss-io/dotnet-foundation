@@ -2,6 +2,8 @@ using System.Collections.Frozen;
 using System.Globalization;
 using System.Security.Cryptography;
 using Orbyss.Foundation.Json;
+using Orbyss.Foundation.Authentication;
+using Orbyss.Foundation.WebDefaults;
 
 namespace Orbyss.Foundation.Web.HostedPages;
 
@@ -16,14 +18,19 @@ internal sealed class HostedPageCatalog
     public string CurrentRevision { get; }
     /// <summary>Gets admitted retained revisions with owned byte snapshots.</summary>
     public IReadOnlyList<AdmittedHostedRevision> Revisions { get; }
+    /// <summary>Gets the immutable route admission snapshot.</summary>
+    public IReadOnlyList<AdmittedHostedPageRoute> Routes { get; }
+    /// <summary>Gets the explicit public asset response policy.</summary>
+    public string AssetResponsePolicy { get; }
 
     /// <summary>Validates settings, text, graph, budgets, files and hashes before publishing any endpoint.</summary>
     public HostedPageCatalog(HostedPageOptions options, IHostedAssetSource source)
     {
-        if (options.MaxTotalBytes is < 1 or > 128_000_000 ||
-            !options.PagePath.StartsWith('/') || options.PagePath.StartsWith("/_foundation", StringComparison.Ordinal))
+        if (options.MaxTotalBytes is < 1 or > 128_000_000 || options.Routes is null || options.Routes.Count > 64)
             throw new InvalidDataException("Invalid hosted-page settings.");
-        if (options.PagePath != "/") HostedAssetAdmission.ValidatePath(options.PagePath[1..]);
+        ValidateRoutePath(options.PagePath);
+        if (options.Routes.Count > 0 && options.PagePath != "/")
+            throw new InvalidDataException("PagePath and explicit Routes cannot both be selected.");
         PagePath = options.PagePath;
         CurrentRevision = options.CurrentRevision;
         var bytes = HostedAssetAdmission.Read(source, options.Manifest, options.ManifestSha256, 2_000_000);
@@ -98,6 +105,59 @@ internal sealed class HostedPageCatalog
         }
         if (!ids.Contains(CurrentRevision)) throw new InvalidDataException("Current hosted-page revision is not retained.");
         Revisions = revisions.AsReadOnly();
+        AssetResponsePolicy = ValidatePolicy(options.AssetResponsePolicy);
+        var routes = new List<AdmittedHostedPageRoute>();
+        var routeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var route in options.Routes)
+        {
+            if (route is null) throw new InvalidDataException("Null hosted page route.");
+            ValidateId(route.Id);
+            ValidateRoutePath(route.Path);
+            if (!routeIds.Add(route.Id) || !paths.Add(route.Path) || !ids.Contains(route.Revision ?? CurrentRevision))
+                throw new InvalidDataException("Duplicate route or unknown revision.");
+            var page = AdmitAccess(route.Page);
+            var bootstrap = AdmitAccess(route.Bootstrap);
+            if (page.Private && !bootstrap.Private)
+                throw new InvalidDataException("Bootstrap cannot weaken page admission.");
+            routes.Add(new(route.Id, route.Path, route.Revision ?? CurrentRevision, page, bootstrap));
+        }
+        if (routes.Count == 0)
+            routes.Add(new(null, PagePath, CurrentRevision,
+                new(false, null, null), new(false, null, WebResponsePolicyNames.PublicAsset)));
+        Routes = routes.AsReadOnly();
+    }
+
+    /// <summary>Admits only explicit resource modes and bounded selectors.</summary>
+    private static HostedPageAdmission AdmitAccess(HostedPageAccessOptions? access)
+    {
+        if (access is null || access.Mode is not (HostedPageAccessMode.Public or HostedPageAccessMode.Authenticated) ||
+            access.Mode == HostedPageAccessMode.Public && access.Permission is not null)
+            throw new InvalidDataException("An explicit coherent hosted resource access selection is required.");
+        if (access.Permission is not null)
+        {
+            try { _ = PermissionPolicyNames.ForPermission(access.Permission); }
+            catch (ArgumentException) { throw new InvalidDataException("Invalid canonical hosted route permission."); }
+        }
+        return new(access.Mode == HostedPageAccessMode.Authenticated, access.Permission, ValidatePolicy(access.ResponsePolicy));
+    }
+
+    /// <summary>Rejects invalid policy identities before endpoint mapping.</summary>
+    private static string ValidatePolicy(string policy)
+    {
+        if (string.IsNullOrWhiteSpace(policy) || policy.Length > 128 ||
+            policy.Any(character => !char.IsAsciiLetterOrDigit(character) && character is not ('.' or '-' or '_')))
+            throw new InvalidDataException("Invalid hosted response policy identity.");
+        return policy;
+    }
+
+    /// <summary>Rejects templates, aliases, internal routes and ambiguous path spelling.</summary>
+    private static void ValidateRoutePath(string path)
+    {
+        if (string.IsNullOrEmpty(path) || !path.StartsWith('/') ||
+            path.StartsWith("/_foundation", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Invalid hosted page route.");
+        if (path != "/") HostedAssetAdmission.ValidatePath(path[1..]);
     }
 
     /// <summary>Requires an admitted trusted runtime dependency.</summary>

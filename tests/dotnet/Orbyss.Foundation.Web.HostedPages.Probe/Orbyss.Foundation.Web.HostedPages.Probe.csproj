@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><IsPackable>false</IsPackable></PropertyGroup>
 <ItemGroup><PackageReference Include="CShells.AspNetCore" />
 <ProjectReference Include="../../../src/Orbyss.Foundation.Web.HostedPages/Orbyss.Foundation.Web.HostedPages.csproj" />
+<ProjectReference Include="../../../src/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />
+<ProjectReference Include="../../../src/Orbyss.Foundation.Web.OpenApi/Orbyss.Foundation.Web.OpenApi.csproj" />
+<ProjectReference Include="../../../src/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
 </ItemGroup></Project>

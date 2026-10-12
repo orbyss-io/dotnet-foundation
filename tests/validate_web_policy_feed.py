@@ -7,9 +7,18 @@ import validate_web_policies as policies
 
 
 class CandidateFeedTests(unittest.TestCase):
-    def package(self, root, name, identity):
+    def package(self, root, name, identity, version="0.3.2"):
         with zipfile.ZipFile(root / name, "w") as archive:
-            archive.writestr("owner.nuspec", '<package xmlns="urn:nuget"><metadata><id>' + identity + '</id><version>0.3.2</version></metadata></package>')
+            archive.writestr("owner.nuspec", '<package xmlns="urn:nuget"><metadata><id>' + identity + '</id><version>' + version + '</version></metadata></package>')
+
+    def test_full_development_family_uses_exact_supplied_versions_and_rejects_duplicates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            identity = "Orbyss.Foundation.Json.AspNetCore"
+            self.package(root, identity + ".local.nupkg", identity, "0.3.3-local.pages")
+            self.assertEqual({identity: "0.3.3-local.pages"}, policies.candidate_package_versions(root))
+            self.package(root, identity + ".stable.nupkg", identity)
+            with self.assertRaises(ValueError): policies.candidate_package_versions(root)
 
     def test_private_two_owner_and_full_family_route_only_present_native_identities(self):
         with tempfile.TemporaryDirectory() as directory:

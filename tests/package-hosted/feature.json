@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Foundation.ContractFixture.HostedPages",
+  "features": [{
+    "identity": "Foundation.HostedAccessFixture",
+    "featureDependencies": ["Orbyss.Foundation.Authentication.BffCookie"],
+    "runtimeDependencies": [],
+    "routes": ["/fixture/session/{identity}", "/api/data/{owner}"],
+    "dormant": true,
+    "composeForOpenApi": false,
+    "requiresContractCoverage": false
+  }]
+}

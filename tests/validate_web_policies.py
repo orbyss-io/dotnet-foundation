@@ -13,8 +13,8 @@ import settings_package_bindings as bindings
 
 
 
-def candidate_package_ids(feed: Path):
-    identities = set()
+def candidate_package_versions(feed: Path):
+    identities = {}
     for package in feed.glob("Orbyss.Foundation.*.nupkg"):
         with zipfile.ZipFile(package) as archive:
             specs = [name for name in archive.namelist() if "/" not in name and name.endswith(".nuspec")]
@@ -23,9 +23,16 @@ def candidate_package_ids(feed: Path):
             values = [node.text for node in metadata.iter() if node.tag.rsplit("}", 1)[-1] == "id"]
             bindings.require(len(values) == 1 and isinstance(values[0], str)
                              and values[0].startswith("Orbyss.Foundation."), "candidate must contain a Foundation identity")
-            identities.add(values[0])
+            versions = [node.text for node in metadata.iter() if node.tag.rsplit("}", 1)[-1] == "version"]
+            bindings.require(len(versions) == 1 and isinstance(versions[0], str) and versions[0], "candidate requires one exact version")
+            bindings.require(values[0] not in identities, "candidate identity cannot have ambiguous archives")
+            identities[values[0]] = versions[0]
     bindings.require(bool(identities), "candidate feed is empty")
-    return sorted(identities)
+    return identities
+
+
+def candidate_package_ids(feed: Path):
+    return sorted(candidate_package_versions(feed))
 
 
 def qualify(package: Path, bff_package: Path | None):
@@ -39,7 +46,8 @@ def qualify(package: Path, bff_package: Path | None):
     config = work / "NuGet.config"
     # Pin every locally supplied Foundation identity, including full stable families.
     # Private two-owner feeds retain public resolution for all other dependencies.
-    candidate_ids = candidate_package_ids(package.parent)
+    candidate_versions = candidate_package_versions(package.parent)
+    candidate_ids = sorted(candidate_versions)
     candidate_patterns = "".join('<package pattern="' + fixture.escape(identity) + '"/>'
                                  for identity in candidate_ids)
     config.write_text('<configuration><packageSources><clear/><add key="candidate" value="' + fixture.escape(str(package.parent))
@@ -70,7 +78,7 @@ def qualify(package: Path, bff_package: Path | None):
             references.append('<PackageReference Include="' + node.get("Include") + '" Version="' + versions[node.get("Include")] + '"/>')
         for node in document.iter("ProjectReference"):
             owner = Path(node.get("Include")).parent.name
-            version = fixture.package_version(selected) if owner == bindings.inspect(selected)["packageId"] else stable
+            version = fixture.package_version(selected) if owner == bindings.inspect(selected)["packageId"] else candidate_versions.get(owner, stable)
             references.append('<PackageReference Include="' + owner + '" Version="' + version + '"/>')
         sdk = document.getroot().get("Sdk")
         project = folder / (name + ".csproj")

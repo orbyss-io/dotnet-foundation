@@ -35,6 +35,10 @@ def main():
     packages=payload/'nuget'; tools=payload/'tools'; host=payload/'host-runtime'
     if args.upgrade:
         run('upgrade',[sys.executable,'scripts/dependency_maintenance.py','upgrade'])
+    npm = shutil.which('npm.cmd' if os.name == 'nt' else 'npm')
+    if not npm:
+        raise ValueError('npm is required for the maintained browser tooling lock')
+    run('browser-tooling-lock',[npm,'install','--prefix','tests/browser','--package-lock-only','--ignore-scripts'])
     run('restore',['dotnet','restore','Orbyss.Foundation.slnx','--force-evaluate','--configfile','NuGet.config'])
     run('vendor-metadata',[sys.executable,'scripts/refresh_vendor_metadata.py'])
     run('fixture-locks',[sys.executable,'scripts/refresh_test_locks.py'])
@@ -53,6 +57,9 @@ def main():
     run('pack',['dotnet','pack','Orbyss.Foundation.slnx','-c','Release','--no-build','-p:FoundationRuntimeOnly=true','-p:PackageOutputPath='+str(packages)])
     run('publish-host',['dotnet','publish','src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj','-c','Release','--no-build','--no-restore','-p:UseAppHost=false','-o',str(host)])
     run('foundation-tests',[sys.executable,'scripts/validate_foundation.py'])
+    run('browser-tooling',[npm,'ci','--prefix','tests/browser'])
+    run('browser-engines',['node','tests/browser/node_modules/playwright/cli.js','install','--with-deps','chromium','firefox','webkit'])
+    run('hosted-browser-tests',['node','tests/browser/hosted-pages.cjs'])
     version=(ROOT/'VERSION').read_text().strip()
     run('packaged-web-policies',[sys.executable,'tests/validate_web_policies.py','--package',str(packages/('Orbyss.Foundation.WebDefaults.'+version+'.nupkg')),'--bff-package',str(packages/('Orbyss.Foundation.Authentication.BffCookie.'+version+'.nupkg'))])
     run('pack-build-tool',['dotnet','pack','src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj','-c','Release','--no-restore','--output',str(tools)])

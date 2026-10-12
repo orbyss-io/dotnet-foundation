@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <FoundationVersion>0.3.2</FoundationVersion>
+    <FoundationVersion>0.3.3</FoundationVersion>
     <Version>$(FoundationVersion)</Version>
     <PackageVersion>$(FoundationVersion)</PackageVersion>
     <!-- Explicit private qualification changes only the two candidate owners; stable dependencies keep their identities. -->

@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-<PropertyGroup><Description>Fixed semantic hosted pages and admitted public branding/runtime assets.</Description><PackageReadmeFile>README.md</PackageReadmeFile></PropertyGroup>
+<PropertyGroup><Description>Fixed semantic public or BFF-authenticated application pages with route-specific bootstrap and admitted public runtime assets.</Description><PackageReadmeFile>README.md</PackageReadmeFile></PropertyGroup>
 <ItemGroup>
 <FrameworkReference Include="Microsoft.AspNetCore.App" />
 <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
 <ProjectReference Include="../Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
 <ProjectReference Include="../Orbyss.Foundation.Json/Orbyss.Foundation.Json.csproj" />
+<ProjectReference Include="../Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
 </ItemGroup>
 <ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /></ItemGroup>
 </Project>

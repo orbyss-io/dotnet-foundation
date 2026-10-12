@@ -43,7 +43,9 @@ python tests/validate_openapi_exporter.py
 ```
 
 Or run `python scripts/validate_foundation.py` after the Release build. Node 20 or newer is required
-for independent canonicalization vectors. The 0.3.0 candidate adds six contract/provider packages
+for independent canonicalization vectors and browser tooling. See [authenticated application pages](docs/hosted-application-pages.md)
+for the new source contract, applicability, minimal configuration and pending release/adoption gates.
+The accepted 0.3.2 release retains its public-only HostedPages contract. The 0.3.0 candidate adds six contract/provider packages
 and retains existing package names. See [contracts adoption](docs/foundation-contracts-adoption.md)
 for identity, bounded JSON, persistence, canonical-byte and migration guidance. Packaged conformance
 also runs through the actual Host and a disposable PostgreSQL target before publication.

@@ -6,5 +6,5 @@ namespace Orbyss.Foundation.Authentication.BffCookie;
 internal sealed class BffCookieProfileMarker : IFoundationAuthenticationProfile
 {
     /// <inheritdoc />
-    public string Name => "bff-cookie-v1";
+    public string Name => FoundationAuthenticationProfiles.BffCookie;
 }

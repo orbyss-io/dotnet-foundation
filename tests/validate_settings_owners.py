@@ -38,6 +38,7 @@ foreach (var document in documents) foreach (var contract in document!["contract
 JsonNode? Snapshot(object? value) {
  if(value is null)return null;
  var type=value.GetType();
+ if(type.IsEnum)return JsonValue.Create(value.ToString());
  if(value is string || type.IsPrimitive || value is decimal || value is TimeSpan)return JsonSerializer.SerializeToNode(value,type);
  if(value is IDictionary dictionary) {var result=new JsonObject();foreach(DictionaryEntry item in dictionary)result.Add((string)item.Key,Snapshot(item.Value));return result;}
  if(value is IEnumerable sequence){var result=new JsonArray();foreach(var item in sequence)result.Add(Snapshot(item));return result;}

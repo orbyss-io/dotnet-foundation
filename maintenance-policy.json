@@ -11,7 +11,8 @@
     "src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj",
     "tests/validate_postgresql.py",
     ".python-version",
-    ".nvmrc"
+    ".nvmrc",
+    "tests/browser/package.json"
   ],
   "additionalPins": [],
   "metadataOverrides": {

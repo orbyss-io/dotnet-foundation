@@ -3,6 +3,8 @@ namespace Orbyss.Foundation.Web.HostedPages;
 /// <summary>Selects one trusted local deployment and its exact admitted manifest.</summary>
 public sealed class HostedPageOptions
 {
+    /// <summary>Names the shell-local configuration section.</summary>
+    public const string SectionName = "Foundation:HostedPages";
     /// <summary>Gets or sets the read-only deployment root relative to application content root.</summary>
     public string Root { get; set; } = "hosted-pages";
     /// <summary>Gets or sets the manifest filename inside the deployment root.</summary>
@@ -13,6 +15,10 @@ public sealed class HostedPageOptions
     public string CurrentRevision { get; set; } = "";
     /// <summary>Gets or sets the literal shell-local page route.</summary>
     public string PagePath { get; set; } = "/";
+    /// <summary>Gets or sets explicit routes; an empty list retains the legacy public PagePath contract.</summary>
+    public List<HostedPageRouteOptions> Routes { get; set; } = [];
+    /// <summary>Gets or sets the response policy for explicitly public immutable assets, including built-ins.</summary>
+    public string AssetResponsePolicy { get; set; } = Orbyss.Foundation.WebDefaults.WebResponsePolicyNames.PublicAsset;
     /// <summary>Gets or sets the aggregate retained asset byte budget, capped at 128 MiB.</summary>
     public int MaxTotalBytes { get; set; } = 32_000_000;
 }

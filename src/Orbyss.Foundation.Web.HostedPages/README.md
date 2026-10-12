@@ -1,8 +1,13 @@
 # Orbyss.Foundation.Web.HostedPages
 
-An opt-in CShells feature for a fixed, encoded semantic page, typed public bootstrap, and explicitly
+An opt-in CShells feature for encoded semantic application pages, typed bootstrap, and explicitly
 admitted public runtime/branding assets. Host stays application-neutral. Requires WebDefaults;
-its dependency is selected by the feature declaration.
+its dependency is selected by the feature declaration. Explicit authenticated routes additionally
+require the independently selected Foundation BFF-cookie feature.
+
+The route/access extension described here is local source development based on 0.3.2. The released
+0.3.2 contract has only public PagePath hosting. Adoption requires a newly qualified package family,
+Host payload/image and versioned publisher knowledge; this README does not establish availability.
 
 ## Settings-only consumption
 
@@ -42,7 +47,9 @@ Enable `Orbyss.Foundation.Web.HostedPages` in that shell's Features map. No cons
 ConfigureServices registration is needed. The actual Nuplane host must receive the new released
 Foundation packages together; a source merge alone does not make these packages available.
 
-The loader fetches only the typed public bootstrap, imports the admitted entry and invokes `mount`.
+The loader fetches the route's typed bootstrap, imports the admitted entry and invokes `mount`.
+Private bootstrap uses same-origin credentials; public bootstrap omits credentials. Redirects fail
+the bootstrap load rather than following an authentication redirect as application data.
 It hides the live loading message on success and announces localized text through an alert on failure.
 Initial title, heading and purpose are server-rendered before JavaScript executes. All output contexts
 are encoded; styles come from a built-in stylesheet with blue/green/slate theme tokens. Language selection
@@ -72,7 +79,7 @@ per-file hashes prevent changed bytes from passing admission.
 
 Public assets are intentionally anonymous. Each shell maps only its admitted snapshots; knowledge of
 another shell's intentionally public URL does not make it confidential. Private result downloads and
-their authorization/storage remain outside this feature. Unknown/wrong-shell/private references get 404.
+their authorization/storage remain outside this feature. Unknown or unadmitted references get 404.
 Pages and errors are no-store; admitted immutable assets support GET/HEAD, ETags and ranges with accurate
 MIME, nosniff and safe inline filenames. No directory browsing or arbitrary remote fetching occurs.
 
@@ -81,7 +88,9 @@ MIME, nosniff and safe inline filenames. No directory browsing or arbitrary remo
 Changes require a newly admitted manifest and shell recreation. Use `--retain old-manifest.json` to
 include retained revisions whose files are still deployed. Foundation never deletes them. Deployment
 tooling owns removal and rollback. Keep immutable asset paths distinct between revisions. The current
-page refers only to its selected snapshot; retained bootstrap/assets remain available at their hashes.
+page refers only to its selected snapshot. Legacy public mode retains revision-only bootstrap hashes.
+Explicit routes expose bootstrap only for their selected revision, partitioned by route ID and revision
+hash. Retained explicitly public assets remain available; no shared bootstrap alias is registered.
 
 An alternative code provider implements IHostedAssetSource.OpenRead and registers it before feature
 composition. The same bounded manifest, hash and content admission applies to provider streams.
@@ -90,3 +99,39 @@ SVG, embedding and arbitrary templates are outside this version.
 
 Run `python tests/validate_hosted_pages.py` after the Release build. The HTTP probe uses real CShells;
 the browser fixture is available through the same probe's `--serve` option.
+
+## Authenticated application routes
+
+See [the contract and adoption example](../../docs/hosted-application-pages.md). `HostedPageOptions.SectionName`
+owns the configuration section; `FoundationHostedPagesFeature.FeatureName` owns the feature selector.
+`Routes` contains at most 64 distinct `HostedPageRouteOptions`, each with a stable `Id`, literal `Path`,
+optional admitted `Revision`, and explicit `Page` and `Bootstrap` selections. `HostedPageAccessOptions`
+selects `HostedPageAccessMode.Public` or `Authenticated`, optional canonical `Permission` and named
+`ResponsePolicy`. Authenticated mode requires a validated BFF session. Bootstrap also requires its
+page's permission, and may add one of its own. Private Page plus Public Bootstrap is rejected.
+
+Protected HTML/bootstrap carry `WebResponseMetadata.Private`, use native authorization metadata and
+contain no AllowAnonymous metadata. The existing final WebDefaults writer owns all security, cache and
+crawler headers, including denials, redirects and errors. Private HTML/bootstrap are no-store and
+noindex/nofollow regardless of indexing flags in a selected policy. All hosting endpoints remain
+excluded from API description/export. Discovery only consumes its separately admitted public catalog;
+never copy private manifest text or data into that catalog.
+
+Omitting Routes retains the public PagePath contract. An explicitly empty/null/sparse Routes selection
+is invalid; it cannot fall back to public mode. Do not configure PagePath alongside explicit Routes.
+Duplicate case-insensitive IDs/paths, templates/traversal/reserved paths, unknown revisions/policies,
+missing access selections, anonymous permissions and absent BFF composition reject activation before
+any hosted endpoint is published. Unknown settings reject rather than ignoring a misspelled access key.
+Changes require shell recreation; admission and bytes belong to the shell generation.
+
+Assets retain independent, explicit manifest `Visibility: public` admission. `AssetResponsePolicy`
+selects their response policy, including public built-in loader/styles. JS/CSS/branding/fonts must contain
+no private data. Private downloadable assets are outside this feature. Data APIs must independently
+enforce `PermissionPolicyNames.ForPermission(ownerPermission)` plus resource ownership/state rules.
+Page permission is neither API admission nor ownership authority.
+
+Run `npm ci --prefix tests/browser`, prepare Playwright engines, then `node tests/browser/hosted-pages.cjs`.
+The fixture uses only deterministic local identities and synthetic data. Firefox remains required in
+Linux CI/Release; this Windows host uses `--engines=chromium,webkit`. `--serve-private` exposes the same
+authenticated source-shell fixture for browser testing. The packaged Host probe adds a test-only cookie
+issuer package; that fixture is never part of the runtime family or production Host.
