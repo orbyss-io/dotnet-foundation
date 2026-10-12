@@ -1,0 +1,6 @@
+{
+  "name": "foundation-hosted-page-browser-probes",
+  "private": true,
+  "scripts": { "test": "node hosted-pages.cjs" },
+  "devDependencies": { "playwright": "1.64.0" }
+}

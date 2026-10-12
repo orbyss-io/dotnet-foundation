@@ -2,6 +2,7 @@
 import argparse
 from contextlib import nullcontext
 import hashlib
+import http.cookiejar
 import json
 import os
 from pathlib import Path
@@ -12,7 +13,84 @@ import sys
 import tempfile
 import time
 import urllib.request
+import urllib.error
 import xml.etree.ElementTree as ET
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args):
+        return None
+
+
+def qualify_private_host(base, root):
+    observations = []
+    def client():
+        return urllib.request.build_opener(NoRedirect(), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    def request(opener, path, expected, private=True, data=None, headers=None):
+        packet = urllib.request.Request(base + path, data=data, headers=headers or {})
+        try:
+            response = opener.open(packet, timeout=15)
+        except urllib.error.HTTPError as error:
+            response = error
+        with response:
+            body = response.read(65537)
+            assert len(body) <= 65536 and response.status == expected, (path, response.status, expected)
+            if private:
+                assert response.headers['Cache-Control'] == 'no-store'
+                assert response.headers['X-Robots-Tag'] == 'noindex, nofollow'
+                assert response.headers['X-Frame-Options'] == 'DENY'
+                assert response.headers['X-Content-Type-Options'] == 'nosniff'
+                assert response.headers['Content-Security-Policy']
+            if expected != 200: assert b'Packaged private fixture' not in body
+            observations.append(dict(path=path, status=response.status, cache=response.headers.get('Cache-Control')))
+            return body
+    anonymous, alpha, beta, none, full = [client() for _ in range(5)]
+    for opener, identity in [(alpha, 'alpha'), (beta, 'beta'), (none, 'none'), (full, 'full')]:
+        request(opener, '/private/fixture/session/' + identity, 204)
+    html = request(alpha, '/private/alpha', 200).decode()
+    bootstrap = re.search(r'data-bootstrap="([^"]+)"', html).group(1)
+    assert 'data-credentials="same-origin"' in html
+    beta_html = request(beta, '/private/beta', 200).decode()
+    beta_bootstrap = re.search(r'data-bootstrap="([^"]+)"', beta_html).group(1)
+    assert bootstrap != beta_bootstrap
+    for path in ['/private/alpha', '/private/beta', bootstrap, beta_bootstrap]:
+        request(anonymous, path, 302)
+        request(none, path, 302)
+    request(alpha, beta_bootstrap, 302)
+    request(beta, bootstrap, 302)
+    wire = json.loads(request(alpha, bootstrap, 200))
+    assert wire['title'] == 'Packaged private fixture'
+    asset = urllib.request.urlopen(base + wire['runtime'], timeout=15)
+    with asset:
+        assert asset.status == 200 and 'immutable' in asset.headers['Cache-Control']
+        assert b'Packaged private fixture' not in asset.read()
+    request(anonymous, '/private/api/data/synthetic-owner', 401)
+    request(alpha, '/private/api/data/synthetic-owner', 403)
+    request(full, '/private/api/data/foreign', 404)
+    assert request(full, '/private/api/data/synthetic-owner', 200) == b'synthetic owned data'
+    request(full, bootstrap.replace('/alpha/', '/'), 404)
+    tokens = json.loads(request(alpha, '/private/bff/antiforgery', 200))
+    request(alpha, '/private/bff/logout', 302, data=b'', headers={tokens['headerName']: tokens['requestToken']})
+    request(alpha, '/private/alpha', 302)
+    request(alpha, bootstrap, 302)
+    (root / 'observations.json').write_text(json.dumps(observations, indent=2) + '\n', encoding='utf-8')
+    return len(observations)
+
+
+def build_fixture(repository, root, feed, version, cshells_version, dotnet, restore_config, packaged):
+    fixture = root / 'fixture'
+    shutil.copytree(repository / 'tests/package-hosted', fixture)
+    descriptor = fixture / 'feature.json'
+    metadata = json.loads(descriptor.read_text())
+    metadata['sourceSha256'] = {path.name: hashlib.sha256(path.read_text().replace('\r\n', '\n').encode()).hexdigest() for path in fixture.glob('*.cs')}
+    descriptor.write_text(json.dumps(metadata, indent=2) + '\n')
+    project = fixture / 'HostedAccessFixture.csproj'
+    properties = [f'-p:FoundationCandidateVersion={version}', f'-p:CShellsCandidateVersion={cshells_version}']
+    restore = packaged.restore_command(dotnet, project, restore_config, root / 'nuget-cache', properties)
+    packaged.run_command(restore, root, root / 'fixture-restore.log')
+    packaged.run_command([*restore, '--locked-mode'], root, root / 'fixture-locked-restore.log')
+    packaged.run_command([dotnet, 'build', str(project), '-c', 'Release', '--no-restore', *properties], root, root / 'fixture-build.log')
+    packaged.run_command([dotnet, 'pack', str(project), '-c', 'Release', '--no-build', '--no-restore', '--output', str(feed), *properties], root, root / 'fixture-pack.log')
 
 def main():
     repository = Path(__file__).resolve().parents[1]
@@ -37,7 +115,7 @@ def main():
         feed = root / "feed"
         feed.mkdir()
         identities = []
-        for name in ("Json", "WebDefaults", "Web.HostedPages", "Web.ProblemDetails"):
+        for name in ("Json", "WebDefaults", "Web.HostedPages", "Web.ProblemDetails", "Authentication.BffCookie"):
             package = packages / f"Orbyss.Foundation.{name}.{version}.nupkg"
             shutil.copy2(package, feed / package.name)
             identities.append("Orbyss.Foundation." + name)
@@ -65,6 +143,7 @@ def main():
             root / "nuget-cache", ["-p:TargetFramework=net10.0", "-p:RestorePackagesWithLockFile=true"])
         packaged.run_command(contract_restore, root, root / "host-contracts-restore.log")
         packaged.run_command([*contract_restore, "--locked-mode"], root, root / "host-contracts-locked-restore.log")
+        build_fixture(repository, root, feed, version, cshells_version, args.dotnet, restore_config, packaged)
         packaged.copy_restored_packages(root / "nuget-cache", feed)
         host_hashes = packaged.preserve_host_payload(host, root / "host")
         host = root / "host" / host.name
@@ -97,6 +176,21 @@ def main():
                 }}}
             }}}
         }
+        private_deployment = root / 'private-pages'
+        shutil.copytree(deployment, private_deployment)
+        private_manifest = json.loads((private_deployment / 'manifest.json').read_text())
+        private_manifest['revisions'][0]['locales']['en']['title'] = 'Packaged private fixture'
+        private_bytes = json.dumps(private_manifest).encode()
+        (private_deployment / 'manifest.json').write_bytes(private_bytes)
+        settings['CShells']['Shells']['private'] = {
+            'Features': {'Orbyss.Foundation.Web.HostedPages': True, 'Orbyss.Foundation.Authentication.BffCookie': True, 'Foundation.HostedAccessFixture': True},
+            'Configuration': {'WebRouting': {'Path': 'private'}, 'Foundation': {
+                'Web': {'Authority': 'https://identity.example/hosted', 'ClientId': 'fixture', 'ClientSecret': 'synthetic-secret', 'Audience': 'fixture-api', 'AllowHttpForLocalDevelopment': True},
+                'HostedPages': {'Root': 'private-pages', 'CurrentRevision': 'release-1', 'ManifestSha256': hashlib.sha256(private_bytes).hexdigest(),
+                    'Routes': [{'Id': name, 'Path': '/' + name, 'Page': {'Mode': 'Authenticated', 'Permission': 'pages.' + name, 'ResponsePolicy': 'private'},
+                        'Bootstrap': {'Mode': 'Authenticated', 'ResponsePolicy': 'private'}} for name in ('alpha', 'beta')]}
+            }}
+        }
         (root / "shells.json").write_text(json.dumps(settings))
         configuration = json.loads((root / "host/appsettings.json").read_text(encoding="utf-8"))
         paths = configuration.setdefault("Nuplane", {}).setdefault("Paths", {})
@@ -105,6 +199,7 @@ def main():
         (root / "appsettings.json").write_text(json.dumps(configuration), encoding="utf-8")
         environment = {key: value for key, value in os.environ.items()
                        if not key.upper().startswith(("CSHELLS__", "FOUNDATION__", "NUPLANE__"))}
+        environment['ASPNETCORE_ENVIRONMENT'] = environment['DOTNET_ENVIRONMENT'] = 'Development'
         log_path = root / "host.log"
         with log_path.open("w", encoding="utf-8") as log:
             process = subprocess.Popen([args.dotnet, str(host), "--contentRoot", str(root), "--urls", "http://127.0.0.1:0"],
@@ -134,13 +229,15 @@ def main():
                 with urllib.request.urlopen(address + bootstrap["runtime"], timeout=15) as response:
                     assert response.read() == runtime
                     assert "immutable" in response.headers["Cache-Control"]
+                private_checks = qualify_private_host(address, root)
                 assert package_hashes == {path.name: packaged.sha256(path) for path in feed.glob("*.nupkg")}
                 assert all(packaged.sha256(root / "host" / relative) == digest
                            for relative, digest in host_hashes.items())
-                (root / "result.json").write_text(json.dumps({"status": "qualified", "version": version,
+                (root / "result.json").write_text(json.dumps({"status": "passed-local-http", "version": version,
                     "settingsOnlyActivation": True, "packageHashesVerified": True,
-                    "hostRuntimeHashesVerified": True}, indent=2) + "\n", encoding="utf-8")
-                print("Actual Nuplane Host consumed packaged hosted pages through settings only. Evidence: " + str(root))
+                    "hostRuntimeHashesVerified": True, "privateDispatchChecks": private_checks,
+                    "releaseQualification": False}, indent=2) + "\n", encoding="utf-8")
+                print("Actual Nuplane Host consumed public/private hosted pages with BFF/route/bootstrap/data/logout checks. Evidence: " + str(root))
             finally:
                 process.terminate()
                 try: process.wait(timeout=15)

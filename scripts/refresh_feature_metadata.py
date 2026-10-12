@@ -12,7 +12,7 @@ def main():
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     mismatches = []
-    for descriptor in sorted((root / "src").glob("*/feature.json")):
+    for descriptor in sorted([*(root / "src").glob("*/feature.json"), *(root / "src").glob("*/settings.source.json")]):
         if args.packages and descriptor.parent.name not in args.packages:
             continue
         data = json.loads(descriptor.read_text(encoding="utf-8-sig"))

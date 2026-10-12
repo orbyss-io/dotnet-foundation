@@ -4,11 +4,11 @@
     "net10.0": {
       "CShells.AspNetCore.Abstractions": {
         "type": "Direct",
-        "requested": "[0.0.30-preview.174, )",
-        "resolved": "0.0.30-preview.174",
-        "contentHash": "Li/5bc9WLlnowYOwNPKnbSDhS4C5WTaRFIAKflZO4Lr2/3qC15IzXBsDmVZetjjGOuRFRi097y6gHkj6FD1x+A==",
+        "requested": "[0.0.30, )",
+        "resolved": "0.0.30",
+        "contentHash": "/RIj39NcSccZ+fFHYrf3ahXnh+jKq73O4OVWFGRKq82RIxFY8KT+ByL8Iy0TkCmXJCZP5SpOk4HyNeybJhoYOw==",
         "dependencies": {
-          "CShells.Abstractions": "0.0.30-preview.174",
+          "CShells.Abstractions": "0.0.30",
           "JetBrains.Annotations": "2025.2.4"
         }
       },
@@ -37,14 +37,14 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.2, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.3, )"
         }
       },
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.2, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.2, )"
+          "Orbyss.Foundation.Json": "[0.3.3, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.3, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {
@@ -52,9 +52,9 @@
       },
       "CShells.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[0.0.30-preview.174, )",
-        "resolved": "0.0.30-preview.174",
-        "contentHash": "QVUV9mcj54ZbHi57yq2/nAQJoFjMiuN1jIdk22Hk96xB4l9M8Ajjr18XMT7Z+9sV2aR1wq//76NeF2fMqJMQsA==",
+        "requested": "[0.0.30, )",
+        "resolved": "0.0.30",
+        "contentHash": "Kf3tyvnuRMIZui951/iZA95SCnb3zPjnK02x/JXJE1xNhqlYqbMKtIhqlUAj54dC33g3n5rWpXYSKK5cGe3RKw==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }

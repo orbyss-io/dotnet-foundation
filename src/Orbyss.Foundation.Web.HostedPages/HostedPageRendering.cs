@@ -14,7 +14,7 @@ internal static class HostedPageRendering
     public const string Loader = """
 const target = document.getElementById('foundation-form');
 try {
-  const response = await fetch(target.dataset.bootstrap, {credentials:'omit'});
+  const response = await fetch(target.dataset.bootstrap, {credentials:target.dataset.credentials, redirect:'error'});
   if (!response.ok) throw new Error('bootstrap unavailable');
   const bootstrap = await response.json();
   const runtime = await import(bootstrap.runtime);
@@ -40,7 +40,8 @@ img{max-width:12rem;max-height:6rem}p{line-height:1.6}#foundation-status[role=al
     /// <summary>Creates the revision's hash-addressed asset prefix, preserving relative Vite imports.</summary>
     public static string AssetPrefix(AdmittedHostedRevision revision) => "/_foundation/assets/" + revision.Hash + "/";
     /// <summary>Creates the explicitly public revision/locale bootstrap route.</summary>
-    public static string BootstrapPath(AdmittedHostedRevision revision, string locale) => "/_foundation/bootstrap/" + revision.Hash + "/" + locale + ".json";
+    public static string BootstrapPath(AdmittedHostedRevision revision, string locale, string? routeId = null) =>
+        "/_foundation/bootstrap/" + (routeId is null ? "" : routeId + "/") + revision.Hash + "/" + locale + ".json";
 
     /// <summary>Selects an admitted locale using HTTP quality weights and culture parents.</summary>
     public static string SelectLocale(HttpContext context, HostedPageRevision revision)
@@ -78,7 +79,7 @@ img{max-width:12rem;max-height:6rem}p{line-height:1.6}#foundation-status[role=al
         });
 
     /// <summary>Encodes every text/attribute sink; scripts and styles are only admitted external assets.</summary>
-    public static string Page(AdmittedHostedRevision revision, string locale, Func<string, string> pathFor)
+    public static string Page(AdmittedHostedRevision revision, string locale, Func<string, string> pathFor, AdmittedHostedPageRoute route)
     {
         var text = revision.Definition.Locales[locale];
         var html = new StringBuilder("<!doctype html><html lang=\"").Append(Encode(locale)).Append("\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>")
@@ -91,7 +92,8 @@ img{max-width:12rem;max-height:6rem}p{line-height:1.6}#foundation-status[role=al
             html.Append("<img src=\"").Append(Encode(pathFor(AssetPrefix(revision) + revision.LogoFile))).Append("\" alt=\"").Append(Encode(text.LogoAlt)).Append("\">");
         html.Append("<h1>").Append(Encode(text.Title)).Append("</h1><p>").Append(Encode(text.Purpose))
             .Append("</p><p id=\"foundation-status\" role=\"status\" aria-live=\"polite\">").Append(Encode(text.LoadingText))
-            .Append("</p><div id=\"foundation-form\" data-bootstrap=\"").Append(Encode(pathFor(BootstrapPath(revision, locale))))
+            .Append("</p><div id=\"foundation-form\" data-bootstrap=\"").Append(Encode(pathFor(BootstrapPath(revision, locale, route.Id))))
+            .Append("\" data-credentials=\"").Append(route.Bootstrap.Private ? "same-origin" : "omit")
             .Append("\" data-failure=\"").Append(Encode(text.FailureText)).Append("\"></div><noscript><p>")
             .Append(Encode(text.NoScriptText)).Append("</p></noscript></main><script type=\"module\" src=\"")
             .Append(Encode(pathFor(BuiltInPath(Loader, ".js")))).Append("\"></script></body></html>");

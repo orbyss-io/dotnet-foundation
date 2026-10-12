@@ -2,16 +2,21 @@
   "schemaVersion": 2,
   "packageId": "Orbyss.Foundation.Web.HostedPages",
   "sourceSha256": {
+    "AdmittedHostedPageRoute.cs": "049015da1a8729f7d46cc239586a591a58d1cb2922f6feb901b99159e90b0362",
     "AdmittedHostedRevision.cs": "f82eac4f42d8354bfc38517027dfb980f7fd2f576f260516c6d1a9a4cc7c8bb5",
-    "FoundationHostedPagesFeature.cs": "a065bdd295399c1ef0b092c50e92dc95f7b9a4b83ddb2a6f58427c44b7e673b9",
+    "FoundationHostedPagesFeature.cs": "9d0584062e883b919b270723f1b2003967b89a31a2774d0a109b8b33d869d053",
     "HostedAssetAdmission.cs": "bf0899130f1380befbdc0f36b30e40725a53e144889b56c7fc40bbdd9b4f0160",
     "HostedAssetDescriptor.cs": "76e2a21c960803e3c096ad34cba17d5026d0f9c863d5ee8ef1668e9a5ee7a596",
     "HostedBrandLocale.cs": "6f6618812a06b83a9f51a388160ef4161c17842f6954187725e31f2b7a1bb737",
-    "HostedPageCatalog.cs": "7b42ba832d6e0b5b439eb23acdf1eb63bd242dc068e2ac7077ab78a204f1e4e6",
+    "HostedPageAccessMode.cs": "bb01bea7b1034d738092e86d5e5f44843777b398f894822b7301f2287833bef9",
+    "HostedPageAccessOptions.cs": "50a4578977731372dc34ae1ad3b946692e0994efcf74714aeee91aa4a111b95c",
+    "HostedPageAdmission.cs": "b8f5972d3e3c127179090aa52bbdd016b414a11d9911fb63797402e77c821644",
+    "HostedPageCatalog.cs": "217725bc5bfd9f26f7d7afa9799de70b767959722cee0b6ef7d8c5ed0d33a2e9",
     "HostedPageManifest.cs": "7ab1bacb031f69da18e943d01bf9ae213db1e7ed5ac15f4323e5b2c20af5fa00",
-    "HostedPageOptions.cs": "0c2a53dd33a3a870cbd4caa0cbc75792bff4f18e23fb34263a8941d34cdbe284",
-    "HostedPageRendering.cs": "4fa65a04fb199bd1f7987732dc48ea82db16aa5038b8cd83f3c9b838c82922da",
+    "HostedPageOptions.cs": "f6e8c81dc8e0cbe67a91a3f2fd9d2f7276efe76872506fbfad72163d6a966802",
+    "HostedPageRendering.cs": "e5dc940600223f909d4c274f9018777a2b32b1e7fd61c3fd04c653516d47b759",
     "HostedPageRevision.cs": "7e49ce263999d840eaba79542d9d16117e1df546a9f2b8657062ed70c57cb6f7",
+    "HostedPageRouteOptions.cs": "4d80406c5a793f154eec763860001fec51f9f221a746ef4e603e8b0150577cd4",
     "HostedViteChunk.cs": "c2abdb654125efc3fb6b15f82bc81413805e33410c2e2f78c1aa5cb46f31a844",
     "IHostedAssetSource.cs": "2ecd704b528cb3a093462fc6e1eea001f3140c5b29a1dac15211f9220a194edd",
     "LocalHostedAssetSource.cs": "e317ed0274ab74944ed700b94af890d194b3a16c6410e31ec137213a47db7847",
@@ -117,12 +122,47 @@
           ],
           "reload": "restart",
           "description": "Supported MaxTotalBytes value owned by HostedPageOptions."
+        },
+        {
+          "property": "Routes",
+          "path": "Foundation:HostedPages:Routes",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxItems": 64
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Absent retains legacy public mode; explicit collection must be nonempty, indexed and contain explicit Page/Bootstrap selections."
+        },
+        {
+          "property": "AssetResponsePolicy",
+          "path": "Foundation:HostedPages:AssetResponsePolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Existing shell response policy for explicitly admitted public immutable assets, including built-ins."
         }
       ],
       "semanticConstraints": [
         "Root and Manifest must resolve to admitted contained local read-only paths; symlinks and traversal reject.",
         "Exact manifest SHA256, current revision and runtime publication/asset identities must agree before endpoint registration. Metadata export does not read deployment assets.",
-        "PagePath must be a fixed local absolute route; source validators govern safe manifest and aggregate retained byte admission."
+        "PagePath must be a fixed local absolute route; source validators govern safe manifest and aggregate retained byte admission.",
+        "PagePath and explicit Routes cannot both be configured. Explicit empty/null Routes, unknown settings, duplicate route IDs/paths, unsafe paths, unknown revisions and policies reject activation.",
+        "Authenticated resources require the independently selected Foundation BFF-cookie feature. Bootstrap cannot weaken Page admission and inherits its permission in addition to any bootstrap permission.",
+        "Explicit route bootstrap URLs partition route ID and selected revision hash. Legacy revision-only aliases are not registered in explicit mode. Assets remain explicitly public and must contain no private data."
       ],
       "appliesTo": {
         "kind": "shell",
@@ -131,6 +171,250 @@
         ],
         "configuration": [
           "Foundation:HostedPages"
+        ]
+      }
+    },
+    {
+      "scope": "hosted-page-route",
+      "typeName": "Orbyss.Foundation.Web.HostedPages.HostedPageRouteOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Id",
+          "path": "Foundation:HostedPages:Routes:{index}:Id",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "maxLength": 128
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Id selection."
+        },
+        {
+          "property": "Path",
+          "path": "Foundation:HostedPages:Routes:{index}:Path",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "maxLength": 513
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Path selection."
+        },
+        {
+          "property": "Revision",
+          "path": "Foundation:HostedPages:Routes:{index}:Revision",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Revision selection."
+        },
+        {
+          "property": "Page",
+          "path": "Foundation:HostedPages:Routes:{index}:Page",
+          "required": true,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Page selection."
+        },
+        {
+          "property": "Bootstrap",
+          "path": "Foundation:HostedPages:Routes:{index}:Bootstrap",
+          "required": true,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Bootstrap selection."
+        }
+      ],
+      "semanticConstraints": [
+        "HostedPageCatalog validates all selections at shell activation; configuration changes require shell recreation."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Web.HostedPages"
+        ],
+        "configuration": [
+          "Foundation:HostedPages:Routes"
+        ]
+      }
+    },
+    {
+      "scope": "hosted-page-page-access",
+      "typeName": "Orbyss.Foundation.Web.HostedPages.HostedPageAccessOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Mode",
+          "path": "Foundation:HostedPages:Routes:{index}:Page:Mode",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "Public",
+              "Authenticated"
+            ]
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Mode selection."
+        },
+        {
+          "property": "Permission",
+          "path": "Foundation:HostedPages:Routes:{index}:Page:Permission",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 256
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Permission selection."
+        },
+        {
+          "property": "ResponsePolicy",
+          "path": "Foundation:HostedPages:Routes:{index}:Page:ResponsePolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 128
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ResponsePolicy selection."
+        }
+      ],
+      "semanticConstraints": [
+        "HostedPageCatalog validates all selections at shell activation; configuration changes require shell recreation."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Web.HostedPages"
+        ],
+        "configuration": [
+          "Foundation:HostedPages:Routes"
+        ]
+      }
+    },
+    {
+      "scope": "hosted-page-bootstrap-access",
+      "typeName": "Orbyss.Foundation.Web.HostedPages.HostedPageAccessOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "Mode",
+          "path": "Foundation:HostedPages:Routes:{index}:Bootstrap:Mode",
+          "required": true,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "Public",
+              "Authenticated"
+            ]
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Mode selection."
+        },
+        {
+          "property": "Permission",
+          "path": "Foundation:HostedPages:Routes:{index}:Bootstrap:Permission",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 256
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported Permission selection."
+        },
+        {
+          "property": "ResponsePolicy",
+          "path": "Foundation:HostedPages:Routes:{index}:Bootstrap:ResponsePolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 128
+          },
+          "binding": "Shell-local HostedPages binding and catalog validation before endpoint registration.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Supported ResponsePolicy selection."
+        }
+      ],
+      "semanticConstraints": [
+        "HostedPageCatalog validates all selections at shell activation; configuration changes require shell recreation."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Web.HostedPages"
+        ],
+        "configuration": [
+          "Foundation:HostedPages:Routes"
         ]
       }
     }

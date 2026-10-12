@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Foundation.ContractFixture.HostedPages</PackageId>
+    <Version>$(FoundationCandidateVersion)</Version>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Foundation synthetic HTTP qualification</Authors>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" Version="[$(CShellsCandidateVersion)]" PrivateAssets="all" />
+    <PackageReference Include="Orbyss.Foundation.Authentication.BffCookie" Version="[$(FoundationCandidateVersion)]" />
+    <None Include="feature.json" Pack="true" PackagePath="orbyss-foundation/feature.json" />
+  </ItemGroup>
+</Project>

@@ -10,7 +10,7 @@ internal sealed class PermissionPolicyProvider(
     : DefaultAuthorizationPolicyProvider(authorizationOptions)
 {
     /// <summary>Prefixes canonical application-permission policies.</summary>
-    private const string Prefix = "permission:";
+    private const string Prefix = PermissionPolicyNames.Prefix;
 
     /// <inheritdoc />
     public override Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)

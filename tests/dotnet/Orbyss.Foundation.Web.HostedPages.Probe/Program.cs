@@ -171,6 +171,7 @@ try
         catch (Exception error) when (error is InvalidDataException or Orbyss.Foundation.Json.JsonProfileException) { }
     }
     File.WriteAllBytes(Path.Combine(root, "a", "manifest.json"), originalManifest);
+    await AuthenticatedPagesProbe.RunAsync(root, args.Contains("--serve-private"));
     var link = Path.Combine(root, "linked");
     try
     {
@@ -180,7 +181,9 @@ try
         Directory.Delete(link);
         Console.WriteLine("Linked-root rejection passed.");
     }
-    catch (UnauthorizedAccessException) { Console.WriteLine("Symbolic-link creation unavailable; run this case on Linux CI."); }
+    catch (Exception error) when (error is UnauthorizedAccessException ||
+        OperatingSystem.IsWindows() && error is IOException && (error.HResult & 0xffff) == 1314)
+    { Console.WriteLine("Symbolic-link creation unavailable; run this case on Linux CI."); }
     Console.WriteLine("Malformed/incoherent manifest, public/private, MIME/hash and Vite dependency negatives passed.");
 }
 finally

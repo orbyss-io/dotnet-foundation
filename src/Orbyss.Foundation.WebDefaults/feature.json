@@ -21,9 +21,10 @@
     "WebResponseMetadata.cs": "13c7f9f598a6933a9b195ec4c43cd674d9e0b0f213725515f415a58d836528e5",
     "WebResponseNonceState.cs": "9b1a6a8314ccbc1bd0e0ebc3135567de42b3d2db340fd0dfe90280f0c799ad08",
     "WebResponsePoliciesMiddleware.cs": "b18d9dcde1e41b573d68db42ab80cba41ffd91cecfee091be0a9cb18096fde41",
-    "WebResponsePoliciesOptions.cs": "6812cdd90a47581e4487cd1d04350207804585e9b665aff9be3d3afa9b40e7a0",
+    "WebResponsePoliciesOptions.cs": "35fee8933ea524a2e96a54604350c2d8ae0f5f0cdfe2a6e0655792caca2ee861",
     "WebResponsePolicy.cs": "5a4c0c675898f0f739ebfd56602a8484bce35e0b5bec4e2b3fd6e63bd54141c6",
     "WebResponsePolicyCatalog.cs": "f3c780d85286b1711113358976a9b2fd73fd6e74bdd03d03418f2bed22ce00f1",
+    "WebResponsePolicyNames.cs": "be952ba86d20108d42e6adde7e1d55732c39ae406e29698fc173de077f1b3fe6",
     "WebResponsePolicyOptions.cs": "8fb547cf919520ba663a3a517a8561cd1ee4ea99de979984b98bff3768a4cb5b"
   }
 }
