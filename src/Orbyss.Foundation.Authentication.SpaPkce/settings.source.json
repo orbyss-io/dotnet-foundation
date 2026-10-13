@@ -308,6 +308,22 @@
           "description": "Gets or sets the interactive access-denied path."
         },
         {
+          "property": "LogoutLandingPath",
+          "path": "Foundation:Web:LogoutLandingPath",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "This selected profile contributes validation to the common shell-bound FoundationWebOptions; types and defaults are imported from the exact owning Authentication metadata and native implementation assembly.",
+          "precedence": [
+            "typed property initializer",
+            "named shell Configuration snapshot",
+            "feature settings overlay in native shell composition",
+            "explicit registered options configuration in registration order"
+          ],
+          "reload": "restart",
+          "description": "Literal shell-relative logout destination after local session clearing and provider completion or initiation failure; the default retains the machine acknowledgement route."
+        },
+        {
           "property": "CookieName",
           "path": "Foundation:Web:CookieName",
           "required": false,
@@ -340,7 +356,7 @@
             "explicit registered options configuration in registration order"
           ],
           "reload": "restart",
-          "description": "Gets or sets the discovery and JWKS readiness budget in seconds."
+          "description": "Timeout for each native OIDC backchannel HTTP request, including discovery and JWKS retrieval; native retries do not enlarge the human sign-in window."
         },
         {
           "property": "RemoteAuthenticationTimeoutSeconds",
@@ -356,7 +372,7 @@
             "explicit registered options configuration in registration order"
           ],
           "reload": "restart",
-          "description": "Gets or sets the maximum duration of an interactive remote authentication operation."
+          "description": "Finite human sign-in window including credentials, MFA and consent; native backchannel HTTP timeouts remain separate."
         },
         {
           "property": "SessionIdleMinutes",

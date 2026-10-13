@@ -41,4 +41,37 @@ Foreign keys cannot be read, renewed or removed through another shell's ticket s
 validated claim URNs remain compatible. Older unbound session keys cannot establish shell ownership
 and therefore require a new login after this update; no account or persisted application identity changes.
 
-`RemoteAuthenticationTimeoutSeconds` must be positive; invalid values fail shell configuration admission before the OIDC handler is challenged. The value remains operational and fixed per shell activation.
+`RemoteAuthenticationTimeoutSeconds` defaults to 900 seconds, including human time entering
+credentials, MFA and consent. Positive explicit overrides remain effective for both the remote flow
+and native nonce lifetime. Expired state/correlation still fails safely and needs a fresh sign-in.
+`DiscoveryTimeoutSeconds` remains a separate three-second per-HTTP-request backchannel timeout;
+native metadata retries may consume more than one request budget. Session expiry is separate.
+
+`LogoutLandingPath` defaults to `/bff/signed-out`, preserving its typed machine JSON acknowledgement.
+Set it to an application-owned public page such as `/signed-out` or `/`. It is shell-relative and
+uses the owning shell's captured authentication path base for both native provider completion and
+initiation-failure fallback (`?remote=unavailable`). It must be a literal local path of at most 2048
+characters, without query, fragment, escapes, dot segments or routing syntax. Protocol/error paths,
+the API namespace and BFF controls are reserved; `/bff/signed-out` is the compatibility exception.
+Local ticket/cookie deletion precedes provider navigation and logout still requires antiforgery.
+Neither reaching a landing, its query hint nor the static machine acknowledgement proves current
+local session state or provider-wide sign-out. Applications should observe `/bff/user` and distinguish
+confirmed local sign-out from unknown provider completion when presenting recovery.
+
+Applications replace the existing `IAuthenticationErrorWriter` through shell DI to present browser
+recovery while retaining bounded machine/API problem responses. Initial sign-in discovery, JWKS and
+native PAR transport failures, HTTP timeouts and availability statuses (408, 429, 5xx) reach that
+writer as 503 `identity_provider_unavailable`. Classification uses failures observed by the owned
+native transport/retriever, retaining native metadata refresh, key rollover and last-known-good
+behavior. Malformed metadata, invalid client/address responses, unmarked event/programming errors
+and caller cancellation keep their native or general error handling. Explicit custom HTTP clients
+and configuration managers retain their ownership; opaque transport failures cannot be classified
+by this provenance mechanism. Provider response bodies and exception messages are not logged by
+the recovery handler.
+
+A failed new attempt does not delete an independently valid existing session. Browser presentation
+may offer Continue only after validating that session and must retain current permission checks.
+For shell-local retry links in an endpoint writer, use
+`context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase`;
+CShells restores the outer path before endpoint delegates execute. Branding and recovery UI belong
+to the application feature, keeping Foundation.Host application-neutral.

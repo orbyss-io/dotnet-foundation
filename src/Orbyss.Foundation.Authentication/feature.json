@@ -16,7 +16,7 @@
     "DefaultAuthenticationErrorWriter.cs": "9d4446c89d6889bb5040f875c0ba17ade1a9b4d020bc3927259f6855093b38cd",
     "FoundationAuthenticationFeature.cs": "f0f062b346b50030e9865a5e7518bdf2aadd9135a43aaf2279e732b85f955592",
     "FoundationAuthenticationProfiles.cs": "e53adf5aae400932f0274e139652553730f7a804dea0d77df915e4a0c3023563",
-    "FoundationWebOptions.cs": "d5cea8dde1008f58c300b02037447322332a5582303d34ddf4ce8f01fb51fa07",
+    "FoundationWebOptions.cs": "bbe208b2e93e84015c5705ba6e208210e41e945c8c929246e811d066819e2ab5",
     "FoundationWebOptionsValidator.cs": "c28ed0bc9751ae2c4ad8a1eee2bc9bb01901dc858a9b6b2f818d80a1d6c54e9c",
     "IAuthenticationErrorWriter.cs": "d965483f0a1c5c817a0fc3415fc93d93e7bad83b32177750d840f143b9584b6a",
     "IFoundationAuthenticationProfile.cs": "b365e3944d9e1065953cbc32d66032d9895db65d38097f700d6dd3dd94eceedc",

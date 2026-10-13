@@ -14,11 +14,12 @@ POSTGRES_IMAGE = "postgres@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51
 def main() -> int:
     parser = argparse.ArgumentParser(description="Qualify Foundation deadlines and, by default, native PostgreSQL ownership against a disposable database.")
     parser.add_argument("--deadline-only", action="store_true", help="Run deterministic deadlines only; this does not claim native PostgreSQL acceptance.")
+    parser.add_argument("--configuration", choices=("Debug", "Release"), default="Release", help="Select the already-built probe; release workflows retain Release.")
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    probe = root / "tests/dotnet/Orbyss.Foundation.PostgreSql.Probe/bin/Release/net10.0/Orbyss.Foundation.PostgreSql.Probe.dll"
+    probe = root / f"tests/dotnet/Orbyss.Foundation.PostgreSql.Probe/bin/{arguments.configuration}/net10.0/Orbyss.Foundation.PostgreSql.Probe.dll"
     if not probe.is_file():
-        raise AssertionError("Build the Release PostgreSQL probe before running its disposable-database qualifier.")
+        raise AssertionError("Build the selected PostgreSQL probe configuration before running its disposable-database qualifier.")
     if arguments.deadline_only:
         result = subprocess.run(["dotnet", str(probe), "--deadline-only"], cwd=root,
                                 capture_output=True, text=True, timeout=30, check=True)

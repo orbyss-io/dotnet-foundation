@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -50,6 +51,8 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         services.AddJsonResponseContract<BffSignedOutResponse>(responseProfile, responseRequirement);
         services.AddSingleton<IFoundationAuthenticationProfile, BffCookieProfileMarker>();
         services.AddSingleton<IValidateOptions<FoundationWebOptions>, BffCookieOptionsValidator>();
+        // Register before native post-configuration; all consumer Configure actions still run first.
+        services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, BffOpenIdConnectPostConfigureOptions>();
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -88,13 +91,7 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                 .AllowAnonymous()
                 .ExcludeFromDescription();
         }
-        endpoints.MapGet("/bff/login", (string? returnUrl) =>
-        {
-            var destination = IsLocalReturnUrl(returnUrl) ? returnUrl! : "/";
-            return Results.Challenge(
-                new AuthenticationProperties { RedirectUri = destination },
-                [OpenIdConnectDefaults.AuthenticationScheme]);
-        }).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        endpoints.MapGet("/bff/login", LoginAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
         endpoints.MapGet("/bff/user", WriteUserAsync).WithJsonResponse<BffUserResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
 
@@ -186,6 +183,7 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                 options.SignedOutCallbackPath = settings.SignedOutCallbackPath;
                 options.RemoteSignOutPath = settings.RemoteSignOutPath;
                 options.RemoteAuthenticationTimeout = TimeSpan.FromSeconds(settings.RemoteAuthenticationTimeoutSeconds);
+                options.ProtocolValidator.NonceLifetime = options.RemoteAuthenticationTimeout;
                 options.BackchannelTimeout = TimeSpan.FromSeconds(settings.DiscoveryTimeoutSeconds);
                 options.CorrelationCookie.SecurePolicy = insecureLocal
                     ? CookieSecurePolicy.SameAsRequest
@@ -263,21 +261,52 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     }
 
     /// <summary>Clears the local session before attempting provider logout.</summary>
-    private static async Task LogoutAsync(HttpContext context, ILoggerFactory loggerFactory)
+    private static async Task LogoutAsync(HttpContext context, ILoggerFactory loggerFactory, IOptions<FoundationWebOptions> settings)
     {
+        // CShells restores the outer request path before executing endpoint delegates.
+        // Native authentication retains the shell base captured by its middleware.
+        var pathBase = context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase;
+        var destination = pathBase.Add(new PathString(settings.Value.LogoutLandingPath)).Value!;
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
         try
         {
             await context.SignOutAsync(
                 OpenIdConnectDefaults.AuthenticationScheme,
-                new AuthenticationProperties { RedirectUri = "/bff/signed-out" }).ConfigureAwait(false);
+                new AuthenticationProperties { RedirectUri = destination }).ConfigureAwait(false);
         }
         catch (Exception exception) when (
             exception is HttpRequestException or InvalidOperationException or TaskCanceledException)
         {
             loggerFactory.CreateLogger("Orbyss.Foundation.RemoteLogout")
                 .LogWarning("Remote logout could not be initiated after the local session was cleared.");
-            context.Response.Redirect("/bff/signed-out?remote=unavailable");
+            context.RequestAborted.ThrowIfCancellationRequested();
+            if (context.Response.HasStarted) throw;
+            context.Response.Redirect(QueryHelpers.AddQueryString(destination, "remote", "unavailable"));
+        }
+    }
+
+    /// <summary>Starts native sign-in and recovers only provider failures with observed backchannel/retrieval provenance.</summary>
+    private static async Task LoginAsync(HttpContext context, string? returnUrl, IAuthenticationErrorWriter errorWriter, ILoggerFactory loggerFactory)
+    {
+        context.RequestAborted.ThrowIfCancellationRequested();
+        try
+        {
+            await context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
+                new AuthenticationProperties { RedirectUri = IsLocalReturnUrl(returnUrl) ? returnUrl! : "/" }).ConfigureAwait(false);
+        }
+        catch (Exception) when (context.RequestAborted.IsCancellationRequested)
+        {
+            context.RequestAborted.ThrowIfCancellationRequested();
+            throw;
+        }
+        catch (Exception failure) when (!context.Response.HasStarted && BffProviderFailureProvenance.IsUnavailable(failure))
+        {
+            loggerFactory.CreateLogger("Orbyss.Foundation.RemoteAuthentication").LogWarning(
+                "OIDC initiation failed with stable code {AuthenticationErrorCode} and failure kind {AuthenticationFailureKind}.",
+                AuthenticationErrorCodes.IdentityProviderUnavailable, failure.GetType().Name);
+            context.RequestAborted.ThrowIfCancellationRequested();
+            await errorWriter.WriteAsync(context, StatusCodes.Status503ServiceUnavailable,
+                AuthenticationErrorCodes.IdentityProviderUnavailable).ConfigureAwait(false);
         }
     }
 

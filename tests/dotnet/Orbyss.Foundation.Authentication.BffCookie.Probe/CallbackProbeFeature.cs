@@ -68,6 +68,14 @@ public sealed class CallbackProbeFeature : IWebShellFeature
         return code;
     }
 
+    internal static string? RedeemCode(string code) => Codes.TryRemove(code, out var token) ? token : null;
+
+    internal static object JwksDocument()
+    {
+        var parameters = SigningKey.Rsa.ExportParameters(false);
+        return new { keys = new[] { new { kty = "RSA", use = "sig", kid = SigningKey.KeyId, alg = "RS256", n = Base64UrlEncoder.Encode(parameters.Modulus), e = Base64UrlEncoder.Encode(parameters.Exponent) } } };
+    }
+
     public void MapEndpoints(IEndpointRouteBuilder endpoints, IHostEnvironment? environment) { }
 
     private sealed class FixtureBackchannel(OpenIdConnectOptions options) : HttpMessageHandler

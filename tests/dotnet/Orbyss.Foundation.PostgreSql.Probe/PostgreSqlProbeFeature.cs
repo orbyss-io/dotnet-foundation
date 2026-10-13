@@ -14,6 +14,22 @@ public sealed class PostgreSqlProbeFeature(ShellSettings settings) : IShellFeatu
     {
         services.AddScoped(typeof(ILogger<>), typeof(ScopedProbeLogger<>));
         services.AddFoundationPostgreSql<ProbeContext>(settings, "primary", options => new ProbeContext(options));
+        services.AddSingleton<InterceptorEvidence>();
+        services.AddScoped<InterceptorUnitIdentity>();
+        services.AddTransient<PostCommitFaultInterceptor>();
+        services.AddFoundationPostgreSql<InterceptedContext>(settings, "primary", options => new InterceptedContext(options), provider =>
+        {
+            var evidence = provider.GetRequiredService<InterceptorEvidence>();
+            var interceptor = provider.GetRequiredService<PostCommitFaultInterceptor>();
+            interceptor.Register();
+            return evidence.RejectMode switch
+            {
+                1 => null!,
+                2 => [interceptor, interceptor],
+                3 => [null!],
+                _ => [interceptor]
+            };
+        });
         var single = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("FOUNDATION_POSTGRES_TEST_CONNECTION")) { MaxPoolSize = 1 };
         services.AddFoundationPostgreSql<SinglePoolContext>("single", new PostgreSqlOptions
         {

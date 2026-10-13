@@ -22,6 +22,13 @@ internal static class OptionsBindingProbe
         CheckScopes(first, expected);
         using var omitted = Provider("");
         CheckScopes(omitted, ["openid", "profile", "offline_access", "orbyss-foundation-api"]);
+        var defaults = omitted.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>().Get(OpenIdConnectDefaults.AuthenticationScheme);
+        Require(defaults.RemoteAuthenticationTimeout == TimeSpan.FromSeconds(900)
+            && defaults.ProtocolValidator.NonceLifetime == defaults.RemoteAuthenticationTimeout
+            && defaults.BackchannelTimeout == TimeSpan.FromSeconds(3), "human/network default budgets were mixed");
+        using var longer = Provider("\"RemoteAuthenticationTimeoutSeconds\":1200");
+        Require(longer.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>().Get(OpenIdConnectDefaults.AuthenticationScheme)
+            .ProtocolValidator.NonceLifetime == TimeSpan.FromSeconds(1200), "nonce lifetime silently shortened the configured human sign-in window");
         using var minimal = Provider("\"Scopes\":[\"openid\"]");
         CheckScopes(minimal, ["openid"]);
         foreach (var selection in new[] { "[]", "null", "\"\"", "\"openid\"", "[\"profile\"]", "[\"openid\",\"\"]", "[\"openid\",null]", "[\"openid\",\"two scopes\"]", "[\"openid\",\"bad\\\\scope\"]", "[\"openid\",\"ÃƒÂ©\"]", "[\"openid\",\"openid\"]", "{\"unexpected\":\"openid\"}", "{\"1\":\"openid\"}", "[\"openid\",{\"nested\":\"scope\"}]" })
@@ -37,6 +44,17 @@ internal static class OptionsBindingProbe
         using var shortest = Provider("\"RemoteAuthenticationTimeoutSeconds\":1");
         Require(shortest.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>()
             .Get(OpenIdConnectDefaults.AuthenticationScheme).RemoteAuthenticationTimeout == TimeSpan.FromSeconds(1), "positive remote timeout did not bind to native OIDC");
+        foreach (var path in new[] { "/", "/signed-out", "/bff/signed-out" })
+        {
+            using var selectedLanding = Provider("\"LogoutLandingPath\":\"" + path + "\"");
+            Require(selectedLanding.GetRequiredService<IOptions<FoundationWebOptions>>().Value.LogoutLandingPath == path, "valid logout landing did not bind");
+        }
+        foreach (var path in new[] { "", "https://external.example/", "//external.example", "/a/../b", "/a%2fb", "/bff/login", "/bff/logout", "/api/private", "/signin-oidc", "/signout-callback-oidc", "/signout-oidc", "/bff/access-denied", "/landing?next=bad", "/landing#part", "/{route}", "/landing/" })
+        {
+            using var invalidLanding = Provider("\"LogoutLandingPath\":\"" + path + "\"");
+            try { _ = invalidLanding.GetRequiredService<IOptions<FoundationWebOptions>>().Value; throw new Exception("Unsafe/conflicting logout landing accepted"); }
+            catch (OptionsValidationException) { }
+        }
         using var security = Provider("""
             "Scopes":["openid"],"AllowedOrigins":["https://consumer.example"],
             "RolePermissions":{"reader":["records.read"]},"ScopePermissions":{"records":["records.read"]},
@@ -72,6 +90,9 @@ internal static class OptionsBindingProbe
             "\"RemoteAuthenticationTimeoutSeconds\":0", "\"RemoteAuthenticationTimeoutSeconds\":-1",
             "\"RoleClaim\":\"urn:orbyss-foundation:authentication:validated-issuer\"",
             "\"PermissionClaim\":\"urn:orbyss-foundation:authentication:validated-subject\"",
+            "\"LogoutLandingPath\":null", "\"LogoutLandingPath\":\"/api\"", "\"LogoutLandingPath\":\"/bff\"",
+            "\"LogoutLandingPath\":\"/landing\\\\other\"", "\"LogoutLandingPath\":\"/landing\\nother\"",
+            "\"LogoutLandingPath\":\"" + new string('a', 2048).Insert(0, "/") + "\"",
             "\"CallbackPath\":null", "\"CallbackPath\":\"//other.example/callback\"",
             "\"CallbackPath\":\"/oidc/{value}\"", "\"CallbackPath\":\"/oidc/callback?x=1\"",
             "\"CallbackPath\":\"/oidc/../callback\"", "\"CallbackPath\":\"/signin-oidc/\"",

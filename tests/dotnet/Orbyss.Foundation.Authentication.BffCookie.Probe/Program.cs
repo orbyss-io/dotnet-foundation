@@ -10,11 +10,13 @@ using Orbyss.Foundation.Authentication.BffCookie;
 using CShells.Lifecycle.Blueprints;
 using Microsoft.Extensions.Configuration;
 
+if (args is ["--serve-recovery"]) { await RecoveryProbe.RunAsync(serve: true); return; }
 VerifyLocalHttpDevelopmentCookies();
 VerifyProductionCookies();
 OptionsBindingProbe.Run();
 await IdentityProjectionProbe.RunAsync();
 await CallbackRoutingProbe.RunAsync();
+await RecoveryProbe.RunAsync();
 
 static void VerifyLocalHttpDevelopmentCookies()
 {
