@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+import sys
 from xml.etree import ElementTree
 from xml.sax.saxutils import escape
 
@@ -44,7 +45,7 @@ def package_version(package: Path) -> str:
     return next(item.text for item in metadata.iter() if item.tag.rsplit("}", 1)[-1] == "version")
 
 
-def create_feature(work: Path, *, refresh_lock: bool = False, historical_lock: Path | None = None) -> Path:
+def create_feature(work: Path, *, refresh_lock: bool = False, historical_lock: Path | None = None, configuration: str = "Release") -> Path:
     fixture = work / "feature"
     fixture.mkdir()
     # Keep this generated project independent of repository build/analyzer injection.
@@ -89,8 +90,23 @@ def create_feature(work: Path, *, refresh_lock: bool = False, historical_lock: P
     if refresh_lock:
         shutil.copy2(fixture / 'packages.lock.json', ROOT / 'tests/openapi-exporter/packages.lock.json')
     closure = work / "closure"
-    run(["dotnet", "pack", str(project), "-c", "Release", "--no-restore", "--output", str(closure)],
+    run(["dotnet", "pack", str(project), "-c", configuration, "--no-restore", "--output", str(closure)],
         ROOT, work / "feature-pack.log")
+    # Stage the real native dependency closure. The tool must not supply the
+    # application's OpenAPI libraries implicitly from its own dependencies.
+    assets = json.loads((fixture / "obj/project.assets.json").read_text())
+    for identity, library in assets["libraries"].items():
+        if library["type"] != "package":
+            continue
+        targets = [items[identity] for items in assets["targets"].values() if identity in items]
+        if not any(target.get("runtime") for target in targets):
+            continue
+        name, version = identity.split("/")
+        archives = [Path(folder) / library["path"] / (name.lower() + "." + version + ".nupkg")
+                    for folder in assets["packageFolders"]]
+        archives = [archive for archive in archives if archive.is_file()]
+        assert len(archives) == 1
+        shutil.copy2(archives[0], closure / archives[0].name)
     return closure
 
 
@@ -182,6 +198,9 @@ def main() -> None:
     run(["dotnet", "build", str(ROOT / f"src/{TOOL_ID}/{TOOL_ID}.csproj"), "-c", "Release",
          "--no-restore"], ROOT, work / "restore-release-build.log")
     write_json(work / "results.json", {"packages": results})
+    selected = (args.packages.resolve() if args.packages else work / "release-feed") / f"{TOOL_ID}.{release_version}.nupkg"
+    run([sys.executable, str(ROOT / "tests/validate_exporter_runtime_closure.py"), "--package", str(selected)],
+        ROOT, work / "runtime-closure.log")
     print("Packed OpenAPI exporter version integration checks passed.")
 
 

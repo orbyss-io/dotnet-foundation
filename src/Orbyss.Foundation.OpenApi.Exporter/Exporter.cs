@@ -5,7 +5,6 @@ using CShells.AspNetCore.Features;
 using CShells.Features;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -128,7 +127,9 @@ internal static class Exporter
         if (composedRoutes.Length == 0)
             throw new InvalidOperationException("the composed web features registered no route endpoints.");
 
-        var providerType = typeof(OpenApiOptions).Assembly.GetType(
+        // The application's validated closure owns its OpenAPI implementation/version.
+        // A tool dependency would shadow those bytes before feature inspection.
+        var providerType = resolver.Load("Microsoft.AspNetCore.OpenApi").GetType(
             "Microsoft.Extensions.ApiDescriptions.IDocumentProvider", throwOnError: true)!;
         var provider = application.Services.GetService(providerType)
             ?? throw new InvalidOperationException(

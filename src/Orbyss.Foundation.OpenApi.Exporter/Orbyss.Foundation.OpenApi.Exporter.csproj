@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' == 'true'">false</IsPackable>
-    <ExporterVersion>0.2.5</ExporterVersion>
+    <ExporterVersion>0.2.6</ExporterVersion>
     <Version>$(ExporterVersion)</Version><PackageVersion>$(ExporterVersion)</PackageVersion>
     <OutputType>Exe</OutputType>
     <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
@@ -15,7 +15,6 @@
   <ItemGroup>
     <PackageReference Include="CShells.Abstractions" />
     <PackageReference Include="CShells.AspNetCore.Abstractions" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyMetadata Include="PackageVersion" Value="$(PackageVersion)" />
