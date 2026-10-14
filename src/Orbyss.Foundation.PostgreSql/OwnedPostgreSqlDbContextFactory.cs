@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -8,6 +9,7 @@ namespace Orbyss.Foundation.PostgreSql;
 internal sealed class OwnedPostgreSqlDbContextFactory<TContext>(
     ContextLeaseState<TContext> state,
     PostgreSqlContextRegistration<TContext> registration,
+    IServiceProvider scopedProvider,
     ILogger<OwnedPostgreSqlDbContextFactory<TContext>>? logger = null,
     ILoggerFactory? loggerFactory = null) : IDbContextFactory<TContext>
     where TContext : FoundationPostgreSqlDbContext
@@ -19,11 +21,17 @@ internal sealed class OwnedPostgreSqlDbContextFactory<TContext>(
         TContext? context = null;
         try
         {
+            var contributions = registration.Interceptors(scopedProvider)?.ToArray()
+                ?? throw new InvalidOperationException("A PostgreSQL interceptor contribution must return a collection.");
+            if (contributions.Any(item => item is null)
+                || contributions.Distinct(ReferenceEqualityComparer.Instance).Count() != contributions.Length)
+                throw new InvalidOperationException("PostgreSQL interceptor contributions must contain distinct non-null native instances.");
             var options = new DbContextOptionsBuilder<TContext>().UseNpgsql(registration.DataSource.Source,
                 native => native.CommandTimeout(PostgreSqlPolicy.Seconds(registration.Policy.CommandTimeout)))
                 .UseLoggerFactory(new PostgreSqlRedactingLoggerFactory(loggerFactory ?? NullLoggerFactory.Instance))
                 .AddInterceptors(new PostgreSqlConnectionInterceptor(), new PostgreSqlCommandInterceptor(
-                    logger ?? NullLogger<OwnedPostgreSqlDbContextFactory<TContext>>.Instance)).Options;
+                    logger ?? NullLogger<OwnedPostgreSqlDbContextFactory<TContext>>.Instance))
+                .AddInterceptors(contributions).Options;
             context = registration.Construct(options);
             context.AttachLease(lease, options);
             return context;

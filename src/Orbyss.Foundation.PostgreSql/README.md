@@ -22,6 +22,24 @@ Concurrent and repeated owner disposal observe the same owner-close outcome, inc
 failed final scope disposal. An early close with live contexts stops admission immediately; those
 contexts own final scope release and any failure from that release.
 
+Both registration forms have an additive overload taking
+`Func<IServiceProvider, IReadOnlyList<IInterceptor>> interceptors` after the context constructor.
+The callback runs once after tracked admission for each context, using that unit's scoped provider.
+For example, register a native `DbTransactionInterceptor` as transient and contribute
+`provider => [provider.GetRequiredService<AuditTransactionInterceptor>()]` to the intended context.
+Contributions are snapshotted in callback order and appended after mandatory Foundation interceptors.
+Null collections, null entries and duplicate instance references are rejected with reservations released.
+Existing overloads contribute no application interceptors and keep their original signatures.
+
+Resolve disposable contributions through DI: transient instances can be context-specific; scoped
+instances share the unit. The retained unit scope disposes them after owner closure and the final
+context release. EF and individual contexts borrow these instances. Independently constructed objects
+and externally supplied singleton instances retain their owner's disposal responsibility. Singleton
+interceptors must support concurrent contexts. Native interceptors are trusted application code and
+can alter EF behavior; registration does not grant options/provider replacement or remove guards.
+A postcommit interceptor exception can follow a durable commit. Dispose the native transaction and
+reconcile through an independent unit; Foundation does not map that exception to a business outcome.
+
 Use the deadline token for database calls and pass an existing outer deadline to follow-up/reconciliation
 units. Caller cancellation does not establish rollback or commit certainty. The package owns no schema,
 entities, transaction contents, retry policy or domain outcome mapping. `PostgreSqlFailureInfo` exposes

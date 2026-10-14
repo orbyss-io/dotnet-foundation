@@ -54,14 +54,17 @@ public sealed class FoundationWebOptions
     /// <summary>Gets or sets the interactive access-denied path.</summary>
     public string AccessDeniedPath { get; set; } = "/bff/access-denied";
 
+    /// <summary>Gets or sets the literal shell-relative browser destination after local logout and provider completion or initiation failure. The default retains the machine acknowledgement route.</summary>
+    public string LogoutLandingPath { get; set; } = "/bff/signed-out";
+
     /// <summary>Gets or sets the host-only encrypted session cookie name.</summary>
     public string CookieName { get; set; } = "__Host-orbyss-foundation-session";
 
-    /// <summary>Gets or sets the discovery and JWKS readiness budget in seconds.</summary>
+    /// <summary>Gets or sets the timeout for each native OIDC backchannel HTTP request, including discovery and JWKS retrieval. Native retries remain separate from the human sign-in window.</summary>
     public int DiscoveryTimeoutSeconds { get; set; } = 3;
 
-    /// <summary>Gets or sets the maximum duration of an interactive remote authentication operation.</summary>
-    public int RemoteAuthenticationTimeoutSeconds { get; set; } = 10;
+    /// <summary>Gets or sets the finite time allowed for a person to complete remote sign-in, including credentials, MFA and consent. Network request budgets remain separate.</summary>
+    public int RemoteAuthenticationTimeoutSeconds { get; set; } = 900;
 
     /// <summary>Gets or sets the sliding server session idle lifetime in minutes.</summary>
     public int SessionIdleMinutes { get; set; } = 30;

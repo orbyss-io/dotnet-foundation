@@ -64,7 +64,7 @@ def qualify(package: Path, bff_package: Path | None):
         with zipfile.ZipFile(bff_package) as archive:
             bff_metadata = json.loads(archive.read("orbyss-foundation/settings.json"))
         timeout = next(setting for setting in bff_metadata["contracts"][0]["settings"] if setting["path"] == "Foundation:Web:RemoteAuthenticationTimeoutSeconds")
-        assert timeout["constraints"] == {"minimum": 1} and timeout["default"] == 10
+        assert timeout["constraints"] == {"minimum": 1} and timeout["default"] == 900
         probes.append(("Orbyss.Foundation.Authentication.BffCookie.Probe", bff_package))
     for name, selected in probes:
         folder = work / name

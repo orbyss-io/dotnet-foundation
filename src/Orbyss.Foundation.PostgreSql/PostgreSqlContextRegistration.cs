@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Orbyss.Foundation.PostgreSql;
 
@@ -6,4 +7,5 @@ namespace Orbyss.Foundation.PostgreSql;
 internal sealed record PostgreSqlContextRegistration<TContext>(
     ShellPostgreSqlDataSource DataSource,
     PostgreSqlPolicy Policy,
-    Func<DbContextOptions<TContext>, TContext> Construct) where TContext : FoundationPostgreSqlDbContext;
+    Func<DbContextOptions<TContext>, TContext> Construct,
+    Func<IServiceProvider, IReadOnlyList<IInterceptor>> Interceptors) where TContext : FoundationPostgreSqlDbContext;

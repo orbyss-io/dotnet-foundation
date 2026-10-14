@@ -62,6 +62,7 @@ jobs:
           npm ci --prefix tests/browser
           node tests/browser/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
           node tests/browser/hosted-pages.cjs
+          node tests/browser/authentication-recovery.cjs
 
       - name: Pack Foundation packages
         run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:FoundationRuntimeOnly=true --output artifacts/nuget

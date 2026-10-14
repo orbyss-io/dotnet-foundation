@@ -377,6 +377,7 @@ await using (var replacement = await reload.NewShell!.ServiceProvider.GetRequire
 {
     Require(replacement.DataSourceId != activeUnit.DataSourceId, "new shell generation reused the disposed source");
 }
+await InterceptorAdmissionProbe.RunAsync(registry, reload.NewShell!, otherShell, connection, "a");
 foreach (var active in registry.GetActiveShells()) await (await registry.DrainAsync(active)).WaitAsync();
 Console.WriteLine("Actual PostgreSQL shell initialization, independent factory units, native waits/cancellation, pool reset and active-unit drain passed.");
 

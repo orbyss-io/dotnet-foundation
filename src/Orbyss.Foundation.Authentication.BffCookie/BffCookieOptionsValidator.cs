@@ -22,6 +22,16 @@ internal sealed class BffCookieOptionsValidator : IValidateOptions<FoundationWeb
         ValidatePath(options.SignedOutCallbackPath, "SignedOutCallbackPath", failures);
         ValidatePath(options.RemoteSignOutPath, "RemoteSignOutPath", failures);
         ValidatePath(options.AccessDeniedPath, "AccessDeniedPath", failures);
+        if (options.LogoutLandingPath != "/") ValidatePath(options.LogoutLandingPath, "LogoutLandingPath", failures);
+        if (!string.IsNullOrWhiteSpace(options.LogoutLandingPath) && (options.LogoutLandingPath.Length > 2048
+            || options.LogoutLandingPath.Equals("/api", StringComparison.OrdinalIgnoreCase)
+            || options.LogoutLandingPath.StartsWith("/api/", StringComparison.OrdinalIgnoreCase)
+            || options.LogoutLandingPath.Equals("/bff", StringComparison.OrdinalIgnoreCase)
+            || options.LogoutLandingPath.StartsWith("/bff/", StringComparison.OrdinalIgnoreCase)
+                && !options.LogoutLandingPath.Equals("/bff/signed-out", StringComparison.OrdinalIgnoreCase)
+            || new[] { options.CallbackPath, options.SignedOutCallbackPath, options.RemoteSignOutPath, options.AccessDeniedPath }
+                .Contains(options.LogoutLandingPath, StringComparer.OrdinalIgnoreCase)))
+            failures.Add("Foundation:Web:LogoutLandingPath must not conflict with protocol, API or BFF control endpoints.");
         var paths = new[] { options.CallbackPath, options.SignedOutCallbackPath, options.RemoteSignOutPath, options.AccessDeniedPath };
         if (paths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != paths.Length
             || paths.Intersect(["/bff/login", "/bff/user", "/bff/antiforgery", "/bff/logout", "/bff/signed-out"], StringComparer.OrdinalIgnoreCase).Any())
