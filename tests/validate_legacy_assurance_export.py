@@ -12,11 +12,12 @@ import validate_openapi_exporter as fixture
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--package', type=Path, required=True)
+    parser.add_argument('--configuration', choices=('Debug', 'Release'), default='Release')
     args = parser.parse_args()
     artifacts = fixture.ROOT / 'artifacts/assurance-export'
     artifacts.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(dir=artifacts))
-    original = fixture.create_feature(root,historical_lock=fixture.ROOT/'tests/openapi-exporter/legacy-public/packages.lock.json')
+    original = fixture.create_feature(root,historical_lock=fixture.ROOT/'tests/openapi-exporter/legacy-public/packages.lock.json', configuration=args.configuration)
     public = root / 'Orbyss.Foundation.OpenApi.Exporter.0.2.3.nupkg'
     with urllib.request.urlopen('https://api.nuget.org/v3-flatcontainer/orbyss.foundation.openapi.exporter/0.2.3/orbyss.foundation.openapi.exporter.0.2.3.nupkg') as response:
         public.write_bytes(response.read())

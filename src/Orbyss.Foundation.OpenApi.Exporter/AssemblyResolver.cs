@@ -17,7 +17,9 @@ internal sealed class AssemblyResolver : IDisposable
     }
 
     /// <summary>Loads a feature assembly into the exporter process.</summary>
-    public Assembly Load(string name) => LoadBytes(_assemblies[name]);
+    public Assembly Load(string name) => _assemblies.TryGetValue(name, out var content)
+        ? LoadBytes(content)
+        : throw new InvalidOperationException($"staged package closure has no managed assembly '{name}'.");
 
     /// <summary>Unregisters the temporary staged-package resolver.</summary>
     public void Dispose() => AssemblyLoadContext.Default.Resolving -= Resolve;

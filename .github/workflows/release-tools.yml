@@ -80,6 +80,12 @@ jobs:
           python scripts/tool_release.py verify --tag "$TAG"
           dotnet nuget push "$PACKAGE" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
       - run: python scripts/verify_nuget_publication.py --packages artifacts/nuget --timeout-seconds 900
+      - name: Verify installed public exporter against supported runtime closures
+        if: steps.selected.outputs.kind == 'exporter'
+        env:
+          PACKAGE: ${{ steps.selected.outputs.package_path }}
+          VERSION: ${{ steps.selected.outputs.version }}
+        run: python tests/validate_exporter_runtime_closure.py --package "$PACKAGE" --public-version "$VERSION"
       - name: Publish independently versioned tool knowledge
         env:
           GH_TOKEN: ${{ github.token }}
