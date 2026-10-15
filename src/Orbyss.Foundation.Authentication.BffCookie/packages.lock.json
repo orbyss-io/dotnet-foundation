@@ -95,8 +95,8 @@
       "orbyss.foundation.authentication": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Authentication.Core": "[0.3.4, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.4, )"
+          "Orbyss.Foundation.Authentication.Core": "[0.3.5, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.5, )"
         }
       },
       "orbyss.foundation.authentication.core": {
@@ -108,22 +108,22 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.4, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.5, )"
         }
       },
       "orbyss.foundation.json.aspnetcore": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": "[10.0.13, )",
-          "Orbyss.Foundation.Json": "[0.3.4, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.4, )"
+          "Orbyss.Foundation.Json": "[0.3.5, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.5, )"
         }
       },
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.4, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.4, )"
+          "Orbyss.Foundation.Json": "[0.3.5, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.5, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {
