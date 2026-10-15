@@ -7,7 +7,7 @@
     "Diagnostics/FoundationRequestDiagnosticLoggerFactory.cs": "24dfc4a31933434c74785e9e9bcf315282f78582045d564b5cc2d05a609005a3",
     "Diagnostics/FoundationRequestDiagnosticRedactionExtensions.cs": "da9e4ff8ed0b5b5a0326716c423c7b3f67abc92a1e3073d4c512bbc3fb9fd3a0",
     "Diagnostics/FoundationRequestDiagnosticRedactionRegistration.cs": "2aec2fb08271ba111c7f652697c5f655811d0ed00a27c2c5f82c36ae8314887e",
-    "Feed/NuplaneAssemblyProvider.cs": "d007ecd01de375e70f78dcef7a3691766fd9b73b649f0e741f67ae05da0b1abf",
+    "Feed/NuplaneAssemblyProvider.cs": "a9b450d527431cf6333ccbdf02c61e70a7bd199be3ff672a17ba5b7f85384e7c",
     "Program.cs": "8d594382bde7f1884d17f9673a4ba7137296aee45b33fef97e92e4507459cc41",
     "Shells/EagerShellActivationHostedService.cs": "365cee121a2245e06f169d61c1d754e68a4e04516ae99402e48f16461ce31e04",
     "Shells/FoundationBootOptions.cs": "5e1a1845c43f5c0f103d141edf3b39e6bad780a17a34ef0cd325c2ab521a7186",

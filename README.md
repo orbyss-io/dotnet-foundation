@@ -54,6 +54,11 @@ The Host build requires Python 3 for its offline native settings integration pro
 Use `FoundationMetadataPython` to select an explicit interpreter when necessary. Python is
 build tooling; the published Host executes no settings exporter at startup.
 
+Foundation 0.3.5 selects Nuplane `1.0.0-preview.109`, including multi-assembly package loading.
+Its native settings metadata reflects dedicated reconciliation/persistence settings taking
+precedence over Setup shorthand, keyed feed declarations, package load modes, and optional
+public key tokens for unsigned shared assemblies. Invalid shared identities fail validation.
+
 Stable tags must exactly match `VERSION`. The release workflow publishes the NuGet family through
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.
 

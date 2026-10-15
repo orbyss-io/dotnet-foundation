@@ -72,8 +72,9 @@ foreach (var token in new string?[] { null, "", "0123456789abcdef", "not-a-token
  var cfg=Config(new(){["SharedAssemblies:0:Name"]="Native.Contract",["SharedAssemblies:0:PublicKeyToken"]=token,["SharedAssemblies:0:MajorVersion"]="0"});
  var options=new LoadingOptions(); cfg.Bind(options);
  var errors=new LoadingOptionsValidator().Validate(options);
- Check(options.SharedAssemblies.Count==(token is null?0:1),"record null constructor omission differs");
- Check((errors.Count==0)==(token is null||token=="0123456789abcdef"),"record token validation differs");
+ Check(options.SharedAssemblies.Count==1,"optional record token did not bind");
+ Check(options.SharedAssemblies.Single().PublicKeyToken==(token??""),"unsigned token normalization differs");
+ Check((errors.Count==0)==(token!="not-a-token"),"record token validation differs");
  binder.Add(new{token,count=options.SharedAssemblies.Count,errors});
 }
 var time = new LoadingOptions(); Config(new(){["DeactivationTimeout"]="00:00:07.125"}).Bind(time);
@@ -83,10 +84,19 @@ Check(resolution.PolicyMode==FeedResolutionPolicyMode.Strict,"native named enum 
 Config(new(){["PolicyMode"]="1"}).Bind(resolution); Check(resolution.PolicyMode==FeedResolutionPolicyMode.Strict,"integral enum binder differs");
 time.DeactivationTimeout=TimeSpan.Zero; Check(new LoadingOptionsValidator().Validate(time).Count>0,"zero native timeout admitted");
 time.DeactivationTimeout=TimeSpan.FromTicks(1); Check(new LoadingOptionsValidator().Validate(time).Count==0,"positive native timeout rejected");
-// Nuplane 1.0 removed the named-map reader and per-package load-mode policy.
-// Probe the selected publisher's direct Setup binder with explicit feed names.
+// Both indexed declarations and named maps remain native publisher contracts.
 var feeds=new NuplaneSetupOptions(); Config(new(){["Feeds:0:Name"]="local",["Feeds:0:DirectoryPath"]="selected"}).Bind(feeds);
 Check(feeds.Feeds.Count==1&&feeds.Feeds[0].Name=="local"&&feeds.Feeds[0].DirectoryPath=="selected","indexed feed declaration binding differs");
+var keyed=NuplaneFeedSetupDeclarationReader.Read(Config(new(){
+ ["Feeds:0:Name"]="local",["Feeds:0:DirectoryPath"]="ignored",
+ ["Feeds:local:DirectoryPath"]="selected"}));
+Check(keyed.Declarations.Count==1&&keyed.Declarations[0].Name=="local"&&keyed.Declarations[0].Options.DirectoryPath=="selected","keyed feed did not override indexed declaration");
+Check(keyed.Diagnostics.Count==1,"mixed-shape feed override diagnostic missing");
+var modes=new LoadingOptions(); Config(new(){["DefaultLoadMode"]="HostIntegrated",
+ ["PackageLoadModes:0:PackageId"]="Selected",["PackageLoadModes:0:LoadMode"]="Collectible"}).Bind(modes);
+Check(modes.DefaultLoadMode==PackageLoadMode.HostIntegrated&&modes.PackageLoadModes.Single().LoadMode==PackageLoadMode.Collectible,"native load mode binding differs");
+modes.DefaultLoadMode=(PackageLoadMode)99;
+Check(new LoadingOptionsValidator().Validate(modes).Count>0,"undefined load mode admitted");
 
 // These native registrations are inspected only through IOptions. No hosted service is resolved or started.
 var configuration=Config(new(){
@@ -100,11 +110,18 @@ using var provider=services.BuildServiceProvider();
 var reconciliation=provider.GetRequiredService<IOptions<ReconciliationOptions>>().Value;
 var store=provider.GetRequiredService<IOptions<StoreRegistryOptions>>().Value;
 var loading=provider.GetRequiredService<IOptions<LoadingOptions>>().Value;
-Check(reconciliation.EnableAutomaticReconciliation&&reconciliation.PollInterval==TimeSpan.FromSeconds(17),"Setup did not override dedicated reconciliation options");
-Check(store.StateFilePath=="selected-native-state.json","Setup did not override dedicated persistence option");
+Check(!reconciliation.EnableAutomaticReconciliation&&reconciliation.PollInterval==TimeSpan.FromSeconds(29),"dedicated reconciliation options did not override Setup");
+Check(store.StateFilePath=="lower-priority-state.json","dedicated persistence option did not override Setup");
 Check(!loading.Enabled,"configuration Loading overload invented enable-by-default");
 configuration["Nuplane:Setup:PollInterval"]="00:00:31";
-Check(provider.GetRequiredService<IOptions<ReconciliationOptions>>().Value.PollInterval==TimeSpan.FromSeconds(17),"native IOptions unexpectedly reloaded");
+Check(provider.GetRequiredService<IOptions<ReconciliationOptions>>().Value.PollInterval==TimeSpan.FromSeconds(29),"native IOptions unexpectedly reloaded");
+var invalidConfiguration=Config(new(){["Nuplane:Loading:SharedAssemblies:0:MajorVersion"]="1"});
+var invalidServices=new ServiceCollection(); invalidServices.AddLogging();
+invalidServices.AddNuplane(invalidConfiguration.GetSection("Nuplane"),n=>n.AutoloadPackages(invalidConfiguration.GetSection("Nuplane:Loading")));
+using(var invalidProvider=invalidServices.BuildServiceProvider()) {
+ try { _=invalidProvider.GetRequiredService<IOptions<LoadingOptions>>().Value; throw new Exception("unbound shared identity silently dropped"); }
+ catch(OptionsValidationException) {}
+}
 
 var shellConfiguration=Config(new(){
  ["CShells:Shells:main:Name"]="ignored-pojo-name",
@@ -126,7 +143,8 @@ var construction=defaults.ToDictionary(x=>x.Key,x=>x.Value.GetType().GetProperti
  .ToDictionary(property=>property.Name,property=>property.GetValue(x.Value)));
 Console.WriteLine(JsonSerializer.Serialize(new{defaults=construction,binder,checks=new{
  nativeTimeSpanAndEnum=true,loadingTimeoutBounds=true,indexedFeedDeclaration=true,
- setupOverridesDedicatedOptions=true,loadingNotEnabledByDefault=true,optionsSnapshotStable=true,
+ dedicatedOptionsOverrideSetup=true,keyedFeedsOverrideIndexed=true,loadModesValidated=true,
+ unboundSharedIdentityRefused=true,loadingNotEnabledByDefault=true,optionsSnapshotStable=true,
  namedShellIdentity=true,featureSettingsOverrideConfiguration=true,composeRereadsSnapshotIsolated=true,
  numericShellMapRejected=true,hostStarted=false,applicationInitialized=false}},json));
 '''
@@ -182,14 +200,15 @@ def verify_defaults(metadata: dict, native: dict, graph: dict) -> int:
             if "bindingAuthority" in constraints:
                 assert "default" not in setting, "Manual binding controls must not claim unused POCO constructor defaults."
                 continue
-            if "default" in setting:
+            if "default" in setting and constraints["sourceType"] in actual:
                 assert setting["default"] == actual[constraints["sourceType"]][constraints["sourceProperty"]]
                 if setting["default"] is not None:
                     assert isinstance(setting["default"], {"string": str, "boolean": bool, "array": list, "object": dict, "integer": int, "number": (int,float)}[setting["type"]]), "Emitted default does not match declared kind."
             assert not(setting["secret"] and "default" in setting)
     entries = {x["path"]: x for c in metadata["contracts"] for x in c["settings"]}
-    assert entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]["required"] is True
-    assert "default" not in entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]
+    assert entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]["required"] is False
+    assert entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]["default"] is None
+    assert entries["Nuplane:Loading:SharedAssemblies:{index}:PublicKeyToken"]["constraints"]["nullable"] is True
     assert entries["Nuplane:Loading:DeactivationTimeout"]["constraints"]["format"] == "dotnetTimeSpan"
     for prefix in ("Nuplane:Setup:Feeds:{index}", "Nuplane:FeedResolution:Feeds:{index}"):
         assert entries[prefix + ":Credentials"]["secret"] is True and "default" not in entries[prefix + ":Credentials"]

@@ -60,7 +60,7 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm64 --output type=oci,dest=artifacts/host-candidate.tar -f src/Orbyss.Foundation.Host/Dockerfile.qualified "$host"
       - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567
         with:
-          version: v0.75.0
+          version: v0.76.0
       - name: Scan candidate images
         run: python scripts/dependency_maintenance.py scan --image artifacts/host-candidate.tar
       - name: Prepare the tested update pull request

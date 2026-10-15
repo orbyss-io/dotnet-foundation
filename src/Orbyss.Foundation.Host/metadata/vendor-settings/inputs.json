@@ -103,40 +103,40 @@
     },
     {
       "packageId": "Nuplane",
-      "packageVersion": "1.0.0-preview.10",
+      "packageVersion": "1.0.0-preview.109",
       "archive": {
-        "name": "nuplane.1.0.0-preview.10.nupkg",
-        "sha256": "734a311891aee58083d39a3aa345c7ba04bbe9bb4e42c7ee876b3aeac9b2ef9d"
+        "name": "nuplane.1.0.0-preview.109.nupkg",
+        "sha256": "a12d149d8a0b8ef75a4a23d8f1a0df16febc956cf457b959c5893a07949452de"
       },
       "assembly": {
         "name": "Nuplane.dll",
-        "sha256": "1afbf14bc79cfd44465207a914380c47363e29bafd6632f416cfecbd5b9ca3cc"
+        "sha256": "4799405c5089d1fbc9cfe711e4c703e8b7d5c0bcff5a9b7d3e1af1f2b4f7c2fe"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
+        "commit": "79b2bb6fbdd56aec088489cfba9fc8b942920f52",
         "files": {
-          "Nuplane/NuplaneServiceCollectionExtensions.cs.txt": "4b357968a38d50eada5917a8e228252b89419503aec6907c4297992a2e7acb89",
-          "Nuplane/Registration/NuplaneOptionsRegistrationServices.cs.txt": "5abbb8b35be60c6acced7187e6530b8f5063dc1b50e82791dfb754158da31b38",
-          "Nuplane/Registration/NuplaneSetupConfigurationServices.cs.txt": "7cea7f665e9f31bb434ba5bdc346840f52e9a58a69c952583e0d170d6852e59a",
-          "Nuplane/Builder/NuplaneBuilder.cs.txt": "c72f39bb54c38c2dd6bf8516a1d48d23a9cad97614dd91e5e9a1b111a26a258a",
+          "Nuplane/NuplaneServiceCollectionExtensions.cs.txt": "a00bc705d1a26089b7fb26bbcef4d33b909dad7e2392529d2ebd63bfa63e023a",
+          "Nuplane/Registration/NuplaneOptionsRegistrationServices.cs.txt": "7260ef6940cad5de2dceea5905b41504e3f0a777bed0960fc67c322f989d2463",
+          "Nuplane/Registration/NuplaneSetupConfigurationServices.cs.txt": "fb043044c0bddb287fb52c66ff86790f62048dd07cd050f386ed703f8ace043c",
+          "Nuplane/Builder/NuplaneBuilder.cs.txt": "29db844a965409ecc25e1152e1cbff24d603eff6dc2d3c5ae50c5bef58777f30",
           "Nuplane/Setup/NuplaneSetupOptions.cs.txt": "b8d7528cf7a6b1ee9d4812679238a1ce8cf818da28e8e9bb5e6a99fa98510cee",
-          "Nuplane/Setup/NuplaneSetupOptionsValidator.cs.txt": "7537c9c844aae5bfa7011f9c026c521b5feb186b973589bfaca1ebba7e8d23e1",
-          "Nuplane/Feeds/Setup/NuplaneFeedSetupOptions.cs.txt": "fc59650d7e5dbd63b0ff3de6bb26931beb2a7b38679f7d5af2224be714b4e880",
-          "Nuplane/Feeds/Setup/NuplaneDirectoryFeedSetupOptions.cs.txt": "5cbd60c5480702c2c510d6a758e7cebef3871afee6c45e99805ee8d50fbf5295",
-          "Nuplane/Feeds/Setup/NuplaneFeedSetupConfiguration.cs.txt": "76fa6ff2f6b5adf229041e4eae32055bbc1377d8e4717454a26ec908aea26b2e",
-          "Nuplane/Feeds/Configuration/FeedResolutionOptions.cs.txt": "573b3eb90aaa1d633e20703e28f9be27179bb193df80f8f4ab9a2c1fb21bf514",
-          "Nuplane/Feeds/Configuration/FeedResolutionOptionsValidator.cs.txt": "9d140837f9132cf54ea7ac466a60f6d494d6a1ce5f3131904d95fef470936d1d",
-          "Nuplane/Feeds/Configuration/FeedCredentialOptionsValidator.cs.txt": "f267a8f1236598bce395bf7b397d603ed1e131dde1b6121a06f524e88a138696",
+          "Nuplane/Setup/NuplaneSetupOptionsValidator.cs.txt": "6639a37644101acea063a7904160709eabbcfb6105016b9dd624953f71e2c3dc",
+          "Nuplane/Feeds/Setup/NuplaneFeedSetupOptions.cs.txt": "5befff0912370df8e8e7329c922d4736fb8ac770b2eae516ca05a0ac5f5aa537",
+          "Nuplane/Feeds/Setup/NuplaneDirectoryFeedSetupOptions.cs.txt": "073aa37f0de7149a48210e7409a09386a57640c4d104260ed8596375ca3edb53",
+          "Nuplane/Feeds/Setup/NuplaneFeedSetupConfiguration.cs.txt": "fabae0473ae177b51c940377b31baf9222ba5f4f4d5b1a4219b6864710f3d10d",
+          "Nuplane/Feeds/Configuration/FeedResolutionOptions.cs.txt": "346ad30540a68f4e32b29e5e769a810729185fefc2d188829ce40f2e832585ef",
+          "Nuplane/Feeds/Configuration/FeedResolutionOptionsValidator.cs.txt": "f807df84f21cd7fc1e819b6abab46c475d2eda1bdf0f620aaaf8de696e19d2b7",
+          "Nuplane/Feeds/Configuration/FeedCredentialOptionsValidator.cs.txt": "ca7e0f6f3c47e220a12599af0613fa11b3166322879a21a78517c5ff78f7ef6d",
           "Nuplane/Feeds/Configuration/FeedResolutionPolicyMode.cs.txt": "811b84b6ac81802e58eb4e09dbe235aa768f01c601c8e420f96645d51d85a44c",
-          "Nuplane/Reconciliation/Configuration/ReconciliationOptions.cs.txt": "7b107a1e7a16116787d9670bab670989069c439bb11c62e18a4bf7268e7a0430",
-          "Nuplane/Reconciliation/Validation/ReconciliationOptionsValidator.cs.txt": "dfb68f53e7e9d1b3be9ac8c48327f9831022aadd1e7a75b860e91ab3b39f710e",
+          "Nuplane/Reconciliation/Configuration/ReconciliationOptions.cs.txt": "40aa6a9b71931552b2d82610de48144a976c90174b211393912b05175f607173",
+          "Nuplane/Reconciliation/Validation/ReconciliationOptionsValidator.cs.txt": "3f5e37c08f4da4e6ede56f0c8abf1606b88389c69b7d75df6f65bd63bbc09396",
           "Nuplane/Reconciliation/Convergence/ConvergenceOptions.cs.txt": "27fb6ddbc68adde169df88383cc303a4e31bb78e691712d5c074fbe980dd0b05",
           "Nuplane/Reconciliation/Validation/ConvergenceOptionsValidator.cs.txt": "8a84b941d73c5a08c2874d68cb177490f92944e2f02468acb807734cf1b3c75a",
           "Nuplane/Sources/ManifestOptions.cs.txt": "16a924292e17ff602695763a371983f43eaec87bd84ac874232de6e59274a06d",
           "Nuplane/Reconciliation/LockFile/LockFileOptions.cs.txt": "db9f2dd4a78036e40b74fda405de1ed4b7a3b6e8a7946130bd0a152da66c4159",
           "Nuplane/Reconciliation/LockFile/LockFileMode.cs.txt": "00e61c2dfeea71fdc6f0d061ab2902a19bf78a43a4cb332174607b8f4598549b",
-          "Nuplane/Reconciliation/Validation/LockFileOptionsValidator.cs.txt": "8fc4b9458eaab53dd7280cc9b0e1298738d61421f336a4ce8e3c1e5bb4d29a9c",
+          "Nuplane/Reconciliation/Validation/LockFileOptionsValidator.cs.txt": "e17980371a48949b173b56108cf9775c4ffdcf96baf8df903d03c9cefb29f93c",
           "Nuplane/Store/Cleanup/CleanupPolicyOptions.cs.txt": "d3fb5a84bb21a50536f7de9055f08176bee634af411d18666635ac82b27768e2",
           "Nuplane/Store/Cleanup/CleanupExecutionMode.cs.txt": "24caf61ccd2ffd29ebeb588346d525d6f66c286599c376df21dd712d8de62c13",
           "Nuplane/Store/Validation/CleanupPolicyOptionsValidator.cs.txt": "9b168872d1a1182db1606410b649ee3f4d43b6a0085a10c4c1f034e5a306c555",
@@ -144,26 +144,31 @@
           "Nuplane/Store/State/StoreRegistryOptionsValidator.cs.txt": "3d45de29835dffcfc5b26be356e0f9919b76759fdea55750b6dfdcd926e33a62",
           "Nuplane/Store/State/EffectiveStorePersistenceSettings.cs.txt": "63dd3b137bb18e12d428b1c21f06cf6d7aa260ce8f21126a81d7d4bbccc53142",
           "Nuplane/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
-          "Nuplane/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"
+          "Nuplane/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f",
+          "Nuplane/Feeds/Configuration/RemoteFallbackMode.cs.txt": "a5355a2259c68c71a308746e94d32b86422643756c7949e3ba64db0ccaa152bb",
+          "Nuplane/Feeds/Setup/DirectoryFeedRole.cs.txt": "4a0e6d9615d7f0640c0344d6f1516dedfd45d6dd56c3a9dbcce86e712f29573d",
+          "Nuplane/Feeds/Setup/NuplaneFeedSetupDeclaration.cs.txt": "5d36741c1b4979ae30024bcbfc8ec287e9ff2abc43c9d8722a20b345eab7bad9",
+          "Nuplane/Feeds/Setup/NuplaneFeedSetupDeclarationReader.cs.txt": "c1883e23751c45770f6aee2240afb8036dd95fc9e2ff4ffcebaa9c4e9a2cce52",
+          "Nuplane/Reconciliation/Configuration/StartupFailurePolicy.cs.txt": "24e5570e7b3ea451e2337bd6dd9c9b89458dd77c02195c575567f14f75258eba"
         }
       }
     },
     {
       "packageId": "Nuplane.Abstractions",
-      "packageVersion": "1.0.0-preview.10",
+      "packageVersion": "1.0.0-preview.109",
       "archive": {
-        "name": "nuplane.abstractions.1.0.0-preview.10.nupkg",
-        "sha256": "60d72c0e69f4f88d07f06754ecffcbe27a0b36d41c7f0adbefbfa859a8b66eab"
+        "name": "nuplane.abstractions.1.0.0-preview.109.nupkg",
+        "sha256": "ea4e533757bbcf0a871dcccef59f80f77ab92e267a084c116fc8b41988976eff"
       },
       "assembly": {
         "name": "Nuplane.Abstractions.dll",
-        "sha256": "4f369487d46162a4a1932fd3c4e96c75d636c1cf5966a8d28dcbe63ff5838349"
+        "sha256": "eeb8ba65b9e3f11ab0ca560cc8e716e5a829deffd22a482ef6e2c06300c5ec84"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
+        "commit": "79b2bb6fbdd56aec088489cfba9fc8b942920f52",
         "files": {
-          "Nuplane.Abstractions/FeedDefinition.cs.txt": "071fba26769483e4024966c26426dea73645a9c8a20fb75bf2f6ca222d2571be",
+          "Nuplane.Abstractions/FeedDefinition.cs.txt": "51c7b4c2a82456c3625fe8505a825e1c98e38296192896927e2a51624a95f080",
           "Nuplane.Abstractions/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
           "Nuplane.Abstractions/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"
         }
@@ -171,67 +176,71 @@
     },
     {
       "packageId": "Nuplane.Loading",
-      "packageVersion": "1.0.0-preview.10",
+      "packageVersion": "1.0.0-preview.109",
       "archive": {
-        "name": "nuplane.loading.1.0.0-preview.10.nupkg",
-        "sha256": "4f4525a248c01b524f1c770c2432adb9f544759f2292292b9ccf2af9a23914b7"
+        "name": "nuplane.loading.1.0.0-preview.109.nupkg",
+        "sha256": "96ff866f92c871788d127d314532cd9030e109da5eb25860c3f9706a9df2dd11"
       },
       "assembly": {
         "name": "Nuplane.Loading.dll",
-        "sha256": "307750037e6fe114bbb921078bd12d6213edc1b45850624d2fe34f73128c6032"
+        "sha256": "4f4bf32c9b0c74b029bbde2ad21976b36b293f220c2363a2621e8767fdf89a46"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
+        "commit": "79b2bb6fbdd56aec088489cfba9fc8b942920f52",
         "files": {
-          "Nuplane.Loading/LoadingOptions.cs.txt": "e9c086b568e17e1311c84921d48224dba6cf3df30c68b682ec2dea4cb9278f0d",
-          "Nuplane.Loading/LoadingOptionsValidator.cs.txt": "77a3fb7977db1866c58974079179afad80f42a81e314596123a482f9257a5c28",
-          "Nuplane.Loading/Builder/NuplaneBuilderLoadingExtensions.cs.txt": "36312cd42ee6aaacba83448175c25f99d8959f725498358ad164c5df3135304b",
-          "Nuplane.Loading/Registration/LoadingRegistrationServices.cs.txt": "e96869370f8d6e8ec717159e289c8020b842354bf5e0a7b98d15f1a2abc856d9",
+          "Nuplane.Loading/LoadingOptions.cs.txt": "dfc2e1deb3bcbe1b2b999bbb79871da7412d6d3f825db7c2c07983956b4e9676",
+          "Nuplane.Loading/LoadingOptionsValidator.cs.txt": "d59e6f9894a49862cc5e41227a47f5b52217457104da9cbc6bd332f86d910bda",
+          "Nuplane.Loading/Builder/NuplaneBuilderLoadingExtensions.cs.txt": "f7aa8069630d770c201ec7b01453cad3e17788408602c078256eb33d2dfbb5dc",
+          "Nuplane.Loading/Registration/LoadingRegistrationServices.cs.txt": "868ee0cfab0f15ea468260b5d48aa9fc13377af40d1b48831c71009ceb0d52da",
           "Nuplane.Loading/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
-          "Nuplane.Loading/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"
+          "Nuplane.Loading/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f",
+          "Nuplane.Loading/PackageLoadModeOverrideOptions.cs.txt": "a2293c3d33314ed79bc9a1d640566a46ef6fce7c6fbbd440d2ac7a312a021bac",
+          "Nuplane.Loading/LoadingOptionsConfigurationBinder.cs.txt": "8a545814a1bb0f2ab5d08b6d732078efbeba4bb56445fd3df016e4be0c4a39c5"
         }
       }
     },
     {
       "packageId": "Nuplane.Loading.Abstractions",
-      "packageVersion": "1.0.0-preview.10",
+      "packageVersion": "1.0.0-preview.109",
       "archive": {
-        "name": "nuplane.loading.abstractions.1.0.0-preview.10.nupkg",
-        "sha256": "9ec6c64b627962adf43bb3d889cce34cccaf93f4c18e2ac892dece52fac1d105"
+        "name": "nuplane.loading.abstractions.1.0.0-preview.109.nupkg",
+        "sha256": "4fa9052cb77c49a63b8a104abe6be6ca3a62c071801d75cf890111af4c47907e"
       },
       "assembly": {
         "name": "Nuplane.Loading.Abstractions.dll",
-        "sha256": "02db626c1e823a9bff3ec25e5b69858493bff4428470abe56ae335402f2a2858"
+        "sha256": "9bdb850bda20351200cf5addf04b071228716f9fb71bec0c99d4b95a1a9a36c2"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
+        "commit": "79b2bb6fbdd56aec088489cfba9fc8b942920f52",
         "files": {
-          "Nuplane.Loading.Abstractions/SharedAssemblyIdentity.cs.txt": "3b6b2935b2aa25e1c2176027772ac019577b77b96f878a814dabdcd8a0cd27b7",
+          "Nuplane.Loading.Abstractions/SharedAssemblyIdentity.cs.txt": "a039911318c977e461ad6aa55765cec09979048ab3bfdb8c3e9ed8e4437cbeec",
           "Nuplane.Loading.Abstractions/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
-          "Nuplane.Loading.Abstractions/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"
+          "Nuplane.Loading.Abstractions/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f",
+          "Nuplane.Loading.Abstractions/PackageLoadMode.cs.txt": "37e87ee108679c3c49ea0b63c52c5eba7e67b69d2ccc56a03ca770617583ff28",
+          "Nuplane.Loading.Abstractions/PackageLoadModeSelectionPolicy.cs.txt": "29747ac60de9b32b40cb6fff9cf1861da85de2b7af7085a58ad5d838a273e5b4"
         }
       }
     },
     {
       "packageId": "Nuplane.Sources.Directory",
-      "packageVersion": "1.0.0-preview.10",
+      "packageVersion": "1.0.0-preview.109",
       "archive": {
-        "name": "nuplane.sources.directory.1.0.0-preview.10.nupkg",
-        "sha256": "8d5d067579a1c39d9df26bb323be2e515f23886cf225d96b4c1ec19466ea591f"
+        "name": "nuplane.sources.directory.1.0.0-preview.109.nupkg",
+        "sha256": "35234e02cb12fd588f296fc3222107323b1cdc1f45982a7262ae41f1771440c1"
       },
       "assembly": {
         "name": "Nuplane.Sources.Directory.dll",
-        "sha256": "afde462dcd4960eb84f6af1f2af673e0d2986c7a4dc854b63a941d4551c29f86"
+        "sha256": "80fd098ef9a95f268622b2c99692ff4e13e00b4af899e1c9dbf5e4b2c6ec6c18"
       },
       "source": {
         "repository": "https://github.com/valence-works/nuplane",
-        "commit": "b95df42be52bf69d99c1148e0a98cabdc9edc0a5",
+        "commit": "79b2bb6fbdd56aec088489cfba9fc8b942920f52",
         "files": {
-          "Nuplane.Sources.Directory/Configuration/NuplaneDirectoryFeedSetupConfiguration.cs.txt": "99ba07e985c64936ddd5120389f2ffe98c837ce93541a8d4199adc214daf15b6",
-          "Nuplane.Sources.Directory/Registration/DirectorySourceRegistrationServices.cs.txt": "666ce978db587a0e4532201155079776f3033310138ca5d3ff081414e2be9c8b",
-          "Nuplane.Sources.Directory/Builder/NuplaneDirectoryFeedOptions.cs.txt": "6b9a2522008347db3c2d62d9884cc9bf0d63361a7f198108a1fe458b37bae0c3",
+          "Nuplane.Sources.Directory/Configuration/NuplaneDirectoryFeedSetupConfiguration.cs.txt": "83447038e89cdc2ab8e2b7404c6794bc37ee1e9b95869618536dd21dc302b620",
+          "Nuplane.Sources.Directory/Registration/DirectorySourceRegistrationServices.cs.txt": "4bd52437039bb394f3c9eb6eb959c03980c3db49ca546ff1cc384286fe331412",
+          "Nuplane.Sources.Directory/Builder/NuplaneDirectoryFeedOptions.cs.txt": "15588a27d283fde053798f5d8600a73f82a89fd5d03fa3046d5fca06e9055907",
           "Nuplane.Sources.Directory/DirectorySourceOptions.cs.txt": "5c98b426ed017814290cfcd9e42d3bdca0389c0cdb1b4094d2375cabb333ddac",
           "Nuplane.Sources.Directory/Directory.Build.props.txt": "f2b70ee7c746112d345d279d2b21c149e35124eeb7ea6f88b5fd0ab39810cdbf",
           "Nuplane.Sources.Directory/LICENSE.txt": "0b984d4125bdf7b7852f858e6e8bd66704ed3d501527f1dc3de25f8eabd69a4f"

@@ -20,7 +20,13 @@
     "Nuplane.Sources.ManifestOptions",
     "Nuplane.Store.State.StoreRegistryOptions",
     "Nuplane.Loading.LoadingOptions",
-    "Nuplane.Loading.SharedAssemblyIdentity"
+    "Nuplane.Loading.SharedAssemblyIdentity",
+    "Nuplane.Feeds.Configuration.RemoteFallbackMode",
+    "Nuplane.Feeds.Setup.DirectoryFeedRole",
+    "Nuplane.Loading.PackageLoadMode",
+    "Nuplane.Loading.PackageLoadModeOverrideOptions",
+    "Nuplane.Loading.PackageLoadModeSelectionPolicy",
+    "Nuplane.Reconciliation.Configuration.StartupFailurePolicy"
   ],
   "boundaries": [
     {
@@ -136,18 +142,18 @@
         "Host directory-feed and Loading module configuration callbacks"
       ],
       "semanticConstraints": [
-        "This scope covers the eight Nuplane sections bound by this exact Host AddNuplane callback; it does not claim every Nuplane module's public configuration API.",
-        "NuplaneOptionsRegistrationServices binds Setup, Reconciliation, FeedResolution, LockFile, CleanupPolicy, Convergence and StoreRegistry using ConfigurationBinder; LoadingRegistrationServices binds Loading through the Host AutoloadPackages(configuration) overload with enableByDefault false. Native validators run on options start without this metadata producer initializing services.",
-        "NuplaneSetupConfigurationServices translates AutomaticReconciliation through NuplaneBuilder.PollEvery, overriding dedicated reconciliation enablement and poll interval only when enabled. Nonblank Setup.StateFilePath overrides StoreRegistry.StateFilePath. Setup.UseInMemoryStore true overrides its dedicated flag. Native validators reject conflicting in-memory/file modes.",
-        "Nuplane 1.0 binds indexed Setup.Feeds declarations with explicit Name. Its native feed configuration callback does not derive Name from map keys and supplies no named-map merge precedence.",
-        "Setup feed declarations select exactly one nonblank directory path or absolute service index. Directory settings are translated by the separately selected Directory module; remote feed names/endpoints are translated through native builder registrations. Setup include patterns are nonblank and deduplicated case-insensitively before translation.",
-        "NuplaneSetupOptionsValidator, ReconciliationOptionsValidator, FeedResolutionOptionsValidator, FeedCredentialOptionsValidator, ConvergenceOptionsValidator, LockFileOptionsValidator, CleanupPolicyOptionsValidator, StoreRegistryOptionsValidator and LoadingOptionsValidator are retained exact source authorities for range, relationship, URI, credential-reference and uniqueness constraints. Metadata structural shape supplements those semantic checks; it does not invent missing enum/range rejection in native validators.",
-        "LoadingOptionsValidator requires positive deactivation timeout; per-package load modes and overrides were removed in Nuplane 1.0. Shared identities require nonblank Name, a 16-hex-character PublicKeyToken, nonnegative MajorVersion and unique composite identity. SharedAssemblyIdentity constructor fields have no implicit element defaults.",
-        "The selected native ConfigurationBinder silently omits a SharedAssemblies collection entry when a required constructor token is null/missing. Empty or malformed tokens bind an entry and are then rejected by LoadingOptionsValidator. Null samples are not evidence of accepted unsigned shared identities.",
-        "FeedCredentialOptionsValidator accepts remote feeds only with HTTPS and uses secrets:// credential references; file feeds cannot contain credentials. Secret values are not metadata defaults. The source validator supplies exact policy-dependent cross-setting behavior.",
-        "Default writable paths are computed by native runtime owners from AppContext.BaseDirectory; this producer emits the source option's null/default literal rather than an environment-specific resolved path. EffectiveStorePersistenceSettings.Resolve establishes the persisted store path and in-memory behavior.",
-        "Nuplane options are configured snapshots; these native registrations do not install an IOptionsMonitor reload contract. Changing Host configuration requires restart for these options. Directory Watch/Debounce controls package-feed reconciliation, not configuration-file reload.",
-        "Foundation completes an explicit initial reconciliation before background producers and eager shell activation. Its typed cross-package Core and reflection contracts use the shared Host lifetime, loaded only from exact native-catalog installed paths. Application assembly identity changes require restart; selected framework assemblies retain normal CLR binding. Nuplane 1.0 removed the earlier HostIntegrated vendor option."
+        "This scope covers the selected Nuplane sections represented below; it does not claim every Nuplane module configuration API.",
+        "NuplaneOptionsRegistrationServices binds the selected core sections with ConfigurationBinder. LoadingRegistrationServices uses LoadingOptionsConfigurationBinder through AutoloadPackages(configuration), with enableByDefault false. Native validators run on options start without this metadata producer initializing services.",
+        "Explicit Reconciliation.EnableAutomaticReconciliation and PollInterval keys take precedence over Setup shorthand. Explicit StoreRegistry persistence settings take precedence over Setup and suppress opposing shorthand. Native validators reject conflicting file and in-memory settings.",
+        "NuplaneFeedSetupDeclarationReader accepts indexed Setup.Feeds declarations with explicit Name and named-map declarations deriving Name from the key. A named declaration overrides indexed declarations with the same case-insensitive name and emits a diagnostic; a conflicting explicit Name on a named entry is rejected.",
+        "Setup feeds select exactly one directory path or absolute service index. The Directory module applies Role, Watch and DebounceWindow. IncludeAll or include patterns explicitly select packages. Setup validators enforce source and pattern requirements.",
+        "The retained publisher validators supply exact range, relationship, URI, credential-reference, enum and uniqueness constraints. Metadata structural shape supplements those semantic checks.",
+        "LoadingOptionsValidator requires a positive deactivation timeout, defined default/selection load modes and valid unique per-package overrides. Shared identities require nonblank Name, nonnegative MajorVersion and a unique composite identity. A missing, null or empty PublicKeyToken identifies an unsigned assembly; other tokens require 16 hexadecimal characters.",
+        "SharedAssemblyIdentity declares an optional null constructor token and normalizes it to an empty string. LoadingOptionsConfigurationBinder rejects configured shared identities that fail to bind, including missing Name or MajorVersion, rather than silently omitting them. SharedAssemblies must be an indexed collection.",
+        "FeedCredentialOptionsValidator enforces HTTPS and secrets:// credential references for remote feeds; file feeds cannot contain credentials. Secret values are never metadata defaults.",
+        "Default writable paths are computed by native owners from AppContext.BaseDirectory. Metadata retains source literals rather than environment-specific resolved paths. EffectiveStorePersistenceSettings.Resolve owns persistence behavior.",
+        "Nuplane options are configured snapshots; these registrations provide no IOptionsMonitor reload contract. Configuration changes require restart. Directory Watch and DebounceWindow control package reconciliation, not configuration-file reload.",
+        "Foundation completes initial reconciliation before background producers and eager shell activation. Its typed cross-package contracts use the shared Host lifetime, loaded only from exact native-catalog installed paths independently of Nuplane load mode. Application assembly identity changes require restart; framework assemblies retain normal CLR binding."
       ],
       "bindings": [
         {
@@ -158,7 +164,7 @@
         {
           "typeName": "Nuplane.Reconciliation.Configuration.ReconciliationOptions",
           "prefix": "Nuplane:Reconciliation",
-          "binding": "NuplaneOptionsRegistrationServices.Configure<ReconciliationOptions>; later Setup translations may override named fields."
+          "binding": "Native dedicated Reconciliation keys take precedence over Setup shorthand during options registration."
         },
         {
           "typeName": "Nuplane.Feeds.Configuration.FeedResolutionOptions",
@@ -183,7 +189,7 @@
         {
           "typeName": "Nuplane.Store.State.StoreRegistryOptions",
           "prefix": "Nuplane:StoreRegistry",
-          "binding": "NuplaneOptionsRegistrationServices.Configure<StoreRegistryOptions>; Setup persistence translations follow."
+          "binding": "Native dedicated StoreRegistry persistence settings take precedence over Setup shorthand."
         },
         {
           "typeName": "Nuplane.Loading.LoadingOptions",
@@ -191,21 +197,21 @@
           "binding": "Host AutoloadPackages(configuration.GetSection('Loading')); no implicit enable-by-default.",
           "semantics": {
             "SharedAssemblies": {
-              "description": "Native host-sharing identities. Missing required record constructor fields may omit an entry during native binding; admitted entries are validated."
+              "description": "Shared host identities; optional null/empty tokens select unsigned assemblies. Configured entries that fail to bind are rejected."
             }
           }
         },
         {
           "typeName": "Nuplane.Feeds.Setup.NuplaneFeedSetupOptions",
           "prefix": "Nuplane:Setup:Feeds:{index}",
-          "binding": "ConfigurationBinder binds indexed Setup.Feeds records; Name is an explicit field.",
+          "binding": "NuplaneFeedSetupDeclarationReader binds indexed or keyed Setup.Feeds entries. Keyed declarations derive Name from their key and override same-name indexed entries.",
           "semantics": {
             "Credentials": {
               "secret": true,
               "description": "Credential reference consumed by the native feed credential policy; actual secret values are excluded."
             },
             "Name": {
-              "description": "Explicit native feed name; the selected publisher does not derive a name from a map key."
+              "description": "Explicit feed name for indexed entries; keyed entries derive identity from their key and reject a conflicting explicit Name."
             }
           }
         },
@@ -228,17 +234,9 @@
         {
           "typeName": "Nuplane.Loading.SharedAssemblyIdentity",
           "prefix": "Nuplane:Loading:SharedAssemblies:{index}",
-          "binding": "ConfigurationBinder positional record binding followed by LoadingOptionsValidator. A missing/null required constructor parameter silently omits the collection entry."
+          "binding": "Native positional record binding accepts an optional null PublicKeyToken, normalized to an empty string for unsigned assemblies. LoadingOptionsConfigurationBinder rejects unbound entries; LoadingOptionsValidator validates identities."
         }
       ]
     }
-  ],
-  "removedPublisherTypes": [
-    "Nuplane.Feeds.Configuration.RemoteFallbackMode",
-    "Nuplane.Feeds.Setup.DirectoryFeedRole",
-    "Nuplane.Loading.PackageLoadMode",
-    "Nuplane.Loading.PackageLoadModeOverrideOptions",
-    "Nuplane.Loading.PackageLoadModeSelectionPolicy",
-    "Nuplane.Reconciliation.Configuration.StartupFailurePolicy"
   ]
 }

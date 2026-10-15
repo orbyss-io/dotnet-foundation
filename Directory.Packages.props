@@ -21,8 +21,8 @@
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
-    <PackageVersion Include="Nuplane" Version="1.0.0-preview.10" />
-    <PackageVersion Include="Nuplane.Loading" Version="1.0.0-preview.10" />
-    <PackageVersion Include="Nuplane.Sources.Directory" Version="1.0.0-preview.10" />
+    <PackageVersion Include="Nuplane" Version="1.0.0-preview.109" />
+    <PackageVersion Include="Nuplane.Loading" Version="1.0.0-preview.109" />
+    <PackageVersion Include="Nuplane.Sources.Directory" Version="1.0.0-preview.109" />
   </ItemGroup>
 </Project>
