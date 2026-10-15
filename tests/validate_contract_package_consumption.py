@@ -345,7 +345,7 @@ def write_runtime_configuration(host: Path, runtime: Path, shell_configuration: 
         "Foundation": {"Transport": {"MaxRequestBodyBytes": 1024}},
         "Nuplane": {"Setup": {"StateFilePath": str(runtime / "nuplane-store-state.json")},
                     "FeedResolution": {"PackageInstallRoot": str(runtime / "installed")},
-                    "Loading": {"ActiveStoreRoot": str(runtime / "packages/.installed")}}}), encoding="utf-8")
+                    "Loading": {"ActiveStoreRoot": str(runtime / "installed")}}}), encoding="utf-8")
 
 
 def request(opener: urllib.request.OpenerDirector, base: str, path: str, payload: bytes | None = None,
@@ -599,7 +599,9 @@ def main() -> None:
     for project in source.rglob("*.csproj"):
         assert "ProjectReference" not in project.read_text(), "Independent qualification cannot use source ProjectReferences."
     write_descriptors(source, args.cshells_version)
-    properties = [f"-p:FoundationCandidateVersion={args.version}", f"-p:CShellsCandidateVersion={args.cshells_version}"]
+    dependency_injection_version = selected_packages['Microsoft.Extensions.DependencyInjection']
+    properties = [f"-p:FoundationCandidateVersion={args.version}", f"-p:CShellsCandidateVersion={args.cshells_version}",
+                  f"-p:FoundationDependencyInjectionVersion={dependency_injection_version}"]
     sdk_cwd = args.sdk_working_directory.resolve()
     run_command([args.dotnet, "--info"], sdk_cwd, run / "toolchain.log")
     restore_configuration = run / "NuGet.config"
@@ -617,6 +619,7 @@ def main() -> None:
                 "fixtureSources": {path.relative_to(source).as_posix(): sha256(path)
                                    for path in sorted(source.rglob("*.cs"))},
                 "sdkWorkingDirectory": str(sdk_cwd), "sourceProjectReferences": False,
+                "consumerDependencyPins": {"Microsoft.Extensions.DependencyInjection": dependency_injection_version},
                 "restoreSources": restore_sources, "restoreConfigurationSha256": sha256(restore_configuration),
                 "freshPackageCache": str(cache),
                 "runtimeClosurePackagePruning": False,

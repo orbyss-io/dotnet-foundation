@@ -20,11 +20,11 @@ internal sealed class NuplaneAssemblyProvider(IPackageAssemblyCatalog packageAss
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken = default)
     {
-        var packages = await packageAssemblyCatalog.GetAssembliesAsync(cancellationToken).ConfigureAwait(false);
-        var assemblies = packages.SelectMany(package => package.Assemblies).Distinct().ToArray();
+        var catalog = await packageAssemblyCatalog.GetAssembliesAsync(cancellationToken).ConfigureAwait(false);
+        var assemblies = catalog.Distinct().ToArray();
         // Foundation's typed cross-package contracts require a common lifetime.
-        // Nuplane 1.0 removed HostIntegrated mode; keep that policy at the Host
-        // boundary using the exact installed paths owned by its native catalog.
+        // Keep that policy at the Host boundary using the exact installed paths
+        // owned by the native catalog, independently of Nuplane's load mode.
         var identities = assemblies.Where(assembly => assembly.FullName is not null)
             .GroupBy(assembly => assembly.FullName!, StringComparer.OrdinalIgnoreCase).ToArray();
         if (identities.Any(group => group.Count() != 1))

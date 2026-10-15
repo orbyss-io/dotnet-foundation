@@ -91,8 +91,16 @@ public sealed class InspectSettingsSourceGraph : Microsoft.Build.Utilities.Task
                     && property.DeclaredAccessibility == Accessibility.Public && !property.IsImplicitlyDeclared))
                 {
                     var syntax = property.DeclaringSyntaxReferences.Select(reference => reference.GetSyntax()).SingleOrDefault();
+                    // A positional record can explicitly implement its property (for example,
+                    // normalizing null). Inspect the constructor input without executing that accessor.
+                    var positional = symbol.IsRecord ? symbol.DeclaringSyntaxReferences.Select(reference => reference.GetSyntax())
+                        .OfType<RecordDeclarationSyntax>().SelectMany(record => record.ParameterList?.Parameters ?? [])
+                        .SingleOrDefault(parameter => parameter.Identifier.ValueText == property.Name) : null;
+                    if (positional is not null) syntax = positional;
                     var entry = new JsonObject { ["name"] = property.Name, ["type"] = defaults.SymbolKind(property.Type),
                         ["typeName"] = property.Type.ToDisplayString(), ["nullable"] = defaults.ImportedNullable(property), ["hasDefault"] = false };
+                    if (positional is not null && compilation.GetSemanticModel(positional.SyntaxTree).GetDeclaredSymbol(positional) is IParameterSymbol input)
+                        entry["nullable"] = input.NullableAnnotation == NullableAnnotation.Annotated;
                     foreach (var shape in defaults.ContainerShape(property.Type)) entry.Add(shape.Key, shape.Value?.DeepClone());
                     var nativeType = property.Type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable
                         ? nullable.TypeArguments[0] : property.Type;
@@ -108,10 +116,10 @@ public sealed class InspectSettingsSourceGraph : Microsoft.Build.Utilities.Task
                         entry["default"] = defaults.ReadSymbol(property);
                         entry["hasDefault"] = true;
                     }
-                    else if (syntax is ParameterSyntax parameter && parameter.Default is not null)
+                    else if (syntax is ParameterSyntax parameter
+                        && compilation.GetSemanticModel(parameter.SyntaxTree).GetDeclaredSymbol(parameter) is IParameterSymbol { HasExplicitDefaultValue: true } parameterSymbol)
                     {
-                        var constant = compilation.GetSemanticModel(parameter.SyntaxTree).GetConstantValue(parameter.Default.Value);
-                        Require(constant.HasValue && constant.Value is null, "Only explicit null positional record defaults are supported.");
+                        Require(parameterSymbol.ExplicitDefaultValue is null, "Only explicit null positional record defaults are supported.");
                         entry["default"] = null;
                         entry["hasDefault"] = true;
                     }

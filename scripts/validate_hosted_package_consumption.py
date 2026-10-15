@@ -193,9 +193,10 @@ def main():
         }
         (root / "shells.json").write_text(json.dumps(settings))
         configuration = json.loads((root / "host/appsettings.json").read_text(encoding="utf-8"))
-        paths = configuration.setdefault("Nuplane", {}).setdefault("Paths", {})
-        paths.update(StateFilePath=str(root / "nuplane-state.json"), PackageInstallRoot=str(root / "installed"),
-                     ActiveStoreRoot=str(root / "packages/.installed"))
+        nuplane = configuration.setdefault("Nuplane", {})
+        nuplane.setdefault("StoreRegistry", {})["StateFilePath"] = str(root / "nuplane-state.json")
+        nuplane.setdefault("FeedResolution", {})["PackageInstallRoot"] = str(root / "installed")
+        nuplane.setdefault("Loading", {})["ActiveStoreRoot"] = str(root / "installed")
         (root / "appsettings.json").write_text(json.dumps(configuration), encoding="utf-8")
         environment = {key: value for key, value in os.environ.items()
                        if not key.upper().startswith(("CSHELLS__", "FOUNDATION__", "NUPLANE__"))}
