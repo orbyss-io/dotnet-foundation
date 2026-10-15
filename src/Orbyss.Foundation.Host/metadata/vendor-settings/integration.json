@@ -153,7 +153,7 @@
         "FeedCredentialOptionsValidator enforces HTTPS and secrets:// credential references for remote feeds; file feeds cannot contain credentials. Secret values are never metadata defaults.",
         "Default writable paths are computed by native owners from AppContext.BaseDirectory. Metadata retains source literals rather than environment-specific resolved paths. EffectiveStorePersistenceSettings.Resolve owns persistence behavior.",
         "Nuplane options are configured snapshots; these registrations provide no IOptionsMonitor reload contract. Configuration changes require restart. Directory Watch and DebounceWindow control package reconciliation, not configuration-file reload.",
-        "Foundation completes initial reconciliation before background producers and eager shell activation. Its typed cross-package contracts use the shared Host lifetime, loaded only from exact native-catalog installed paths independently of Nuplane load mode. Application assembly identity changes require restart; framework assemblies retain normal CLR binding."
+        "Nuplane's blocking startup service reconciles and loads packages before subsequent CShells discovery and eager shell activation. Foundation's typed cross-package contracts use the shared Host lifetime, loaded only from exact native-catalog installed paths independently of Nuplane load mode. Application assembly identity changes require restart; framework assemblies retain normal CLR binding."
       ],
       "bindings": [
         {

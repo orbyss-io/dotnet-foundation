@@ -22,9 +22,8 @@ var transport = configuration.GetSection("Foundation:Transport").Get<FoundationT
 builder.WebHost.ConfigureKestrel(options => transport.Apply(options));
 builder.Services.AddFoundationRequestDiagnosticRedaction();
 
-// Nuplane 1.0 schedules reconciliation in the background. Complete the first
-// cycle before those producers and eager shell activation start.
-builder.Services.AddHostedService<InitialPackageReconciliationHostedService>();
+// Nuplane's blocking startup service reconciles and loads packages before
+// subsequent CShells discovery and eager shell activation services start.
 builder.Services.AddNuplane(nuplaneConfiguration, nuplane =>
 {
     nuplane.AddDirectoryFeedsFromConfiguration(nuplaneConfiguration);

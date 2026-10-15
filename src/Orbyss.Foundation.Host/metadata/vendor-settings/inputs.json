@@ -149,7 +149,9 @@
           "Nuplane/Feeds/Setup/DirectoryFeedRole.cs.txt": "4a0e6d9615d7f0640c0344d6f1516dedfd45d6dd56c3a9dbcce86e712f29573d",
           "Nuplane/Feeds/Setup/NuplaneFeedSetupDeclaration.cs.txt": "5d36741c1b4979ae30024bcbfc8ec287e9ff2abc43c9d8722a20b345eab7bad9",
           "Nuplane/Feeds/Setup/NuplaneFeedSetupDeclarationReader.cs.txt": "c1883e23751c45770f6aee2240afb8036dd95fc9e2ff4ffcebaa9c4e9a2cce52",
-          "Nuplane/Reconciliation/Configuration/StartupFailurePolicy.cs.txt": "24e5570e7b3ea451e2337bd6dd9c9b89458dd77c02195c575567f14f75258eba"
+          "Nuplane/Reconciliation/Configuration/StartupFailurePolicy.cs.txt": "24e5570e7b3ea451e2337bd6dd9c9b89458dd77c02195c575567f14f75258eba",
+          "Nuplane/Hosting/NuplaneStartupHostedService.cs.txt": "92268c82fdc6934e26fc86399a83682e4e65bcab9d66af522f17e3451a4ea56c",
+          "Nuplane/Registration/NuplaneRuntimeRegistrationServices.cs.txt": "d4d3ab70a0f896fe9406315ea205d1fbba1eb55a40afcc529b82dae3a3f83adb"
         }
       }
     },
