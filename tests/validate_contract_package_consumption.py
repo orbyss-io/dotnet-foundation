@@ -591,7 +591,7 @@ def main() -> None:
         for project in (repository / "src").glob("Orbyss.Foundation*/*.csproj")
         if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build",
             "Orbyss.Foundation.OpenApi.Exporter", "Orbyss.Foundation.Analyzers"}}
-    assert len(expected_runtime_identities) == 29, "The explicit runtime package family requires review."
+    assert len(expected_runtime_identities) == 30 and 'Orbyss.Foundation.Web.Presentation' in expected_runtime_identities, "The explicit runtime package family requires review."
     assert set(candidate_identities) == expected_runtime_identities, (
         "Exact candidate runtime package set mismatch", {
             "missing": sorted(expected_runtime_identities - set(candidate_identities)),
