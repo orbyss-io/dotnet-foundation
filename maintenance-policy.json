@@ -16,6 +16,7 @@
   ],
   "additionalPins": [],
   "metadataOverrides": {
+    "typescript": "https://registry.npmjs.org/typescript",
     "CShells.Abstractions": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.abstractions/index.json",
     "CShells.AspNetCore": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.aspnetcore/index.json",
     "CShells.AspNetCore.Abstractions": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.aspnetcore.abstractions/index.json",

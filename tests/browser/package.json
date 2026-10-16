@@ -2,9 +2,12 @@
   "name": "foundation-hosted-page-browser-probes",
   "private": true,
   "scripts": {
-    "test": "node hosted-pages.cjs && node authentication-recovery.cjs"
+    "test:types": "tsc -p tsconfig.json",
+    "test:module": "node --test presentation.test.mjs && node presentation-browser.cjs",
+    "test": "npm run test:types && npm run test:module && node hosted-pages.cjs && node authentication-recovery.cjs"
   },
   "devDependencies": {
-    "playwright": "1.64.1"
+    "playwright": "1.64.1",
+    "typescript": "7.0.2"
   }
 }
