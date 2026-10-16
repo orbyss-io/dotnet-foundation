@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json.Nodes;
 using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis;
@@ -42,9 +40,9 @@ public sealed class InspectSettingsSourceGraph : Microsoft.Build.Utilities.Task
                 var length = new FileInfo(path).Length;
                 total += length;
                 Require(length <= 1_048_576 && total <= 16_777_216, "Source graph snapshots exceed 1 MiB/file or 16 MiB total.");
-                var text = File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal);
+                var text = SettingsSourceText.Read(path);
                 Require(!sources.ContainsKey(path), "Duplicate source graph snapshot.");
-                sources.Add(path, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(text))));
+                sources.Add(path, SettingsSourceText.Hash(text));
                 var tree = CSharpSyntaxTree.ParseText(text, new CSharpParseOptions(LanguageVersion.Latest), path);
                 Require(!tree.GetDiagnostics().Any(item => item.Severity == DiagnosticSeverity.Error), "Invalid source graph snapshot.");
                 Require(!tree.GetRoot().DescendantTrivia(descendIntoTrivia: true).Any(trivia => trivia.GetStructure() is

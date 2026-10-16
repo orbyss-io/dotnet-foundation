@@ -5,6 +5,12 @@ import json
 from pathlib import Path
 
 
+def settings_source_hash(source):
+    """Match SettingsSourceText: strict UTF-8, optional BOM, CRLF only."""
+    text = source.read_bytes().decode('utf-8-sig').replace('\r\n', '\n')
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="Update current descriptor source hashes after source review")
@@ -21,8 +27,11 @@ def main():
             relative = source.relative_to(descriptor.parent)
             if any(part in {"bin", "obj"} for part in relative.parts):
                 continue
-            text = source.read_text(encoding="utf-8-sig").replace("\r\n", "\n")
-            inventory[relative.as_posix()] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            if descriptor.name == 'settings.source.json':
+                inventory[relative.as_posix()] = settings_source_hash(source)
+            else:
+                text = source.read_text(encoding="utf-8-sig").replace("\r\n", "\n")
+                inventory[relative.as_posix()] = hashlib.sha256(text.encode("utf-8")).hexdigest()
         if data.get("sourceSha256") != inventory:
             if args.write:
                 data["sourceSha256"] = inventory

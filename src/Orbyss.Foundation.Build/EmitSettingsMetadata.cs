@@ -99,8 +99,8 @@ public sealed class EmitSettingsMetadata : Microsoft.Build.Utilities.Task
             for (var parent = new FileInfo(file) as FileSystemInfo; parent is not null && parent.FullName != directory;
                 parent = parent is FileInfo info ? info.Directory : ((DirectoryInfo)parent).Parent)
                 Require((parent.Attributes & FileAttributes.ReparsePoint) == 0, "Linked settings sources are unsupported.");
-            var text = File.ReadAllText(file).Replace("\r\n", "\n", StringComparison.Ordinal);
-            var hash = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(text)));
+            var text = SettingsSourceText.Read(file);
+            var hash = SettingsSourceText.Hash(text);
             Require(hashes[name]?.GetValue<string>() == hash, $"Settings source binding changed: {name}. Review owning semantics.");
             var tree = CSharpSyntaxTree.ParseText(text, parseOptions, file);
             Require(!tree.GetRoot().DescendantTrivia(descendIntoTrivia: true).Any(trivia => trivia.GetStructure() is
