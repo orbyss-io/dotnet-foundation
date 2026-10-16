@@ -1,4 +1,7 @@
 import type { SignOutOptions, SignOutControl } from './presentation.mjs';
+import type { SessionObservationOptions, BffSessionObserver } from './session.mjs';
+/** Protocol freshness belongs to the selected adapter; local cached user data alone is insufficient. */
+export function observeSpaSession(options: SessionObservationOptions): BffSessionObserver;
 export interface SpaAuthenticationAdapter {
   /** Must synchronously clear in-memory native client credentials and private session projections. */
   clearLocalAuthentication(): undefined;

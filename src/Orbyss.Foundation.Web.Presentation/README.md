@@ -81,6 +81,29 @@ leaves roots hidden. Applications render recovery from `onObservation` and own
 component disposal. The guard stores no token/draft, discards no work, repeats no
 domain request and initiates no logout.
 
+`observeSpaSession` in `spa.mjs` uses the same private DOM lifecycle with a
+selected client's fresh `observe(signal)` callback. Every observation has a finite
+deadline (5 seconds by default, at most 30 seconds). The callback must propagate
+the abort signal to its network reads; errors, timeouts and late results keep the
+boundary hidden. `onObservation` must complete synchronously before private roots
+can be revealed. A cached client user alone is not fresh provider-session proof.
+Choose and document the actual session/revocation observation supported by the
+provider; an unavailable observation does not establish local or remote logout.
+
+The separate `tests/browser/spa-client-browser.cjs` fixture exercises the locked
+`oidc-client-ts` client, its native authorization-code/PKCE popup and native popup
+logout against a synthetic provider on another origin. Its explicitly owned
+in-memory user and protocol-state stores are cleared synchronously before native
+logout dispatch; the application projection is independently checked anonymous.
+A one-use ID-token hint stays in the protocol call stack, outside persistent
+storage. Applications must evaluate their own client's store and cleanup contract.
+The fixture verifies fresh userinfo revocation, failed reads, real deadline expiry,
+native nonce rejection, exact retained invalid draft text and zero pre-confirmation
+provider effects. This does not establish immediate revocation for every JWT or
+provider topology. Its popup-compatible application COOP policy is
+`same-origin-allow-popups`, with no provider COOP header; an application using a
+different isolation policy needs its own selected-client integration evidence.
+
 The native browser fixture separately verifies private no-store pages and a public
 static client shell with no private response payload. The latter adds synthetic
 private DOM after actual native authentication, then revokes the native server

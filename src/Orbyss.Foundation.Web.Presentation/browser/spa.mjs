@@ -1,4 +1,8 @@
 import { createSignOutControl } from './presentation.mjs';
+import { observeSessionBoundary } from './session.mjs';
+
+/** Bind a fresh selected SPA protocol reader to the common private DOM lifecycle. */
+export function observeSpaSession(options) { return observeSessionBoundary(options); }
 
 /** Bind a selected SPA protocol adapter without moving its fresh user gesture behind an await. */
 export function createSpaSignOutControl({ adapter, ...options }) {

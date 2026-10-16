@@ -66,6 +66,7 @@ def main():
     run('hosted-browser-tests',['node','tests/browser/hosted-pages.cjs'])
     run('authentication-browser-tests',['node','tests/browser/authentication-recovery.cjs'])
     run('native-presentation-browser-tests',['node','tests/browser/native-presentation.cjs'])
+    run('spa-client-browser-tests',['node','tests/browser/spa-client-browser.cjs'])
     version=(ROOT/'VERSION').read_text().strip()
     run('packaged-web-policies',[sys.executable,'tests/validate_web_policies.py','--package',str(packages/('Orbyss.Foundation.WebDefaults.'+version+'.nupkg')),'--bff-package',str(packages/('Orbyss.Foundation.Authentication.BffCookie.'+version+'.nupkg'))])
     run('pack-build-tool',['dotnet','pack','src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj','-c','Release','--no-restore','--output',str(tools)])

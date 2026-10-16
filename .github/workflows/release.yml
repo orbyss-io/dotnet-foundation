@@ -62,6 +62,7 @@ jobs:
           node tests/browser/hosted-pages.cjs
           node tests/browser/authentication-recovery.cjs
           node tests/browser/native-presentation.cjs
+          node tests/browser/spa-client-browser.cjs
 
       - name: Verify installed response-policy and BFF candidate packages
         shell: bash
