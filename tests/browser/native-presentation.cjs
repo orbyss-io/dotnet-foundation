@@ -32,11 +32,13 @@ async function run() {
     const browser = await playwright[name].launch(launchOptions);
     try {
       for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
-        const context = await browser.newContext({ viewport });
+        const context = await browser.newContext({ viewport, colorScheme: 'light' });
         try {
           const page = await context.newPage();
           await page.goto(base + '/pages-a/app/auth/sign-in');
           assert.deepEqual(await page.evaluate(() => ({ width: innerWidth, height: innerHeight })), viewport);
+          assert.equal(await page.locator('body').getAttribute('data-theme'), 'green');
+          assert.equal(await page.getByRole('heading', { name: 'Aanmelden', exact: true }).evaluate(node => getComputedStyle(node).color), 'rgb(25, 102, 67)');
           await page.getByRole('button', { name: 'Aanmelden', exact: true }).click();
           await page.getByRole('heading', { name: 'Synthetic identity provider' }).waitFor();
           await page.getByRole('button', { name: 'Sign in', exact: true }).click();
@@ -99,6 +101,21 @@ async function run() {
         assert((await page.locator('main').innerText()).includes('No local session is active.'));
         observations.push({ engine: name, javaScript: false, nativeAntiforgeryForm: true, observedLocalLogout: true, status: 'passed' });
       } finally { await noScript.close(); }
+      const dark = await browser.newContext({ colorScheme: 'dark' });
+      try {
+        const page = await dark.newPage();
+        await page.goto(base + '/pages-a/app/auth/sign-in');
+        const colors = await page.evaluate(() => ({ theme: document.body.dataset.theme,
+          heading: getComputedStyle(document.querySelector('h1')).color,
+          background: getComputedStyle(document.documentElement).backgroundColor }));
+        assert.deepEqual(colors, { theme: 'green', heading: 'rgb(134, 239, 172)', background: 'rgb(17, 24, 39)' });
+        const luminance = color => color.match(/\d+/g).slice(0, 3).map(Number).map(channel => {
+          const value = channel / 255; return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+        }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+        const contrast = (luminance(colors.heading) + .05) / (luminance(colors.background) + .05);
+        assert(contrast >= 4.5);
+        observations.push({ engine: name, colorScheme: 'dark', colors, headingContrast: contrast, status: 'passed' });
+      } finally { await dark.close(); }
       const lifecycle = await browser.newContext();
       try {
         const page = await lifecycle.newPage();

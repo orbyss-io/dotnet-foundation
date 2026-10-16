@@ -33,6 +33,7 @@ internal static class BrowserPresentationProbe
             values[web + ":LogoutLandingPath"] = "/auth/signed-out";
             values[web + ":Presentation:ApplicationName"] = name == "pages-a" ? "Synthetic <Application>" : "Synthetic application";
             values[web + ":Presentation:Locale"] = name == "pages-a" ? "nl" : "en";
+            values[web + ":Presentation:Theme"] = name == "pages-a" ? "green" : name == "pages-failure" ? "slate" : "blue";
             values[web + ":Presentation:Copy:sign-in"] = name == "pages-a" ? "Aanmelden" : "Sign in";
             if (name != "pages-failure") values[web + ":Presentation:SignOutConfirmation"] = name == "pages-a" ? "always" : "never";
         }
@@ -41,6 +42,11 @@ internal static class BrowserPresentationProbe
             values[collisionRoot + item.Key["CShells:Shells:pages".Length..]] = item.Value;
         values[collisionRoot + ":Configuration:WebRouting:Path"] = "pages-collision";
         values[collisionRoot + ":Features:PresentationCollision"] = "true";
+        const string invalidThemeRoot = "CShells:Shells:pages-theme-invalid";
+        foreach (var item in values.Where(item => item.Key.StartsWith("CShells:Shells:pages:", StringComparison.Ordinal)).ToArray())
+            values[invalidThemeRoot + item.Key["CShells:Shells:pages".Length..]] = item.Value;
+        values[invalidThemeRoot + ":Configuration:WebRouting:Path"] = "pages-theme-invalid";
+        values[invalidThemeRoot + ":Configuration:Foundation:Web:Presentation:Theme"] = "green\" style=\"background:url(unreviewed)";
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = Environments.Development });
         builder.Logging.ClearProviders();
         builder.Configuration.AddInMemoryCollection(values);
@@ -58,6 +64,13 @@ internal static class BrowserPresentationProbe
             throw new InvalidOperationException("Ambiguous application/presentation routes were published.");
         }
         catch (ShellGenerationActivationException error) when (error.InnerException?.GetType().Name == "ShellEndpointConflictException") { }
+        try
+        {
+            await registry.GetOrActivateAsync("pages-theme-invalid");
+            throw new InvalidOperationException("Invalid presentation theme was admitted.");
+        }
+        catch (ShellGenerationActivationException error) when (error.GetBaseException() is InvalidDataException invalid
+            && invalid.Message == "Presentation name, locale, theme or confirmation policy is invalid.") { }
         if (serve)
         {
             foreach (var name in names) registry.GetActive(name)!.ServiceProvider.GetRequiredService<RecoveryControl>().BrowserProvider
@@ -86,7 +99,7 @@ internal static class BrowserPresentationProbe
                 Require(html.Contains("action=\"" + prefix + "/auth/sign-in\"", StringComparison.Ordinal), "form escaped native shell prefix");
                 Require(page.Headers.CacheControl?.NoStore == true && page.Headers.GetValues("X-Robots-Tag").Single() == "noindex, nofollow", "private browser headers missing");
                 if (name == "pages-a") Require(html.Contains("Synthetic &lt;Application&gt;", StringComparison.Ordinal) && html.Contains("Aanmelden", StringComparison.Ordinal)
-                    && html.Contains("lang=\"nl\"", StringComparison.Ordinal), "branding/locale copy leaked or was not encoded");
+                    && html.Contains("lang=\"nl\"", StringComparison.Ordinal) && html.Contains("data-theme=\"green\"", StringComparison.Ordinal), "branding/theme/locale copy leaked or was not encoded");
                 foreach (var asset in new[] { "page.css", "presentation.mjs", "presentation.d.mts" })
                 {
                     using var response = await client.GetAsync(prefix + "/auth/assets/v1/" + asset);

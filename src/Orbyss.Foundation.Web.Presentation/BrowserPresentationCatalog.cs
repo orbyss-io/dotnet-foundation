@@ -17,8 +17,9 @@ public sealed class BrowserPresentationCatalog
         if (string.IsNullOrWhiteSpace(options.ApplicationName) || options.ApplicationName.Length > 128
             || options.ApplicationName.Any(char.IsControl) || options.Locale.Length is < 1 or > 64
             || CultureInfo.GetCultureInfo(options.Locale).Name != options.Locale
+            || options.Theme is not ("blue" or "green" or "slate")
             || options.SignOutConfirmation is not ("never" or "when-unsaved" or "always"))
-            throw new InvalidDataException("Presentation name, locale or confirmation policy is invalid.");
+            throw new InvalidDataException("Presentation name, locale, theme or confirmation policy is invalid.");
         var copy = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["sign-in"] = "Sign in", ["sign-out"] = "Sign out", ["signed-out"] = "Session status",
@@ -38,6 +39,7 @@ public sealed class BrowserPresentationCatalog
         Copy = copy.ToFrozenDictionary(StringComparer.Ordinal);
         ApplicationName = options.ApplicationName;
         Locale = options.Locale;
+        Theme = options.Theme;
         RoutePrefix = options.RoutePrefix;
         ReturnPath = options.ReturnPath;
         SignOutConfirmation = options.SignOutConfirmation;
@@ -54,6 +56,8 @@ public sealed class BrowserPresentationCatalog
     public string ApplicationName { get; }
     /// <summary>Gets the configured copy language.</summary>
     public string Locale { get; }
+    /// <summary>Gets the admitted application theme token.</summary>
+    public string Theme { get; }
     /// <summary>Gets the reserved public route prefix.</summary>
     public string RoutePrefix { get; }
     /// <summary>Gets the fixed application return path.</summary>

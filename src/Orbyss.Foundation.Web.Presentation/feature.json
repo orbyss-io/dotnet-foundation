@@ -18,10 +18,10 @@
     }
   ],
   "sourceSha256": {
-    "BrowserPageRendering.cs": "bbf93a8f6702c34680ada716f25e127a8aeb6809f09e36ab0041d05f6c751b42",
+    "BrowserPageRendering.cs": "49cd164ef8a10a990d1c9c421a116dbe902bfaf6a8f214d3c39c8c5dd98fa571",
     "BrowserPresentationBootstrap.cs": "ff5c01de6ca2d0aee2a5fbb003dca378bb4ca24bd5fab09c61b6cfbcbd2f8593",
-    "BrowserPresentationCatalog.cs": "5ce32a9277ac428285e2a856e5531d7e669ab26ef5548204cf96e61724f78d2e",
-    "BrowserPresentationOptions.cs": "560a9cbabfd7893a741fff76e5fff0168138987343e498485a597e7079ba032d",
+    "BrowserPresentationCatalog.cs": "c312e5b0efb7c39c525fa640858ebe06739575ee52705eba3b12511bfd91c31f",
+    "BrowserPresentationOptions.cs": "d93aae75b8ea1b85ee04a231991f07438092974b30b22ac6e019ad33a510421e",
     "BrowserProblemPageRenderer.cs": "6967e691180189495d78fe819649d250fc8818cdd4a07a53e6dfdf7130545b0d",
     "FoundationBrowserPresentationFeature.cs": "0ef6fe3ad2ad8fce0eb928b671a1e54ad4e544360be0935111c6df074497065c"
   }

@@ -1,5 +1,15 @@
-:root { color-scheme: light dark; font: 100%/1.5 system-ui, sans-serif; }
+:root { color-scheme: light dark; font: 100%/1.5 system-ui, sans-serif; color: #111827; background: #fff; }
 body { margin: 0 auto; max-width: 48rem; padding: 1.5rem; }
+body { --foundation-accent: #164fa3; }
+body[data-theme=green] { --foundation-accent: #196643; }
+body[data-theme=slate] { --foundation-accent: #334155; }
+h1, a { color: var(--foundation-accent); }
+@media (prefers-color-scheme: dark) {
+  :root { color: #f9fafb; background: #111827; }
+  body { --foundation-accent: #93c5fd; }
+  body[data-theme=green] { --foundation-accent: #86efac; }
+  body[data-theme=slate] { --foundation-accent: #cbd5e1; }
+}
 header { border-bottom: 1px solid; padding-bottom: 1rem; }
 main { padding-block: 1.5rem; overflow-wrap: anywhere; }
 button, input, a { font: inherit; }

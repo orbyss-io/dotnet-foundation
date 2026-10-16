@@ -12,7 +12,7 @@ internal static class BrowserPageRendering
         "<!doctype html><html lang=\"" + E(catalog.Locale) + "\"><head><meta charset=\"utf-8\">"
         + "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + E(title) + " — "
         + E(catalog.ApplicationName) + "</title><link rel=\"stylesheet\" href=\"" + E(pathBase + catalog.RoutePrefix + "/assets/v1/page.css")
-        + "\"></head><body><header>" + E(catalog.ApplicationName) + "</header><main><h1 tabindex=\"-1\" autofocus>"
+        + "\"></head><body data-theme=\"" + E(catalog.Theme) + "\"><header>" + E(catalog.ApplicationName) + "</header><main><h1 tabindex=\"-1\" autofocus>"
         + E(title) + "</h1>" + content + "<p><a href=\"" + E(pathBase + catalog.ReturnPath) + "\">"
         + E(catalog.Copy["home"]) + "</a></p></main></body></html>";
 }

@@ -6,7 +6,7 @@ application tooling. The native Host retains a neutral document-navigation fallb
 when no application endpoint is selected; it cannot recover an unreachable server.
 
 Configure `Foundation:Web:Presentation` with `ApplicationName`, `Locale`, bounded
-`Copy` overrides, a literal `RoutePrefix` (default `/auth`), local `ReturnPath`,
+`Copy` overrides, the owning application's blue/green/slate `Theme`, a literal `RoutePrefix` (default `/auth`), local `ReturnPath`,
 `ResponsePolicy`, `AssetResponsePolicy` and `SignOutConfirmation`. Unknown settings,
 copy keys, paths, policies and confirmation modes fail activation. Native CShells
 validates mapped route collisions before generation publication. Keep presentation

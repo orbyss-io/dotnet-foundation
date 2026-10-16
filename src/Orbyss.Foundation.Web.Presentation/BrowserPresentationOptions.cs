@@ -9,6 +9,8 @@ public sealed class BrowserPresentationOptions
     public string ApplicationName { get; set; } = "Application";
     /// <summary>Gets or sets the BCP-47 language of the selected copy.</summary>
     public string Locale { get; set; } = "en";
+    /// <summary>Gets or sets the selected built-in application theme: blue, green or slate.</summary>
+    public string Theme { get; set; } = "blue";
     /// <summary>Gets or sets public route paths below the native shell prefix.</summary>
     public string RoutePrefix { get; set; } = "/auth";
     /// <summary>Gets or sets the fixed post-login destination below the native shell prefix.</summary>
