@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -57,7 +58,8 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 CorrelationId: correlation, TraceId: correlation, FieldErrors: definition.FieldErrors, Detail: definition.Detail),
                 profile.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             page = new AdmittedProblemPage(definition.StatusCode, definition.Code,
-                definition.Title ?? "Request Failed", correlation);
+                definition.Title ?? "Request Failed", correlation, AdmitPathBase(http),
+                http.RequestServices.GetService<IProblemPageSessionReader>()?.ReadLocalSession(http));
         }
         catch (Exception error) when (error is JsonResponseContractException or ArgumentException
             or InvalidOperationException or InvalidCastException or KeyNotFoundException)
@@ -70,7 +72,7 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 FieldErrors: Array.Empty<ProblemFieldError>(), Detail: null),
                 fallback.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             context.ProblemDetails.Status = 500;
-            page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation);
+            page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation, AdmitPathBase(http));
         }
         var contentType = "application/problem+json";
         if (ProblemPageNegotiation.AllowsHtml(http))
@@ -116,4 +118,13 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
     private static string AdmitCorrelation(string value) => value.Length is >= 1 and <= 128
         && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or ':' or '.')
         ? value : Guid.NewGuid().ToString("N");
+    /// <summary>Retains the native shell prefix after CShells restores outer endpoint paths.</summary>
+    private static string AdmitPathBase(HttpContext context)
+    {
+        var value = (context.Features.Get<ProblemRequestPathBase>()?.Value
+            ?? context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase).Value ?? "";
+        return value.Length <= 1024 && (value.Length == 0 || value.StartsWith('/') && !value.StartsWith("//", StringComparison.Ordinal))
+            && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '/' or '-' or '_' or '.')
+            && !value.Split('/').Any(segment => segment is "." or "..") ? value.TrimEnd('/') : "";
+    }
 }

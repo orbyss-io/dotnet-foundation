@@ -38,6 +38,8 @@ internal static class BrowserProblemBoundaryProbe
             return FoundationProblemResults.Problem(new ProblemDefinition(401, "machine_contract"));
         }).WithMetadata(browser);
         app.MapGet("/unclassified", () => FoundationProblemResults.Problem(new ProblemDefinition(404, "unclassified")));
+        app.MapGet("/conflicting-purpose", () => FoundationProblemResults.Problem(new ProblemDefinition(400, "conflicting")))
+            .WithMetadata(machine, browser);
         app.MapGet("/unknown-purpose", (HttpContext context) =>
         {
             context.Features.Set(browser);
@@ -58,7 +60,7 @@ internal static class BrowserProblemBoundaryProbe
         }).WithMetadata(browser);
         await app.StartAsync();
         using var client = new HttpClient { BaseAddress = new Uri(app.Urls.Single()) };
-        foreach (var path in new[] { "/machine", "/protocol-machine", "/unclassified", "/unknown-purpose", "/machine-exception" })
+        foreach (var path in new[] { "/machine", "/protocol-machine", "/unclassified", "/unknown-purpose", "/machine-exception", "/conflicting-purpose" })
             await Check(client, path, "text/html", "application/problem+json");
         Require(renderer.Seen.Count == 0, "Machine/default requests reached a page renderer.");
         foreach (var accept in new[] { "application/json", "*/*", "text/html;q=0,application/json", "text/html;q=0.5,application/json", "malformed" })

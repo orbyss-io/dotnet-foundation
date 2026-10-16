@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.Presentation",
+  "sourceSha256": {
+    "BrowserPageRendering.cs": "bbf93a8f6702c34680ada716f25e127a8aeb6809f09e36ab0041d05f6c751b42",
+    "BrowserPresentationBootstrap.cs": "ff5c01de6ca2d0aee2a5fbb003dca378bb4ca24bd5fab09c61b6cfbcbd2f8593",
+    "BrowserPresentationCatalog.cs": "5ce32a9277ac428285e2a856e5531d7e669ab26ef5548204cf96e61724f78d2e",
+    "BrowserPresentationOptions.cs": "560a9cbabfd7893a741fff76e5fff0168138987343e498485a597e7079ba032d",
+    "BrowserProblemPageRenderer.cs": "6967e691180189495d78fe819649d250fc8818cdd4a07a53e6dfdf7130545b0d",
+    "FoundationBrowserPresentationFeature.cs": "0ef6fe3ad2ad8fce0eb928b671a1e54ad4e544360be0935111c6df074497065c"
+  },
+  "imports": [],
+  "contracts": [
+    {
+      "scope": "browser-presentation",
+      "typeName": "Orbyss.Foundation.Web.Presentation.BrowserPresentationOptions",
+      "complete": true,
+      "settings": [
+        {
+          "property": "ApplicationName",
+          "path": "Foundation:Web:Presentation:ApplicationName",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 128
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected ApplicationName for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "Locale",
+          "path": "Foundation:Web:Presentation:Locale",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 64
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected Locale for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "RoutePrefix",
+          "path": "Foundation:Web:Presentation:RoutePrefix",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 256
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected RoutePrefix for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "ReturnPath",
+          "path": "Foundation:Web:Presentation:ReturnPath",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 256
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected ReturnPath for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "SignOutConfirmation",
+          "path": "Foundation:Web:Presentation:SignOutConfirmation",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "enum": [
+              "never",
+              "when-unsaved",
+              "always"
+            ]
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected SignOutConfirmation for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "ResponsePolicy",
+          "path": "Foundation:Web:Presentation:ResponsePolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 128
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected ResponsePolicy for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "AssetResponsePolicy",
+          "path": "Foundation:Web:Presentation:AssetResponsePolicy",
+          "required": false,
+          "secret": false,
+          "constraints": {
+            "maxLength": 128
+          },
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected AssetResponsePolicy for the independently enabled browser presentation feature."
+        },
+        {
+          "property": "Copy",
+          "path": "Foundation:Web:Presentation:Copy",
+          "required": false,
+          "secret": false,
+          "constraints": {},
+          "binding": "Shell-local Configure<BrowserPresentationOptions> binds Foundation:Web:Presentation; BrowserPresentationCatalog validates before native endpoint publication.",
+          "precedence": [
+            "typed source initializer",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
+          "reload": "restart",
+          "description": "Selected Copy for the independently enabled browser presentation feature."
+        }
+      ],
+      "semanticConstraints": [
+        "Local literal presentation paths cannot overlap native authentication/API/control prefixes. Native CShells rejects route collisions before generation publication.",
+        "Native LogoutLandingPath must equal RoutePrefix plus /signed-out. BFF browser actions reuse native authentication and antiforgery.",
+        "Application name, locale and bounded copy are encoded as text. Only known copy keys are accepted."
+      ],
+      "appliesTo": {
+        "kind": "shell",
+        "features": [
+          "Orbyss.Foundation.Web.Presentation"
+        ],
+        "configuration": [
+          "Foundation:Web:Presentation"
+        ]
+      }
+    }
+  ]
+}

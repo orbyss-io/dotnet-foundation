@@ -49,15 +49,19 @@ jobs:
       - name: Validate Foundation contracts before publication
         run: python scripts/validate_foundation.py
 
+      - name: Verify neutral browser fallback through the actual Host
+        run: python tests/validate_neutral_browser_fallback.py --host src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll
+
       - name: Verify authenticated hosting in Chromium, Firefox and WebKit
         run: |
           npm ci --prefix tests/browser
           node tests/browser/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
           npm run --prefix tests/browser test:types
-          node --test tests/browser/presentation.test.mjs
+          node --test tests/browser/presentation.test.mjs tests/browser/spa-presentation.test.mjs
           node tests/browser/presentation-browser.cjs
           node tests/browser/hosted-pages.cjs
           node tests/browser/authentication-recovery.cjs
+          node tests/browser/native-presentation.cjs
 
       - name: Verify installed response-policy and BFF candidate packages
         shell: bash

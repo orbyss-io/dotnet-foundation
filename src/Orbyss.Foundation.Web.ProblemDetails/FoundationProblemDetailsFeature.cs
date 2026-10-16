@@ -38,6 +38,11 @@ public sealed class FoundationProblemDetailsFeature : IMiddlewareShellFeature
     public void UseMiddleware(IApplicationBuilder app, IHostEnvironment? environment)
     {
         _ = app.ApplicationServices.GetRequiredService<IProblemDetailsService>();
+        app.Use((context, next) =>
+        {
+            context.Features.Set(new ProblemRequestPathBase(context.Request.PathBase));
+            return next(context);
+        });
         app.UseExceptionHandler();
         app.UseFoundationProblemStatusCodePages();
     }

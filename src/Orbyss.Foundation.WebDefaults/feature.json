@@ -17,6 +17,7 @@
     "FoundationWebDefaultsFeature.cs": "113313707f353ea3100822d5b07c8f515cbf38060462d43e034140d89b449f10",
     "FoundationWebDefaultsOptions.cs": "104cd06d7440c3c26914d7cbffb51a34084898b7bce09eb2808da81692c94450",
     "FoundationWebDefaultsOptionsValidator.cs": "9bc58c697dcc37daac0aad65353a77054e2bc618aca3cbf49768dafc3d35abc7",
+    "ShellWebPaths.cs": "d13e6a714c08c41e2baf7f1aee1005fe656f4b7570483aea7a466865bc811564",
     "WebResponseContributions.cs": "bf74c8ce491821a73cbe9bfe2e646f2da1cfdca29d45fb8a4b1264cb12677ac5",
     "WebResponseMetadata.cs": "13c7f9f598a6933a9b195ec4c43cd674d9e0b0f213725515f415a58d836528e5",
     "WebResponseNonceState.cs": "9b1a6a8314ccbc1bd0e0ebc3135567de42b3d2db340fd0dfe90280f0c799ad08",

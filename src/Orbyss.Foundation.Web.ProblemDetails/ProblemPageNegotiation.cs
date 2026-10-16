@@ -9,9 +9,9 @@ internal static class ProblemPageNegotiation
     /// <summary>Machine metadata wins over protocol-handler hints and every media preference.</summary>
     public static bool AllowsHtml(HttpContext context)
     {
-        var purposes = new[] { context.GetEndpoint()?.Metadata.GetMetadata<ProblemResponsePurposeMetadata>(),
-            context.Features.Get<IExceptionHandlerFeature>()?.Endpoint?.Metadata.GetMetadata<ProblemResponsePurposeMetadata>(),
-            context.Features.Get<ProblemResponsePurposeMetadata>() };
+        var purposes = (context.GetEndpoint()?.Metadata.GetOrderedMetadata<ProblemResponsePurposeMetadata>() ?? [])
+            .Concat(context.Features.Get<IExceptionHandlerFeature>()?.Endpoint?.Metadata.GetOrderedMetadata<ProblemResponsePurposeMetadata>() ?? [])
+            .Append(context.Features.Get<ProblemResponsePurposeMetadata>());
         if (purposes.Any(item => item is not null && item.Purpose != ProblemResponsePurpose.BrowserPage)
             || !purposes.Any(item => item?.Purpose == ProblemResponsePurpose.BrowserPage)) return false;
         try

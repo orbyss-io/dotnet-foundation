@@ -145,6 +145,14 @@
           "Orbyss.Foundation.Web.ProblemDetails": "[0.3.5, )"
         }
       },
+      "orbyss.foundation.web.presentation": {
+        "type": "Project",
+        "dependencies": {
+          "Orbyss.Foundation.Authentication": "[0.3.5, )",
+          "Orbyss.Foundation.Json.AspNetCore": "[0.3.5, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.5, )"
+        }
+      },
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {

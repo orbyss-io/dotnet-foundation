@@ -42,6 +42,7 @@ builder.Services.AddCShellsAspNetCore(shells => shells
 builder.Services.AddHostedService<EagerShellActivationHostedService>();
 
 var app = builder.Build();
-app.UseStatusCodePages();
+app.UseMiddleware<NeutralBrowserFailureMiddleware>();
+app.UseWhen(context => !NeutralBrowserFailureMiddleware.Eligible(context), branch => branch.UseStatusCodePages());
 app.MapShells();
 app.Run();

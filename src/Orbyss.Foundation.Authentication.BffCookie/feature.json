@@ -24,10 +24,11 @@
     }
   ],
   "sourceSha256": {
-    "AntiforgeryMiddleware.cs": "705115a97337c51333e62f60ec14611fce3ba00b5406f9b8c57dd4c1e9e9de38",
+    "AntiforgeryMiddleware.cs": "88c59f3feeedbc89ee34a59a6686905c68f13062797b8a8a6e8ef1bdaa8a5229",
     "BffAnonymousUserResponse.cs": "55904a2580363db689a0b84dd56b09dea147bb16bdd87fbc46790ee65a4c7de6",
     "BffAntiforgeryResponse.cs": "ad0f48c98191cefb190ac640041d17bd9b709882bbda02dab0b7df9869c10240",
     "BffAuthenticatedUserResponse.cs": "1544165ebd40a38c628828507ca47aa63520acd0c90c61545a10913683539bc1",
+    "BffBrowserAuthenticationSession.cs": "2abf19b1d4636785bd366df6b2d27d60e9397ef26e67235af1720d30a53c2509",
     "BffCookieOptionsValidator.cs": "a5558295ea0905d619f4393ca55461af88b803a772f73df6e483e87ad0723994",
     "BffCookieProfileMarker.cs": "82d8f67d858e9fb1e469d0e09443c6d4078eec4e520c9126dcfe992ad6a20979",
     "BffOpenIdConnectPostConfigureOptions.cs": "3d62a7f39a741fcadb430e70f4387d56ef60b0bf9913e5e2630cfa91198ef4ca",
@@ -37,7 +38,7 @@
     "BffSignedOutResponse.cs": "08b7b279562ae9bdfcaba3d5d3839e09a580f46aac6ef1547a717cdd4b8acd29",
     "BffUserResponse.cs": "f455b6ee0a3e392253849d159f88b635b9f46b29c1317bf1f861cfcaa3663538",
     "DistributedTicketStore.cs": "73a7283f763cb5375454e45ec44838ed072fdde80e8fc7ee7bfac112d4b06583",
-    "FoundationBffCookieFeature.cs": "a2ca333c71de46d3f8f44fc953283acf2e0cfd9e7f43c0da8b962f2b1545b135",
+    "FoundationBffCookieFeature.cs": "2292350c497fa41d54392cf74549cd3ae57695c4cbc25ebe26c700ce2af40978",
     "PendingValidatedIdentityProjection.cs": "0ee050ca083bb0be192442fbf5ff69d48b8de2d76b938b496de5eb2af58406a6",
     "ValidatedIdentityTicketProjection.cs": "6effc67087a7ad6819b2ffe6a7647a09636b325186ef5e06561098629b08c403"
   }

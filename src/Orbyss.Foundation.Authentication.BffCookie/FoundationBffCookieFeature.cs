@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CShells;
 using CShells.AspNetCore.Features;
 using CShells.Features;
 using Microsoft.AspNetCore.Antiforgery;
@@ -50,6 +51,9 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         services.AddJsonResponseContract<BffAntiforgeryResponse>(responseProfile, responseRequirement);
         services.AddJsonResponseContract<BffSignedOutResponse>(responseProfile, responseRequirement);
         services.AddSingleton<IFoundationAuthenticationProfile, BffCookieProfileMarker>();
+        services.AddSingleton<BffBrowserAuthenticationSession>();
+        services.AddSingleton<IBrowserAuthenticationSession>(provider => provider.GetRequiredService<BffBrowserAuthenticationSession>());
+        services.AddSingleton<IProblemPageSessionReader>(provider => provider.GetRequiredService<BffBrowserAuthenticationSession>());
         services.AddSingleton<IValidateOptions<FoundationWebOptions>, BffCookieOptionsValidator>();
         // Register before native post-configuration; all consumer Configure actions still run first.
         services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, BffOpenIdConnectPostConfigureOptions>();
@@ -110,12 +114,19 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         endpoints.MapGet(selected.AccessDeniedPath, WriteAccessDeniedAsync).WithMetadata(new WebResponseMetadata(Private: true), browserPurpose).AllowAnonymous();
     }
 
+    /// <summary>Shares the native challenge with selected browser presentation.</summary>
+    internal static Task BrowserLoginAsync(HttpContext context, string returnTarget, IAuthenticationErrorWriter errors, ILoggerFactory logs) =>
+        LoginAsync(context, returnTarget, errors, logs);
+    /// <summary>Shares native local-first logout with selected browser presentation.</summary>
+    internal static Task BrowserLogoutAsync(HttpContext context, ILoggerFactory logs, IOptions<FoundationWebOptions> settings) =>
+        LogoutAsync(context, logs, settings);
+
     /// <summary>Configures the opaque server-backed session cookie.</summary>
     private static void ConfigureCookie(IServiceCollection services)
     {
         services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
-            .Configure<IOptions<FoundationWebOptions>, IHostEnvironment, ITicketStore>(
-                (options, selected, environment, store) =>
+            .Configure<IOptions<FoundationWebOptions>, IHostEnvironment, ITicketStore, ShellSettings>(
+                (options, selected, environment, store, shell) =>
                 {
                     var settings = selected.Value;
                     var insecureLocal = environment.IsDevelopment() && settings.AllowHttpForLocalDevelopment;
@@ -129,8 +140,8 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                     options.Cookie.Path = "/";
                     options.SlidingExpiration = true;
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(settings.SessionIdleMinutes);
-                    options.AccessDeniedPath = settings.AccessDeniedPath;
-                    options.LoginPath = "/bff/login";
+                    options.AccessDeniedPath = ShellWebPaths.RoutePrefix(shell) + settings.AccessDeniedPath;
+                    options.LoginPath = ShellWebPaths.RoutePrefix(shell) + "/bff/login";
                     options.Events.OnRedirectToLogin = context => ApiRedirectAsErrorAsync(
                         context,
                         StatusCodes.Status401Unauthorized,
@@ -162,8 +173,8 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     private static void ConfigureOpenIdConnect(IServiceCollection services)
     {
         services.AddOptions<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme)
-            .Configure<IOptions<FoundationWebOptions>, IHostEnvironment, ILoggerFactory>(
-                (options, selected, environment, loggerFactory) =>
+            .Configure<IOptions<FoundationWebOptions>, IHostEnvironment, ILoggerFactory, ShellSettings>(
+                (options, selected, environment, loggerFactory, shell) =>
             {
                 var settings = selected.Value;
                 var insecureLocal = environment.IsDevelopment() && settings.AllowHttpForLocalDevelopment;
@@ -182,9 +193,10 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.MapInboundClaims = false;
                 options.RequireHttpsMetadata = !insecureLocal;
-                options.CallbackPath = settings.CallbackPath;
-                options.SignedOutCallbackPath = settings.SignedOutCallbackPath;
-                options.RemoteSignOutPath = settings.RemoteSignOutPath;
+                var routePrefix = ShellWebPaths.RoutePrefix(shell);
+                options.CallbackPath = routePrefix + settings.CallbackPath;
+                options.SignedOutCallbackPath = routePrefix + settings.SignedOutCallbackPath;
+                options.RemoteSignOutPath = routePrefix + settings.RemoteSignOutPath;
                 options.RemoteAuthenticationTimeout = TimeSpan.FromSeconds(settings.RemoteAuthenticationTimeoutSeconds);
                 options.ProtocolValidator.NonceLifetime = options.RemoteAuthenticationTimeout;
                 options.BackchannelTimeout = TimeSpan.FromSeconds(settings.DiscoveryTimeoutSeconds);
@@ -236,7 +248,7 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
                             code,
                             context.Failure?.GetType().Name ?? "unknown");
                     context.HandleResponse();
-                    context.Response.Redirect($"{context.Request.PathBase}{settings.AccessDeniedPath}?code={code}");
+                    context.Response.Redirect($"{context.Request.PathBase}{routePrefix}{settings.AccessDeniedPath}?code={code}");
                     return Task.CompletedTask;
                 };
             });
@@ -269,7 +281,8 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         // CShells restores the outer request path before executing endpoint delegates.
         // Native authentication retains the shell base captured by its middleware.
         var pathBase = context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase;
-        var destination = pathBase.Add(new PathString(settings.Value.LogoutLandingPath)).Value!;
+        var destination = pathBase.Add(new PathString(ShellWebPaths.RoutePrefix(context.RequestServices.GetRequiredService<ShellSettings>())
+            + settings.Value.LogoutLandingPath)).Value!;
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
         try
         {
@@ -371,7 +384,8 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
         int status,
         string code)
     {
-        if (!context.Request.Path.StartsWithSegments("/api"))
+        var purposes = context.HttpContext.GetEndpoint()?.Metadata.GetOrderedMetadata<ProblemResponsePurposeMetadata>() ?? [];
+        if (purposes.Count > 0 && purposes.All(purpose => purpose.Purpose == ProblemResponsePurpose.BrowserPage))
         {
             context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
