@@ -84,7 +84,7 @@ jobs:
         run: |
           shopt -s nullglob
           packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 30 ]] || { echo "Expected 30 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
+          [[ ${#packages[@]} -eq 31 ]] || { echo "Expected 30 Foundation runtime packages plus the analyzer, found ${#packages[@]}." >&2; exit 1; }
           for package in "${packages[@]}"; do
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done
