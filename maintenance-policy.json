@@ -12,7 +12,8 @@
     "tests/validate_postgresql.py",
     ".python-version",
     ".nvmrc",
-    "tests/browser/package.json"
+    "tests/browser/package.json",
+    "tests/loader-fixture/LoaderFixture.csproj"
   ],
   "additionalPins": [],
   "metadataOverrides": {

@@ -58,6 +58,7 @@ def main():
     run('publish-host',['dotnet','publish','src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj','-c','Release','--no-build','--no-restore','-p:UseAppHost=false','-o',str(host)])
     run('foundation-tests',[sys.executable,'scripts/validate_foundation.py'])
     run('neutral-browser-host',[sys.executable,'tests/validate_neutral_browser_fallback.py','--host',str(host/'Orbyss.Foundation.Host.dll')])
+    run('native-package-loader',[sys.executable,'tests/validate_host_package_loading.py','--host',str(host/'Orbyss.Foundation.Host.dll')])
     run('browser-tooling',[npm,'ci','--prefix','tests/browser'])
     run('browser-engines',['node','tests/browser/node_modules/playwright/cli.js','install','--with-deps','chromium','firefox','webkit'])
     run('browser-types',[npm,'run','--prefix','tests/browser','test:types'])

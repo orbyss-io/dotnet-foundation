@@ -59,6 +59,9 @@ jobs:
       - name: Verify neutral browser fallback through the actual Host
         run: python tests/validate_neutral_browser_fallback.py --host src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll
 
+      - name: Verify native multi-assembly and culture-aware package loading
+        run: python tests/validate_host_package_loading.py --host src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll
+
       - name: Verify authenticated hosting in Chromium, Firefox and WebKit
         if: runner.os == 'Linux'
         run: |
