@@ -42,6 +42,7 @@ def qualify_private_host(base, root):
                 assert response.headers['X-Content-Type-Options'] == 'nosniff'
                 assert response.headers['Content-Security-Policy']
             if expected != 200: assert b'Packaged private fixture' not in body
+            if expected in (401, 403): assert response.headers.get('Location') is None, 'Machine denial must not redirect to interactive login'
             observations.append(dict(path=path, status=response.status, cache=response.headers.get('Cache-Control')))
             return body
     anonymous, alpha, beta, none, full = [client() for _ in range(5)]
@@ -54,10 +55,11 @@ def qualify_private_host(base, root):
     beta_bootstrap = re.search(r'data-bootstrap="([^"]+)"', beta_html).group(1)
     assert bootstrap != beta_bootstrap
     for path in ['/private/alpha', '/private/beta', bootstrap, beta_bootstrap]:
-        request(anonymous, path, 302)
-        request(none, path, 302)
-    request(alpha, beta_bootstrap, 302)
-    request(beta, bootstrap, 302)
+        machine = path in (bootstrap, beta_bootstrap)
+        request(anonymous, path, 401 if machine else 302)
+        request(none, path, 403 if machine else 302)
+    request(alpha, beta_bootstrap, 403)
+    request(beta, bootstrap, 403)
     wire = json.loads(request(alpha, bootstrap, 200))
     assert wire['title'] == 'Packaged private fixture'
     asset = urllib.request.urlopen(base + wire['runtime'], timeout=15)
@@ -72,7 +74,7 @@ def qualify_private_host(base, root):
     tokens = json.loads(request(alpha, '/private/bff/antiforgery', 200))
     request(alpha, '/private/bff/logout', 302, data=b'', headers={tokens['headerName']: tokens['requestToken']})
     request(alpha, '/private/alpha', 302)
-    request(alpha, bootstrap, 302)
+    request(alpha, bootstrap, 401)
     (root / 'observations.json').write_text(json.dumps(observations, indent=2) + '\n', encoding='utf-8')
     return len(observations)
 
@@ -101,6 +103,8 @@ def main():
     parser.add_argument("--version", help="Exact private candidate version; tagged releases use VERSION.")
     parser.add_argument("--dotnet", default="dotnet")
     parser.add_argument("--host", type=Path)
+    parser.add_argument("--artifacts", type=Path, default=repository / "artifacts/hosted-package-consumption",
+                        help="Owned evidence parent; a shorter Windows path changes no qualification checks.")
     args = parser.parse_args()
     packages = args.packages.resolve()
     host = (args.host or repository / "src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll").resolve()
@@ -108,7 +112,7 @@ def main():
     central_packages = ET.parse(repository / "Directory.Packages.props")
     cshells_version = next(entry.attrib["Version"] for entry in central_packages.findall(".//PackageVersion")
         if entry.attrib.get("Include") == "CShells.AspNetCore.Abstractions")
-    evidence = repository / "artifacts/hosted-package-consumption"
+    evidence = args.artifacts.resolve()
     evidence.mkdir(parents=True, exist_ok=True)
     with nullcontext(tempfile.mkdtemp(prefix="run-", dir=evidence)) as directory:
         root = Path(directory)
