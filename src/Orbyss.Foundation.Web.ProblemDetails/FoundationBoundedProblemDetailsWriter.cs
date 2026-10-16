@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orbyss.Foundation.Json;
 using Orbyss.Foundation.Web.ProblemDetails.Core;
+using System.Text;
 
 namespace Orbyss.Foundation.Web.ProblemDetails;
 
@@ -42,6 +43,7 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
         http.RequestAborted.ThrowIfCancellationRequested();
         http.RequestServices.GetRequiredService<IOptions<ProblemDetailsOptions>>().Value.CustomizeProblemDetails?.Invoke(context);
         byte[] bytes;
+        AdmittedProblemPage page;
         try
         {
             var problem = context.ProblemDetails;
@@ -54,6 +56,8 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 Title: definition.Title ?? "Request Failed", Status: definition.StatusCode, Code: definition.Code,
                 CorrelationId: correlation, TraceId: correlation, FieldErrors: definition.FieldErrors, Detail: definition.Detail),
                 profile.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
+            page = new AdmittedProblemPage(definition.StatusCode, definition.Code,
+                definition.Title ?? "Request Failed", correlation);
         }
         catch (Exception error) when (error is JsonResponseContractException or ArgumentException
             or InvalidOperationException or InvalidCastException or KeyNotFoundException)
@@ -66,13 +70,47 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 FieldErrors: Array.Empty<ProblemFieldError>(), Detail: null),
                 fallback.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             context.ProblemDetails.Status = 500;
+            page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation);
+        }
+        var contentType = "application/problem+json";
+        if (ProblemPageNegotiation.AllowsHtml(http))
+        {
+            try
+            {
+                var html = http.RequestServices.GetService<IProblemPageRenderer>()?.Render(page);
+                if (html is not null)
+                {
+                    var encoding = new UTF8Encoding(false, true);
+                    if (encoding.GetByteCount(html) > profile.MaxBytes) throw new InvalidOperationException("Page output exceeds the problem response budget.");
+                    bytes = encoding.GetBytes(html);
+                    contentType = "text/html; charset=utf-8";
+                }
+            }
+            catch (Exception error) when (error is not OperationCanceledException || !http.RequestAborted.IsCancellationRequested)
+            {
+                logger.LogError("Foundation problem page rejected {FailureType} with correlation {CorrelationId}.",
+                    error.GetType().Name, page.CorrelationId);
+                context.ProblemDetails.Status = 500;
+                // Fixed nonrecursive HTML fits the minimum 512-byte budget. It
+                // never calls the failed renderer or exposes its exception.
+                bytes = Encoding.UTF8.GetBytes("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Request failed</title>"
+                    + "<main><h1>Request failed</h1><p>Please try again later.</p><p>Reference: " + page.CorrelationId + "</p></main></html>");
+                contentType = "text/html; charset=utf-8";
+            }
         }
         http.RequestAborted.ThrowIfCancellationRequested();
         http.Response.StatusCode = context.ProblemDetails.Status ?? 500;
-        http.Response.ContentType = "application/problem+json";
+        http.Response.ContentType = contentType;
         http.Response.Headers.CacheControl = "no-store";
+        if (contentType.StartsWith("text/html", StringComparison.Ordinal))
+        {
+            http.Response.Headers.XContentTypeOptions = "nosniff";
+            http.Response.Headers.ContentSecurityPolicy = "default-src 'none'; style-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
+            http.Response.Headers["Referrer-Policy"] = "no-referrer";
+        }
         http.Response.ContentLength = bytes.Length;
-        await http.Response.Body.WriteAsync(bytes, http.RequestAborted).ConfigureAwait(false);
+        if (!HttpMethods.IsHead(http.Request.Method))
+            await http.Response.Body.WriteAsync(bytes, http.RequestAborted).ConfigureAwait(false);
     }
     /// <summary>Prevents correlation content from exceeding the finite fallback envelope or carrying control text.</summary>
     private static string AdmitCorrelation(string value) => value.Length is >= 1 and <= 128

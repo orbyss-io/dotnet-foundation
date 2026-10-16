@@ -37,7 +37,7 @@
     "BffSignedOutResponse.cs": "08b7b279562ae9bdfcaba3d5d3839e09a580f46aac6ef1547a717cdd4b8acd29",
     "BffUserResponse.cs": "f455b6ee0a3e392253849d159f88b635b9f46b29c1317bf1f861cfcaa3663538",
     "DistributedTicketStore.cs": "73a7283f763cb5375454e45ec44838ed072fdde80e8fc7ee7bfac112d4b06583",
-    "FoundationBffCookieFeature.cs": "8340eb3be2a8c4582ff6a55fbe32199fcfc5f9cb3e802b2e19f916fa62db256d",
+    "FoundationBffCookieFeature.cs": "a2ca333c71de46d3f8f44fc953283acf2e0cfd9e7f43c0da8b962f2b1545b135",
     "PendingValidatedIdentityProjection.cs": "0ee050ca083bb0be192442fbf5ff69d48b8de2d76b938b496de5eb2af58406a6",
     "ValidatedIdentityTicketProjection.cs": "6effc67087a7ad6819b2ffe6a7647a09636b325186ef5e06561098629b08c403"
   }

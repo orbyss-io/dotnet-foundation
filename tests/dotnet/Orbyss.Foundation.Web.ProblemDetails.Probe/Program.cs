@@ -229,6 +229,7 @@ await using (var statusProvider = ProblemProvider(512))
     try { await defectPipeline.Build()(empty); throw new Exception("Status fallback activated exception handling."); }
     catch (ArgumentException error) { Require(ReferenceEquals(error, unhandled), "Unowned exception identity changed."); }
 }
+await BrowserProblemBoundaryProbe.RunAsync();
 Console.WriteLine("Foundation Problem Details conformance passed: definitions, all envelopes, scoped enrichment, native ordering, privacy, cancellation and auth-only activation.");
 static void Reject(Action action)
 {

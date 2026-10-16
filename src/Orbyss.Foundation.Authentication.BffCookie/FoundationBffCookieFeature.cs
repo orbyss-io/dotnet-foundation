@@ -81,30 +81,33 @@ public sealed class FoundationBffCookieFeature : IWebShellFeature, IMiddlewareSh
     public void MapEndpoints(IEndpointRouteBuilder endpoints, IHostEnvironment? environment)
     {
         var selected = endpoints.ServiceProvider.GetRequiredService<IOptions<FoundationWebOptions>>().Value;
+        var machinePurpose = new ProblemResponsePurposeMetadata(ProblemResponsePurpose.Machine);
+        var browserPurpose = new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage);
         // Shell selection happens before its authentication middleware. These exact routes
         // bring protocol requests into the owning shell; the OIDC handler consumes them.
         foreach (var path in new[] { selected.CallbackPath, selected.SignedOutCallbackPath, selected.RemoteSignOutPath })
         {
             endpoints.MapMethods(path, ["GET", "POST"], (HttpContext context, IAuthenticationErrorWriter errorWriter) =>
                 errorWriter.WriteAsync(context, StatusCodes.Status400BadRequest, AuthenticationErrorCodes.CallbackInvalid))
-                .WithMetadata(new WebResponseMetadata(Private: true))
+                .WithMetadata(new WebResponseMetadata(Private: true),
+                    path == selected.RemoteSignOutPath ? machinePurpose : browserPurpose)
                 .AllowAnonymous()
                 .ExcludeFromDescription();
         }
-        endpoints.MapGet("/bff/login", LoginAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        endpoints.MapGet("/bff/login", LoginAsync).WithMetadata(new WebResponseMetadata(Private: true), browserPurpose).AllowAnonymous();
 
-        endpoints.MapGet("/bff/user", WriteUserAsync).WithJsonResponse<BffUserResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        endpoints.MapGet("/bff/user", WriteUserAsync).WithJsonResponse<BffUserResponse>().WithMetadata(new WebResponseMetadata(Private: true), machinePurpose).AllowAnonymous();
 
         endpoints.MapGet("/bff/antiforgery", (HttpContext context, IAntiforgery antiforgery, IJsonResponseFactory<BffAntiforgeryResponse> responses) =>
         {
             var tokens = antiforgery.GetAndStoreTokens(context);
             return responses.Create(new(AntiforgeryHeader, AntiforgeryFormField, tokens.RequestToken));
-        }).WithJsonResponse<BffAntiforgeryResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+        }).WithJsonResponse<BffAntiforgeryResponse>().WithMetadata(new WebResponseMetadata(Private: true), machinePurpose).AllowAnonymous();
 
-        endpoints.MapPost("/bff/logout", LogoutAsync).WithMetadata(new WebResponseMetadata(Private: true)).RequireAuthorization();
+        endpoints.MapPost("/bff/logout", LogoutAsync).WithMetadata(new WebResponseMetadata(Private: true), machinePurpose).RequireAuthorization();
         endpoints.MapGet("/bff/signed-out", (IJsonResponseFactory<BffSignedOutResponse> responses) => responses.Create(new(true)))
-            .WithJsonResponse<BffSignedOutResponse>().WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
-        endpoints.MapGet(selected.AccessDeniedPath, WriteAccessDeniedAsync).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
+            .WithJsonResponse<BffSignedOutResponse>().WithMetadata(new WebResponseMetadata(Private: true), machinePurpose).AllowAnonymous();
+        endpoints.MapGet(selected.AccessDeniedPath, WriteAccessDeniedAsync).WithMetadata(new WebResponseMetadata(Private: true), browserPurpose).AllowAnonymous();
     }
 
     /// <summary>Configures the opaque server-backed session cookie.</summary>

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Orbyss.Foundation.Authentication;
 using Orbyss.Foundation.WebDefaults;
+using Orbyss.Foundation.Web.ProblemDetails;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -80,7 +81,8 @@ public sealed class FoundationHostedPagesFeature(ShellSettings settings) : IWebS
                     var bootstrap = endpoints.MapMethods(path, ["GET", "HEAD"],
                         (HttpContext context) => Results.Bytes(HostedPageRendering.Bootstrap(revision, locale, target => MappedPath(context, target)), "application/json; charset=utf-8"))
                         .WithName(routeNamespace + path)
-                        .WithMetadata(Metadata(route.Bootstrap, immutable: !route.Bootstrap.Private, noIndex: true))
+                        .WithMetadata(Metadata(route.Bootstrap, immutable: !route.Bootstrap.Private, noIndex: true),
+                            new ProblemResponsePurposeMetadata(ProblemResponsePurpose.Machine))
                         .ExcludeFromDescription();
                     ApplyAccess(bootstrap, route.Page, route.Bootstrap);
                 }
@@ -91,7 +93,7 @@ public sealed class FoundationHostedPagesFeature(ShellSettings settings) : IWebS
                 context.Response.Headers.ContentLanguage = locale;
                 context.Response.Headers.Vary = "Accept-Language";
                 return Results.Content(HostedPageRendering.Page(current, locale, target => MappedPath(context, target), route), "text/html; charset=utf-8");
-            }).WithMetadata(Metadata(route.Page)).ExcludeFromDescription();
+            }).WithMetadata(Metadata(route.Page), new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage)).ExcludeFromDescription();
             ApplyAccess(page, route.Page);
         }
     }
@@ -126,7 +128,8 @@ public sealed class FoundationHostedPagesFeature(ShellSettings settings) : IWebS
         {
             context.Response.Headers.ContentDisposition = $"inline; filename=\"{name}\"";
             return Results.Bytes(data, contentType, entityTag: tag, enableRangeProcessing: true);
-        }).WithName(routeNamespace + route).WithMetadata(Metadata(new(false, null, policy), immutable: true, noIndex: true))
+        }).WithName(routeNamespace + route).WithMetadata(Metadata(new(false, null, policy), immutable: true, noIndex: true),
+            new ProblemResponsePurposeMetadata(ProblemResponsePurpose.Machine))
             .AllowAnonymous().ExcludeFromDescription();
     }
     /// <summary>Uses the actual mapped shell prefix, including after shell recreation.</summary>
