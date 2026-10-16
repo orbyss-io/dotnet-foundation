@@ -49,6 +49,10 @@ async function run() {
           assert(!(await page.locator('body').innerText()).includes('private-exception'));
           await context.request.get(base + '/pages-failure/fixture/session');
           await page.goto(base + '/pages-failure/auth/signed-out');
+          const transportRequests = [];
+          page.on('request', request => {
+            if (/\/bff\/(?:antiforgery|logout)$/u.test(new URL(request.url()).pathname)) transportRequests.push(request.method());
+          });
           await page.evaluate(async () => {
             const selected = await (await fetch('/pages-failure/auth/configuration')).json();
             const { prepareBffSignOut } = await import(selected.bffModulePath);
@@ -63,14 +67,17 @@ async function run() {
           });
           await page.getByRole('button', { name: 'Native sign out' }).click();
           await page.getByRole('dialog').waitFor();
+          assert.deepEqual(transportRequests, [], 'transport acquired or dispatched before confirmation');
           await page.keyboard.press('Escape');
           assert.equal(await page.getByRole('dialog').count(), 0);
           assert.equal(await page.getByRole('textbox', { name: 'Private draft' }).inputValue(), 'retained fixture draft');
           assert.equal((await (await context.request.get(base + '/pages-failure/bff/user')).json()).authenticated, true);
+          assert.deepEqual(transportRequests, [], 'cancellation caused protocol or antiforgery acquisition');
           assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Native sign out');
           await page.getByRole('button', { name: 'Native sign out' }).click();
           await page.getByRole('dialog').getByRole('button', { name: 'Sign out', exact: true }).click();
           await page.waitForURL(base + '/pages-failure/auth/signed-out?remote=unavailable');
+          assert.deepEqual(transportRequests, ['GET', 'POST'], 'native transport duplicated or bypassed admitted acquisition');
           assert((await page.locator('main').innerText()).includes('No local session is active.'));
           assert((await page.locator('main').innerText()).includes('provider session may still be active'));
           assert.equal((await (await context.request.get(base + '/pages-failure/bff/user')).json()).authenticated, false);
@@ -78,7 +85,8 @@ async function run() {
           await page.screenshot({ path: path.join(evidence, name + '-' + viewport.width + '.png'), fullPage: true });
           observations.push({ engine: name, version: browser.version(), viewport, measured: true, nativeLogin: true,
             independentSession: true, encodedError: true, cancelPreservedDraftAndSession: true,
-            nativeCsrfPost: true, observedLocalLogout: true, providerOutcome: 'unconfirmed', storageEmpty: true, status: 'passed' });
+            nativeCsrfPost: true, zeroPreAdmissionAcquisition: true, transportRequests,
+            observedLocalLogout: true, providerOutcome: 'unconfirmed', storageEmpty: true, status: 'passed' });
         } finally { await context.close(); }
       }
       const noScript = await browser.newContext({ javaScriptEnabled: false });

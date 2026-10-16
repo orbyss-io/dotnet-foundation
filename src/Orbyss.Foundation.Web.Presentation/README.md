@@ -89,3 +89,10 @@ Its Chromium variant removes Playwright's explicit BFCache-disable default and
 requires an observed persisted restore. Other engines report their actual restore
 mechanism; a fresh navigation is never labelled a BFCache restore. Native private
 response cache policy is preserved throughout.
+
+`prepareBffSignOut` registers and validates the control without network acquisition.
+Only the shared admission callback starts native antiforgery acquisition. Cancel
+therefore causes neither a token request nor logout. The admitted action validates
+the bounded response and submits the native same-window form; it requires no popup
+or delayed popup gesture. Controls remain serialized through the page transition.
+A pending or observed navigation never certifies local/provider logout completion.

@@ -8,5 +8,5 @@ export interface BffSignOutOptions {
   confirmation?(request: ConfirmationRequest): ConfirmationView;
   signal?: AbortSignal;
 }
-/** Performs read-only native token preparation. Enable controls only after this resolves. */
+/** Validates/registers the control without network acquisition. Native token acquisition begins only after sign-out admission. */
 export function prepareBffSignOut(options: BffSignOutOptions): Promise<SignOutControl<void>>;
