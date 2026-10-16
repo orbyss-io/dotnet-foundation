@@ -115,23 +115,26 @@ internal static class AuthenticatedPagesProbe
 
         foreach (var path in new[] { "/p/alpha", "/p/beta", bootstrap, betaBootstrap })
         {
+            var machine = path == bootstrap || path == betaBootstrap;
             using var unauthenticated = await anonymous.GetAsync(path);
-            CheckPrivate(unauthenticated, HttpStatusCode.Redirect);
-            Require(unauthenticated.Headers.Location!.OriginalString.Contains("/p/bff/login", StringComparison.Ordinal), "anonymous entry did not use native BFF challenge");
+            CheckPrivate(unauthenticated, machine ? HttpStatusCode.Unauthorized : HttpStatusCode.Redirect);
+            if (machine) Require(unauthenticated.Headers.Location is null, "machine bootstrap redirected to login");
+            else Require(unauthenticated.Headers.Location!.OriginalString.Contains("/p/bff/login", StringComparison.Ordinal), "anonymous entry did not use native BFF challenge");
             Require(!(await unauthenticated.Content.ReadAsStringAsync()).Contains(PrivateMarker, StringComparison.Ordinal), "anonymous private data leaked");
             using var forbidden = await none.GetAsync(path);
-            CheckPrivate(forbidden, HttpStatusCode.Redirect);
-            Require(forbidden.Headers.Location!.OriginalString.Contains("/p/bff/access-denied", StringComparison.Ordinal), "permission denial did not use native BFF forbid");
+            CheckPrivate(forbidden, machine ? HttpStatusCode.Forbidden : HttpStatusCode.Redirect);
+            if (machine) Require(forbidden.Headers.Location is null, "machine bootstrap redirected to access denial");
+            else Require(forbidden.Headers.Location!.OriginalString.Contains("/p/bff/access-denied", StringComparison.Ordinal), "permission denial did not use native BFF forbid");
         }
         using (var response = await alpha.GetAsync(bootstrap)) CheckPrivate(response, HttpStatusCode.OK, "no-referrer");
         using (var response = await beta.GetAsync(betaBootstrap)) CheckPrivate(response, HttpStatusCode.OK);
-        using (var response = await alpha.GetAsync(betaBootstrap)) CheckPrivate(response, HttpStatusCode.Redirect);
-        using (var response = await beta.GetAsync(bootstrap)) CheckPrivate(response, HttpStatusCode.Redirect);
+        using (var response = await alpha.GetAsync(betaBootstrap)) CheckPrivate(response, HttpStatusCode.Forbidden);
+        using (var response = await beta.GetAsync(bootstrap)) CheckPrivate(response, HttpStatusCode.Forbidden);
         using (var response = await alpha.GetAsync("/p/beta")) CheckPrivate(response, HttpStatusCode.Redirect);
         using (var response = await none.GetAsync("/p/session")) CheckPrivate(response, HttpStatusCode.OK);
         using var staged = await alpha.GetAsync("/p/staged");
         var stagedBootstrap = BootstrapUrl(await staged.Content.ReadAsStringAsync());
-        using (var response = await alpha.GetAsync(stagedBootstrap)) CheckPrivate(response, HttpStatusCode.Redirect);
+        using (var response = await alpha.GetAsync(stagedBootstrap)) CheckPrivate(response, HttpStatusCode.Forbidden);
         using (var response = await full.GetAsync(stagedBootstrap)) CheckPrivate(response, HttpStatusCode.OK);
         using (var response = await full.GetAsync(bootstrap.Replace("/alpha/", "/unknown/", StringComparison.Ordinal))) Require(response.StatusCode == HttpStatusCode.NotFound, "unknown route bootstrap admitted");
         var sharedAlias = bootstrap.Replace("/alpha/", "/", StringComparison.Ordinal);
@@ -145,8 +148,8 @@ internal static class AuthenticatedPagesProbe
         using var mixed = await anonymous.GetAsync("/p/mixed");
         Require(mixed.IsSuccessStatusCode, "independent public HTML admission failed");
         var mixedBootstrap = BootstrapUrl(await mixed.Content.ReadAsStringAsync());
-        using (var response = await anonymous.GetAsync(mixedBootstrap)) CheckPrivate(response, HttpStatusCode.Redirect);
-        using (var response = await alpha.GetAsync(mixedBootstrap)) CheckPrivate(response, HttpStatusCode.Redirect);
+        using (var response = await anonymous.GetAsync(mixedBootstrap)) CheckPrivate(response, HttpStatusCode.Unauthorized);
+        using (var response = await alpha.GetAsync(mixedBootstrap)) CheckPrivate(response, HttpStatusCode.Forbidden);
         using (var response = await full.GetAsync(mixedBootstrap)) CheckPrivate(response, HttpStatusCode.OK);
         var urls = Regex.Matches(html, "(?:href|src)=\"([^\"]+)\"").Select(match => WebUtility.HtmlDecode(match.Groups[1].Value));
         foreach (var url in urls)
@@ -187,7 +190,7 @@ internal static class AuthenticatedPagesProbe
         logoutRequest.Headers.Add(FoundationBffCookieFeature.AntiforgeryHeader, token);
         using (var logout = await alpha.SendAsync(logoutRequest)) CheckPrivate(logout, HttpStatusCode.Redirect);
         using (var response = await alpha.GetAsync("/p/alpha")) CheckPrivate(response, HttpStatusCode.Redirect);
-        using (var response = await alpha.GetAsync(bootstrap)) CheckPrivate(response, HttpStatusCode.Redirect);
+        using (var response = await alpha.GetAsync(bootstrap)) CheckPrivate(response, HttpStatusCode.Unauthorized);
         Console.WriteLine("Authenticated selected-shell HTTP checks passed: native BFF session/denial/logout, route-specific conjunctive bootstrap, separate API permission/ownership, public immutable assets, final headers, discovery/OpenAPI exclusion and cross-shell cookie isolation.");
 
         // A new generation picks up a policy selection, revokes old session state and owns new route names.
