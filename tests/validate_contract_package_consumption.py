@@ -39,9 +39,19 @@ HOST_SHARED_PACKAGES = {
 }
 
 
+def filesystem_file(path: Path) -> Path:
+    """Windows file I/O spelling only; logical paths/CLI/NuGet URIs stay unchanged."""
+    if os.name != 'nt':
+        return path
+    spelling = str(path.absolute())
+    if spelling.startswith('\\\\?\\'):
+        return path
+    return Path('\\\\?\\UNC\\' + spelling[2:] if spelling.startswith('\\\\') else '\\\\?\\' + spelling)
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as stream:
+    with filesystem_file(path).open("rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
@@ -65,8 +75,8 @@ def preserve_host_payload(host: Path, destination: Path) -> dict[str, str]:
     for relative, expected in hashes.items():
         source = host.parent / relative
         copied = destination / relative
-        copied.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, copied)
+        filesystem_file(copied.parent).mkdir(parents=True, exist_ok=True)
+        shutil.copy2(filesystem_file(source), filesystem_file(copied))
         assert sha256(copied) == expected == sha256(source), "Host payload changed while qualification captured it."
     return hashes
 
@@ -155,7 +165,7 @@ def copy_restored_packages(cache: Path, feed: Path) -> dict[str, str]:
         if destination.exists():
             assert sha256(destination) == digest, f"Package identity has conflicting bytes: {package.name}"
         else:
-            shutil.copy2(package, destination)
+            shutil.copy2(filesystem_file(package), filesystem_file(destination))
             retained[package.name.casefold()] = destination
         hashes[package.name] = digest
     assert hashes, "Fresh dependency restore retained no packages."
@@ -591,7 +601,7 @@ def main() -> None:
         for project in (repository / "src").glob("Orbyss.Foundation*/*.csproj")
         if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build",
             "Orbyss.Foundation.OpenApi.Exporter", "Orbyss.Foundation.Analyzers"}}
-    assert len(expected_runtime_identities) == 29, "The explicit runtime package family requires review."
+    assert len(expected_runtime_identities) == 30 and 'Orbyss.Foundation.Web.Presentation' in expected_runtime_identities, "The explicit runtime package family requires review."
     assert set(candidate_identities) == expected_runtime_identities, (
         "Exact candidate runtime package set mismatch", {
             "missing": sorted(expected_runtime_identities - set(candidate_identities)),

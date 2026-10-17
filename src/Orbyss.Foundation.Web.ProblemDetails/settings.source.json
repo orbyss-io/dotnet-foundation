@@ -2,20 +2,29 @@
   "schemaVersion": 2,
   "packageId": "Orbyss.Foundation.Web.ProblemDetails",
   "sourceSha256": {
+    "AdmittedProblemPage.cs": "1ed7906eb84c44830e50f7173cb6dd2cbac9002c452fbc86e3f5d778348d5268",
+    "BrowserNavigationAdmission.cs": "bdc8f7c28a81ea268391f76a8143bedf5ba1c575ed34eb43b9e5f66d86de4f50",
     "FoundationBadHttpRequestExceptionHandler.cs": "5db1b9e886c63d96ea09b147ffd57714e6994ee1328a80b1cc46b08bde36e66d",
-    "FoundationBoundedProblemDetailsWriter.cs": "6c8a05de4e8dbe1b486d844eb3f81aaaeb739ccd60e95f5facf7f152033d3432",
+    "FoundationBoundedProblemDetailsWriter.cs": "f5db74e9e52701fae02c6edf62e4e6f3456d864c67e20b54c83100f67938a660",
     "FoundationProblemDetailsApplicationBuilderExtensions.cs": "2dfcb350df23fc16d1bbeef87af1bfa914caf600dd5da1fed88f88e6436cc39e",
-    "FoundationProblemDetailsFeature.cs": "93c221ac94f1cda5a99f820132f0e8869bd95429a8a2c90d0834fa02802e98c4",
+    "FoundationProblemDetailsFeature.cs": "40362725d4f4fe321c807ca98780c164c7fb7c3971c75c86eb07099082246fe2",
     "FoundationProblemDetailsOptionsSetup.cs": "b02c0f007aea1cb03c13ea6aa78a01ebfa8538ef25ad625f3a15374c94c55cf6",
     "FoundationProblemDetailsServiceCollectionExtensions.cs": "5e5842c2d1c376d5916ebe4f80ba8ee280a00ef5f78901e873134981f2b60305",
-    "FoundationProblemEnvelope.cs": "3767a3403a8bb7f390001a2df3c0a341280e75887df1bbf737390045307fdd7e",
+    "FoundationProblemEnvelope.cs": "c61be8a13266c211d1a088933c72bf73df5b1553be83e464b31f57a6a85ef19e",
+    "FoundationProblemFieldError.cs": "9189f53565db9a910e437c7aeb836eb237b04ba005d14786d8e815a5d7fbf697",
     "FoundationProblemRepresentationPolicy.cs": "d3236ac312d33430d1b556e3edbb223aa3208730dbebd21463226b1e1649fa71",
     "FoundationProblemResponseOptions.cs": "1ae2064b90d20bdbe1357048e765b162ed24ccc764d20c5a0c41820a99d5b7d3",
     "FoundationProblemResult.cs": "ccdf35641c63e32193b369e11d86d537d02dbb7e2e867f61dd0b29dbccf9bd87",
     "FoundationProblemResults.cs": "2377fae5d9825ec6f21adfc48da3a2cf1fa5e6f4ce8a569f00bf056a578a0eff",
     "IFoundationProblemResult.cs": "81bd5d756032c76dca36d82d426b38949f8660a189274171dbfa2d4d2c05e68a",
     "IProblemDetailsEnricher.cs": "a3f7cb9fe2a7c643c8c78586bbf6ebfb485523dcebd6c6bfa17b050b75605dd6",
-    "IProblemRepresentationPolicy.cs": "32ed022d557332935677be796b8860a71a5f50608afc526c65878cdb50931a72"
+    "IProblemPageRenderer.cs": "fbd4f805acc9a90022a8f56b5f194f6218733f326e513f3520c92aabfcc61505",
+    "IProblemPageSessionReader.cs": "703c3b2dab93bb3c831940b86e9c35247ff971c4d6103e92b2ec5721699c3563",
+    "IProblemRepresentationPolicy.cs": "32ed022d557332935677be796b8860a71a5f50608afc526c65878cdb50931a72",
+    "ProblemPageNegotiation.cs": "4a0f40344b8d45082e310df5e900bbae9520d3741918fdea7c3a779d1be2a5ab",
+    "ProblemRequestPathBase.cs": "4e78e6f7ab8a9f8f54eefbe9193a5458340ac7da204e94b6996c8d29125b2a1f",
+    "ProblemResponsePurpose.cs": "bc95bf98752dca72c6740375261350c34d4a420c9fb5413d626302f71e2a94ea",
+    "ProblemResponsePurposeMetadata.cs": "1257e6474f91a85ec6b6a88a941d4aef8d3c7861d0a26576ecb44474ec9f3c25"
   },
   "contracts": [
     {

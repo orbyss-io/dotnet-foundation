@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orbyss.Foundation.Json;
 using Orbyss.Foundation.Web.ProblemDetails.Core;
+using System.Text;
 
 namespace Orbyss.Foundation.Web.ProblemDetails;
 
@@ -42,6 +44,7 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
         http.RequestAborted.ThrowIfCancellationRequested();
         http.RequestServices.GetRequiredService<IOptions<ProblemDetailsOptions>>().Value.CustomizeProblemDetails?.Invoke(context);
         byte[] bytes;
+        AdmittedProblemPage page;
         try
         {
             var problem = context.ProblemDetails;
@@ -52,8 +55,13 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
             var correlation = AdmitCorrelation((string)problem.Extensions[ProblemExtensionNames.CorrelationId]!);
             bytes = profile.Serialize(new FoundationProblemEnvelope(Type: "about:blank",
                 Title: definition.Title ?? "Request Failed", Status: definition.StatusCode, Code: definition.Code,
-                CorrelationId: correlation, TraceId: correlation, FieldErrors: definition.FieldErrors, Detail: definition.Detail),
+                CorrelationId: correlation, TraceId: correlation,
+                FieldErrors: definition.FieldErrors.Select(field => new FoundationProblemFieldError(field.Field, field.Code, field.Message)).ToArray(),
+                Detail: definition.Detail),
                 profile.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
+            page = new AdmittedProblemPage(definition.StatusCode, definition.Code,
+                definition.Title ?? "Request Failed", correlation, AdmitPathBase(http),
+                http.RequestServices.GetService<IProblemPageSessionReader>()?.ReadLocalSession(http));
         }
         catch (Exception error) when (error is JsonResponseContractException or ArgumentException
             or InvalidOperationException or InvalidCastException or KeyNotFoundException)
@@ -63,19 +71,62 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 error.GetType().Name, correlation);
             bytes = fallback.Serialize(new FoundationProblemEnvelope(Type: "about:blank", Title: "Request Failed",
                 Status: 500, Code: ProblemCodes.RequestFailed, CorrelationId: correlation, TraceId: correlation,
-                FieldErrors: Array.Empty<ProblemFieldError>(), Detail: null),
+                FieldErrors: Array.Empty<FoundationProblemFieldError>(), Detail: null),
                 fallback.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             context.ProblemDetails.Status = 500;
+            page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation, AdmitPathBase(http));
+        }
+        var contentType = "application/problem+json";
+        if (ProblemPageNegotiation.AllowsHtml(http))
+        {
+            try
+            {
+                var html = http.RequestServices.GetService<IProblemPageRenderer>()?.Render(page);
+                if (html is not null)
+                {
+                    var encoding = new UTF8Encoding(false, true);
+                    if (encoding.GetByteCount(html) > profile.MaxBytes) throw new InvalidOperationException("Page output exceeds the problem response budget.");
+                    bytes = encoding.GetBytes(html);
+                    contentType = "text/html; charset=utf-8";
+                }
+            }
+            catch (Exception error) when (error is not OperationCanceledException || !http.RequestAborted.IsCancellationRequested)
+            {
+                logger.LogError("Foundation problem page rejected {FailureType} with correlation {CorrelationId}.",
+                    error.GetType().Name, page.CorrelationId);
+                context.ProblemDetails.Status = 500;
+                // Fixed nonrecursive HTML fits the minimum 512-byte budget. It
+                // never calls the failed renderer or exposes its exception.
+                bytes = Encoding.UTF8.GetBytes("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Request failed</title>"
+                    + "<main><h1>Request failed</h1><p>Please try again later.</p><p>Reference: " + page.CorrelationId + "</p></main></html>");
+                contentType = "text/html; charset=utf-8";
+            }
         }
         http.RequestAborted.ThrowIfCancellationRequested();
         http.Response.StatusCode = context.ProblemDetails.Status ?? 500;
-        http.Response.ContentType = "application/problem+json";
+        http.Response.ContentType = contentType;
         http.Response.Headers.CacheControl = "no-store";
+        if (contentType.StartsWith("text/html", StringComparison.Ordinal))
+        {
+            http.Response.Headers.XContentTypeOptions = "nosniff";
+            http.Response.Headers.ContentSecurityPolicy = "default-src 'none'; style-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
+            http.Response.Headers["Referrer-Policy"] = "no-referrer";
+        }
         http.Response.ContentLength = bytes.Length;
-        await http.Response.Body.WriteAsync(bytes, http.RequestAborted).ConfigureAwait(false);
+        if (!HttpMethods.IsHead(http.Request.Method))
+            await http.Response.Body.WriteAsync(bytes, http.RequestAborted).ConfigureAwait(false);
     }
     /// <summary>Prevents correlation content from exceeding the finite fallback envelope or carrying control text.</summary>
     private static string AdmitCorrelation(string value) => value.Length is >= 1 and <= 128
         && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or ':' or '.')
         ? value : Guid.NewGuid().ToString("N");
+    /// <summary>Retains the native shell prefix after CShells restores outer endpoint paths.</summary>
+    private static string AdmitPathBase(HttpContext context)
+    {
+        var value = (context.Features.Get<ProblemRequestPathBase>()?.Value
+            ?? context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase).Value ?? "";
+        return value.Length <= 1024 && (value.Length == 0 || value.StartsWith('/') && !value.StartsWith("//", StringComparison.Ordinal))
+            && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '/' or '-' or '_' or '.')
+            && !value.Split('/').Any(segment => segment is "." or "..") ? value.TrimEnd('/') : "";
+    }
 }

@@ -19,6 +19,7 @@
     "FoundationWebOptions.cs": "bbe208b2e93e84015c5705ba6e208210e41e945c8c929246e811d066819e2ab5",
     "FoundationWebOptionsValidator.cs": "c28ed0bc9751ae2c4ad8a1eee2bc9bb01901dc858a9b6b2f818d80a1d6c54e9c",
     "IAuthenticationErrorWriter.cs": "d965483f0a1c5c817a0fc3415fc93d93e7bad83b32177750d840f143b9584b6a",
+    "IBrowserAuthenticationSession.cs": "e02eadad3b3d9ee193815d360efd3fe8fc66aab64a52af61cf519870cc744433",
     "IFoundationAuthenticationProfile.cs": "b365e3944d9e1065953cbc32d66032d9895db65d38097f700d6dd3dd94eceedc",
     "IValidatedAccountIdentityReader.cs": "3f550b0b5f7fe7f9a333d6ab01c7a9d46a09a56d778532f89c6715ee4c42ff46",
     "PermissionClaimsTransformation.cs": "a087697b47b4d59ada7ebe1442930232867d23671ebe58eafb2cae83aaa0c837",

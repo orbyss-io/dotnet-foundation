@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Text.Json.Schema;
+using System.Text.Json.Serialization.Metadata;
 using CShells.Lifecycle.Blueprints;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
@@ -13,6 +15,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Orbyss.Foundation.Web.ProblemDetails;
+
+var wireOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web) { TypeInfoResolver = new DefaultJsonTypeInfoResolver() };
+var wireSchema = wireOptions.GetJsonSchemaAsNode(typeof(FoundationProblemEnvelope));
+Require(wireSchema["additionalProperties"]!.GetValue<bool>() == false, "Public native problem metadata is not closed.");
+Require(wireSchema["properties"]!["status"]!["type"]!.GetValue<string>() == "integer", "Native problem status metadata permits a numeric string.");
+Require(wireSchema["properties"]!["fieldErrors"]!["items"]!["additionalProperties"]!.GetValue<bool>() == false,
+    "Public native diagnostic metadata is not closed.");
+Require(wireSchema["required"]!.AsArray().All(value => value!.GetValue<string>() != "detail"),
+    "Native optional omitted detail became a required wire field.");
 
 Reject(() => new ProblemDefinition(200, "bad"));
 Reject(() => new ProblemDefinition(400, "Bad Code"));
@@ -229,6 +240,7 @@ await using (var statusProvider = ProblemProvider(512))
     try { await defectPipeline.Build()(empty); throw new Exception("Status fallback activated exception handling."); }
     catch (ArgumentException error) { Require(ReferenceEquals(error, unhandled), "Unowned exception identity changed."); }
 }
+await BrowserProblemBoundaryProbe.RunAsync();
 Console.WriteLine("Foundation Problem Details conformance passed: definitions, all envelopes, scoped enrichment, native ordering, privacy, cancellation and auth-only activation.");
 static void Reject(Action action)
 {
@@ -274,6 +286,10 @@ static async Task Verify(HttpClient client, string path, int status, string code
     var body = await response.Content.ReadAsStringAsync();
     using var json = JsonDocument.Parse(body);
     var root = json.RootElement;
+    var wire = JsonSerializer.Deserialize<FoundationProblemEnvelope>(body, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+    Require(wire is not null && wire.Status == status && wire.Code == code && wire.CorrelationId == wire.TraceId
+        && wire.FieldErrors.Count == root.GetProperty("fieldErrors").GetArrayLength(),
+        "Actual native problem bytes differ from the authoritative public wire contract.");
     Require((int)response.StatusCode == status && root.GetProperty("status").GetInt32() == status,
         $"Incorrect status for {path}: {body}");
     Require(root.GetProperty("code").GetString() == code, $"Incorrect failure identity for {path}: {body}");

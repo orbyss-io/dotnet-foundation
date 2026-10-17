@@ -54,9 +54,10 @@ async function run() {
       await betaPage.locator('#foundation-status').waitFor({ state: 'hidden' });
       const betaBootstrap = await betaPage.locator('#foundation-form').getAttribute('data-bootstrap');
       assert.notEqual(alphaBootstrap, betaBootstrap);
-      for (const [context, bootstrap] of [[alpha, betaBootstrap], [beta, alphaBootstrap], [anonymous, alphaBootstrap]]) {
+      for (const [context, bootstrap, status] of [[alpha, betaBootstrap, 403], [beta, alphaBootstrap, 403], [anonymous, alphaBootstrap, 401]]) {
         const denied = await context.request.get(base + bootstrap, { maxRedirects: 0 });
-        assert.equal(denied.status(), 302);
+        assert.equal(denied.status(), status);
+        assert.equal(denied.headers().location, undefined, 'Machine bootstrap redirected to interactive login');
         assert.equal(denied.headers()['cache-control'], 'no-store');
         assert.equal(denied.headers()['x-robots-tag'], 'noindex, nofollow');
         assert(!((await denied.text()).includes('FIXTURE_PRIVATE_PAGE')));
@@ -75,8 +76,8 @@ async function run() {
       const token = (await (await alpha.request.get(base + '/p/bff/antiforgery')).json()).requestToken;
       const logout = await alpha.request.post(base + '/p/bff/logout', { headers: { 'X-CSRF-TOKEN': token }, maxRedirects: 0 });
       assert.equal(logout.status(), 302);
-      for (const url of ['/p/alpha', alphaBootstrap])
-        assert.equal((await alpha.request.get(base + url, { maxRedirects: 0 })).status(), 302, 'Logout retained private admission');
+      for (const [url, status] of [['/p/alpha', 302], [alphaBootstrap, 401]])
+        assert.equal((await alpha.request.get(base + url, { maxRedirects: 0 })).status(), status, 'Logout retained private admission');
       results.push({ engine: name, version: browser.version(), status: 'passed', authenticatedBootstrap: true, crossRouteDenied: true, publicRuntimeMounted: true, logoutReentryDenied: true });
       console.log(name + ' ' + browser.version() + ': authenticated loader, route permissions, public mount and logout/re-entry passed');
     } finally { await browser.close(); }

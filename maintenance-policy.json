@@ -12,10 +12,13 @@
     "tests/validate_postgresql.py",
     ".python-version",
     ".nvmrc",
-    "tests/browser/package.json"
+    "tests/browser/package.json",
+    "tests/loader-fixture/LoaderFixture.csproj"
   ],
   "additionalPins": [],
   "metadataOverrides": {
+    "oidc-client-ts": "https://registry.npmjs.org/oidc-client-ts",
+    "typescript": "https://registry.npmjs.org/typescript",
     "CShells.Abstractions": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.abstractions/index.json",
     "CShells.AspNetCore": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.aspnetcore/index.json",
     "CShells.AspNetCore.Abstractions": "https://f.feedz.io/valence-works/cshells/nuget/v3/packages/cshells.aspnetcore.abstractions/index.json",

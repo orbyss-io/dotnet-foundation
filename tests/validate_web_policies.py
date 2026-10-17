@@ -13,7 +13,7 @@ import settings_package_bindings as bindings
 
 
 
-def candidate_package_versions(feed: Path):
+def candidate_packages(feed: Path):
     identities = {}
     for package in feed.glob("Orbyss.Foundation.*.nupkg"):
         with zipfile.ZipFile(package) as archive:
@@ -26,19 +26,23 @@ def candidate_package_versions(feed: Path):
             versions = [node.text for node in metadata.iter() if node.tag.rsplit("}", 1)[-1] == "version"]
             bindings.require(len(versions) == 1 and isinstance(versions[0], str) and versions[0], "candidate requires one exact version")
             bindings.require(values[0] not in identities, "candidate identity cannot have ambiguous archives")
-            identities[values[0]] = versions[0]
+            identities[values[0]] = (versions[0], package)
     bindings.require(bool(identities), "candidate feed is empty")
     return identities
+
+
+def candidate_package_versions(feed: Path):
+    return {identity: value[0] for identity, value in candidate_packages(feed).items()}
 
 
 def candidate_package_ids(feed: Path):
     return sorted(candidate_package_versions(feed))
 
 
-def qualify(package: Path, bff_package: Path | None):
+def qualify(package: Path, bff_package: Path | None, work_root: Path | None = None):
     package = package.resolve()
     inspected = [bindings.inspect(package)]
-    artifact = fixture.ROOT / "artifacts/web-policies"
+    artifact = work_root.resolve() if work_root is not None else fixture.ROOT / "artifacts/web-policies"
     artifact.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="packaged-", dir=artifact))
     for name in ("Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props"):
@@ -47,6 +51,7 @@ def qualify(package: Path, bff_package: Path | None):
     # Pin every locally supplied Foundation identity, including full stable families.
     # Private two-owner feeds retain public resolution for all other dependencies.
     candidate_versions = candidate_package_versions(package.parent)
+    archives = {identity: value[1] for identity, value in candidate_packages(package.parent).items()}
     candidate_ids = sorted(candidate_versions)
     candidate_patterns = "".join('<package pattern="' + fixture.escape(identity) + '"/>'
                                  for identity in candidate_ids)
@@ -61,6 +66,10 @@ def qualify(package: Path, bff_package: Path | None):
         bff_package = bff_package.resolve()
         assert bff_package.parent == package.parent
         inspected.append(bindings.inspect(bff_package))
+        presentation = archives.get("Orbyss.Foundation.Web.Presentation")
+        bindings.require(presentation is not None,
+            "Current BFF/presentation probe requires the exact new Presentation archive in the supplied development/release family.")
+        inspected.append(bindings.inspect(presentation))
         with zipfile.ZipFile(bff_package) as archive:
             bff_metadata = json.loads(archive.read("orbyss-foundation/settings.json"))
         timeout = next(setting for setting in bff_metadata["contracts"][0]["settings"] if setting["path"] == "Foundation:Web:RemoteAuthenticationTimeoutSeconds")
@@ -88,7 +97,7 @@ def qualify(package: Path, bff_package: Path | None):
         fixture.run(["dotnet", "build", str(project), "-c", "Release", "--no-restore"], folder, folder / "build.log", env=environment)
         runtime = folder / "bin/Release/net10.0"
         for record in inspected if bff_package and selected == bff_package else inspected[:1]:
-            archive = package if record["packageId"] == "Orbyss.Foundation.WebDefaults" else bff_package
+            archive = archives[record["packageId"]]
             bindings.verify(record, archive, folder / "obj/project.assets.json", work / "cache", runtime)
         fixture.run(["dotnet", str(runtime / (name + ".dll"))], folder, folder / "runtime.log", env=environment)
         if name == "Orbyss.Foundation.WebDefaults.Probe":
@@ -107,9 +116,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--package", type=Path)
     parser.add_argument("--bff-package", type=Path)
+    parser.add_argument("--work-root", type=Path, help="Owned qualification output root; choose a short path for Windows native fixtures.")
     args = parser.parse_args()
     if args.package:
-        qualify(args.package, args.bff_package)
+        qualify(args.package, args.bff_package, args.work_root)
     else:
         if args.bff_package:
             parser.error("--bff-package requires --package")

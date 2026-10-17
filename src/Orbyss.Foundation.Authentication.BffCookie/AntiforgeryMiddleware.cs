@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Orbyss.Foundation.Authentication.Core;
 using Orbyss.Foundation.Authentication;
+using Orbyss.Foundation.WebDefaults;
+using CShells;
 
 namespace Orbyss.Foundation.Authentication.BffCookie;
 
@@ -12,11 +14,14 @@ internal sealed class AntiforgeryMiddleware(RequestDelegate next)
     public async Task InvokeAsync(
         HttpContext context,
         IAntiforgery antiforgery,
-        IAuthenticationErrorWriter errorWriter)
+        IAuthenticationErrorWriter errorWriter,
+        ShellSettings settings)
     {
+        var path = context.Request.Path;
+        var prefix = ShellWebPaths.RoutePrefix(settings);
+        if (prefix.Length > 0 && path.StartsWithSegments(prefix, out var remainder)) path = remainder;
         if (IsUnsafe(context.Request.Method)
-            && (context.Request.Path.StartsWithSegments("/api")
-                || context.Request.Path.Equals("/bff/logout")))
+            && (path.StartsWithSegments("/api") || path.Equals("/bff/logout")))
         {
             try
             {

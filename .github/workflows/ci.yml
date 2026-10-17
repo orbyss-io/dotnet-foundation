@@ -16,6 +16,7 @@ jobs:
       MSBUILDDISABLENODEREUSE: "1"
       DOTNET_CLI_USE_MSBUILD_SERVER: "0"
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
@@ -56,13 +57,24 @@ jobs:
             python scripts/validate_foundation.py
           fi
 
+      - name: Verify neutral browser fallback through the actual Host
+        run: python tests/validate_neutral_browser_fallback.py --host src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll
+
+      - name: Verify native multi-assembly and culture-aware package loading
+        run: python tests/validate_host_package_loading.py --host src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll
+
       - name: Verify authenticated hosting in Chromium, Firefox and WebKit
         if: runner.os == 'Linux'
         run: |
           npm ci --prefix tests/browser
           node tests/browser/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
+          npm run --prefix tests/browser test:types
+          node --test tests/browser/presentation.test.mjs tests/browser/spa-presentation.test.mjs
+          node tests/browser/presentation-browser.cjs
           node tests/browser/hosted-pages.cjs
           node tests/browser/authentication-recovery.cjs
+          node tests/browser/native-presentation.cjs
+          node tests/browser/spa-client-browser.cjs
 
       - name: Pack Foundation packages
         run: dotnet pack Orbyss.Foundation.slnx -c Release --no-build -p:FoundationRuntimeOnly=true --output artifacts/nuget
@@ -76,9 +88,13 @@ jobs:
           python tests/validate_settings_authentication_owner.py --packages artifacts/nuget
           python tests/validate_settings_owners.py --packages artifacts/nuget
 
+      - name: Capture the portable Host before package and image qualification
+        if: runner.os == 'Linux'
+        run: dotnet publish src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj -c Release --no-build --no-restore -p:UseAppHost=false -o artifacts/host-runtime
+
       - name: Verify packaged public contracts through Host and PostgreSQL
         if: runner.os == 'Linux'
-        run: python tests/run_contract_package_qualification.py
+        run: python tests/run_contract_package_qualification.py --host artifacts/host-runtime/Orbyss.Foundation.Host.dll
 
       - name: Verify packed OpenAPI exporter admission and evidence
         run: python tests/validate_openapi_exporter.py
@@ -95,6 +111,59 @@ jobs:
 
       - name: Verify packaged settings-only host consumption
         run: python scripts/validate_hosted_package_consumption.py --packages artifacts/nuget
+
+      - name: Verify installed response-policy, BFF and presentation packages
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          version="$(tr -d '\r\n' < VERSION)"
+          python tests/validate_web_policies.py --package "artifacts/nuget/Orbyss.Foundation.WebDefaults.$version.nupkg" --bff-package "artifacts/nuget/Orbyss.Foundation.Authentication.BffCookie.$version.nupkg"
+
+      - name: Export exact candidate publisher knowledge
+        if: runner.os == 'Linux'
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: python scripts/build_release_knowledge.py --packages artifacts/nuget --version "$(tr -d '\r\n' < VERSION)" --source-commit "$SOURCE_COMMIT" --output artifacts/foundation-knowledge-candidate.json
+
+      - name: Verify the exact qualified image payload
+        if: runner.os == 'Linux'
+        run: python tests/validate_host_release_payload.py --payload artifacts/host-runtime --qualification-root artifacts/contract-package-consumption
+
+      - name: Set up Docker Buildx
+        if: runner.os == 'Linux'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build both candidate Host image platforms without publication
+        if: runner.os == 'Linux'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: artifacts/host-runtime
+          file: src/Orbyss.Foundation.Host/Dockerfile.qualified
+          platforms: linux/amd64,linux/arm64
+          push: false
+          outputs: type=oci,dest=artifacts/host-candidate.tar
+
+      - name: Set up pinned vulnerability scanner
+        if: runner.os == 'Linux'
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.76.0
+
+      - name: Scan both exact candidate image platforms
+        if: runner.os == 'Linux'
+        run: python scripts/dependency_maintenance.py scan --image artifacts/host-candidate.tar
+
+      - name: Preserve the unpublished candidate payload
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: foundation-candidate-${{ github.sha }}
+          path: |
+            artifacts/foundation-knowledge-candidate.json
+            artifacts/host-runtime/**
+            artifacts/host-candidate.tar
+            artifacts/tools/*.nupkg
+          if-no-files-found: error
 
       - name: Upload packages
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -117,4 +186,5 @@ jobs:
             artifacts/**/provenance.json
             artifacts/**/cancellation.json
             artifacts/**/descriptor-validation.json
+            artifacts/dependency-security/*.json
           if-no-files-found: warn

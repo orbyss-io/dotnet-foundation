@@ -19,6 +19,8 @@ def main() -> None:
     parser.add_argument("--version", default=(root / "VERSION").read_text().strip())
     parser.add_argument("--host", type=Path, default=root / "src/Orbyss.Foundation.Host/bin/Release/net10.0/Orbyss.Foundation.Host.dll")
     parser.add_argument("--dotnet", default="dotnet")
+    parser.add_argument("--artifacts", type=Path, default=root / "artifacts/contract-package-consumption",
+                        help="Owned evidence parent; a shorter local Windows path changes no qualification checks.")
     arguments = parser.parse_args()
     name = "foundation-package-contracts-" + uuid.uuid4().hex
     created = False
@@ -45,7 +47,8 @@ def main() -> None:
             "Password=foundation-contracts-fixture-only;Maximum Pool Size=4;Include Error Detail=false"))
         subprocess.run([sys.executable, str(root / "tests/validate_contract_package_consumption.py"),
                         "--packages", str(arguments.packages.resolve()), "--version", arguments.version,
-                        "--host", str(arguments.host.resolve()), "--dotnet", arguments.dotnet],
+                        "--host", str(arguments.host.resolve()), "--dotnet", arguments.dotnet,
+                        "--artifacts", str(arguments.artifacts.resolve())],
                        cwd=root, env=environment, check=True, timeout=1200)
         print("Packaged Host/PostgreSQL qualification passed; disposable database cleaned on exit.")
     finally:

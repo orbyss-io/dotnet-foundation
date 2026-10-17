@@ -1,6 +1,22 @@
 # Orbyss.Foundation.Build
 
 Build-only, publisher-owned descriptor production. Reference with `PrivateAssets="all"`.
+
+Settings source bindings use strict UTF-8 with an optional initial UTF-8 BOM.
+Replace CRLF pairs with LF, then hash UTF-8 without a BOM. Lone CR, Unicode and a
+missing final newline remain significant. Invalid UTF-8 and UTF-16/32 sources
+reject. This rule concerns current settings source bindings; archive, package and
+historical evidence hashes continue to bind their exact original bytes.
+
+After reviewing a current source change, run
+`dotnet msbuild YourPublisher.csproj -t:FoundationInspectSettingsSourceBindings`.
+This uses the evaluated `Compile` inventory and writes a separate
+`obj/<configuration>/<framework>/orbyss-foundation/settings-source-bindings.json`
+report (the native `IntermediateOutputPath` determines the actual location).
+Review and merge its `sourceSha256` into the current `settings.source.json`, then
+run normal restore/build/pack. Inspection does not change that declaration, run
+publisher code or authorize compiled metadata. Missing/changed source, unsafe
+paths, unsupported encoding or incomplete inventories still fail validation.
 Set `FoundationFeatureIdentity`, `PackageId`, `FoundationFeatureDependencies`,
 `FoundationRuntimeDependencies`, `FoundationFeatureRoutes` and optional
 `FoundationComposeForOpenApi`/`FoundationFeatureDormant`. Packing emits canonical

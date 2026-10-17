@@ -22,11 +22,41 @@ the two CShells contract assemblies; this package loads and discovers its option
 the normal native catalog. Already written responses are preserved. The native Foundation writer
 marks admitted problems `Cache-Control: no-store`.
 
+Optional browser presentation registers `IProblemPageRenderer`. The writer first
+applies the safe policy and admits the complete bounded JSON envelope, then supplies
+only an immutable `AdmittedProblemPage` to that pure renderer. It contains status,
+code, title and correlation; exception data, arbitrary extensions, request bodies
+and diagnostic detail are absent. Renderers encode display text and return HTML
+within the same byte budget, or decline with null. Renderer failure or invalid/
+oversized HTML yields a fixed safe500 page within the minimum budget, without
+calling the failed renderer again. Cancellation and committed responses retain
+their normal boundaries. HEAD retains representation headers and emits no body.
+
+`ProblemResponsePurposeMetadata(BrowserPage)` explicitly permits HTML negotiation.
+Machine purpose, including the original endpoint preserved by native exception
+dispatch, always wins over HTML preferences or protocol hints. Unknown/unclassified
+purposes retain JSON. HTML requires explicit `text/html` acceptance at least as
+preferred as JSON; wildcard-only, excluded, malformed or lower-priority HTML does
+not select it. Native protocol handlers may set the same metadata in request
+features. This is a representation contract; it does not change authentication
+redirects, authorization, antiforgery or endpoint admission. A renderer registration
+alone does not activate application pages, branding, routes or sign-out protocols.
+
 All paths use `code`, canonical `correlationId`, compatibility alias `traceId` and a bounded
 `fieldErrors` array. Both correlation fields have the same admitted request identifier. Existing
 0.2.4 generic codes are retained. Arbitrary extension objects, instance paths and exception messages
 are excluded from the closed shape. The representation must contain safe public text, not submitted
 values, SQL or private provider details.
+
+Declare error metadata with the public `FoundationProblemEnvelope` and
+`FoundationProblemFieldError` wire types. The native bounded writer emits these
+same types; consumers do not mirror its internal representation. For example,
+`.Produces<FoundationProblemEnvelope>(400, "application/problem+json")` declares a
+relevant client error, alongside the actual authentication/authorization, admission
+and server statuses. Both object shapes disallow unknown members, and status remains
+a strict JSON number in generated metadata. This declaration adds no handler and
+does not replace the native writer, safe admission policy or typed success/request
+contracts. Public DTO construction alone does not admit strings for output.
 
 The native writer admits the complete envelope before committing headers. Json.AspNetCore projects
 its configured `problem-response` profile byte/depth/preset selection into `FoundationProblemResponseOptions`;

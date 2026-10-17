@@ -27,8 +27,16 @@ public sealed class RecoveryProbeFeature(ShellSettings settings) : IWebShellFeat
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton(new RecoveryControl { Mode = settings.Id.ToString() });
-        services.Replace(ServiceDescriptor.Singleton<IAuthenticationErrorWriter, RecoveryErrorWriter>());
+        services.AddSingleton(new RecoveryControl { Mode = settings.Id.ToString() == "pages-failure" ? "transport" : settings.Id.ToString() });
+        if (!settings.Id.ToString().StartsWith("pages", StringComparison.Ordinal))
+            services.Replace(ServiceDescriptor.Singleton<IAuthenticationErrorWriter, RecoveryErrorWriter>());
+        else
+        {
+            var nativeStore = services.Last(service => service.ServiceType == typeof(ITicketStore));
+            services.Remove(nativeStore);
+            services.AddSingleton(provider => new RevocableProbeTicketStore((ITicketStore)ActivatorUtilities.CreateInstance(provider, nativeStore.ImplementationType!)));
+            services.AddSingleton<ITicketStore>(provider => provider.GetRequiredService<RevocableProbeTicketStore>());
+        }
         services.AddOptions<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme)
             .Configure<RecoveryControl>((options, control) =>
             {
@@ -65,6 +73,47 @@ public sealed class RecoveryProbeFeature(ShellSettings settings) : IWebShellFeat
             identities.TryRead(context.User, out _) ? "Application sign-out is not yet confirmed."
                 : "You're signed out of this application. Sign-out from your identity provider could not be confirmed.", "text/html")).AllowAnonymous();
         endpoints.MapGet("/api/private", () => Results.Text("admitted synthetic session")).RequireAuthorization();
+        endpoints.MapPost("/api/private", () => Results.NoContent()).RequireAuthorization();
+        if (settings.Id.ToString().StartsWith("pages", StringComparison.Ordinal))
+        {
+            endpoints.MapPost("/fixture/revoke", async (RevocableProbeTicketStore store) =>
+            {
+                await store.RevokeObservedAsync();
+                return Results.NoContent();
+            }).AllowAnonymous();
+            endpoints.MapGet("/fixture/private-page", (HttpContext context) =>
+            {
+                var prefix = (context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase.Value ?? "") + ShellWebPaths.RoutePrefix(settings);
+                // Public static shell contains no private payload. Its client adds
+                // synthetic private DOM only after native session observation.
+                return Results.Content("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Public client shell fixture</title>"
+                    + "<main><h1>Client fixture</h1><section id=\"private\"></section>"
+                    + "<p id=\"session-status\">Checking session</p><a href=\"" + prefix + "/fixture/public-page\">Public page</a></main>"
+                    + "<script type=\"module\" src=\"" + prefix + "/fixture/private-page.mjs\"></script></html>", "text/html");
+            }).AllowAnonymous().WithMetadata(new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage),
+                new WebResponseMetadata(Policy: WebResponsePolicyNames.PublicAsset, ImmutablePublicAsset: true, NoIndex: true));
+            endpoints.MapGet("/fixture/private-page.mjs", () => Results.Text("""
+                const prefix = new URL('../', import.meta.url).pathname.replace(/\/$/, '');
+                const { observeBffSession } = await import(prefix + '/auth/assets/v1/session.mjs');
+                window.sessionObserver = observeBffSession({ privateRoots: [document.querySelector('#private')], userPath: prefix + '/bff/user',
+                  onObservation: ({ state }) => {
+                    document.querySelector('#session-status').textContent = state;
+                    const root = document.querySelector('#private');
+                    if (state === 'authenticated' && !root.children.length) {
+                      const content = document.createElement('p'); content.textContent = 'Sensitive fixture text';
+                      const input = document.createElement('input'); input.setAttribute('aria-label', 'Fixture draft'); input.value = 'retained in DOM only';
+                      root.append(content, input);
+                    }
+                  } });
+                await window.sessionObserver.ready;
+                """, "text/javascript")).AllowAnonymous();
+            endpoints.MapGet("/fixture/public-page", () => Results.Content("<main><h1>Public fixture</h1></main>", "text/html")).AllowAnonymous();
+        }
+        endpoints.MapGet("/fixture/unknown-private", () => Results.NoContent()).RequireAuthorization();
+        endpoints.MapGet("/fixture/browser-private", () => Results.NoContent()).RequireAuthorization()
+            .WithMetadata(new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage));
+        endpoints.MapGet("/fixture/page-failure", (HttpContext _) => { throw new InvalidOperationException("private-exception-marker"); })
+            .AllowAnonymous().WithMetadata(new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage));
     }
 }
 

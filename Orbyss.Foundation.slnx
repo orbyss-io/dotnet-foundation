@@ -24,6 +24,7 @@
     <Project Path="src/Orbyss.Foundation.Web.Discovery.Abstractions/Orbyss.Foundation.Web.Discovery.Abstractions.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.HostedPages/Orbyss.Foundation.Web.HostedPages.csproj" />
+    <Project Path="src/Orbyss.Foundation.Web.Presentation/Orbyss.Foundation.Web.Presentation.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.OpenApi/Orbyss.Foundation.Web.OpenApi.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
     <Project Path="src/Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Selectable native browser recovery pages, admitted error presentation and shared authentication controls.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="CShells.AspNetCore.Abstractions" PrivateAssets="all" />
+    <ProjectReference Include="../Orbyss.Foundation.WebDefaults/Orbyss.Foundation.WebDefaults.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Authentication/Orbyss.Foundation.Authentication.csproj" />
+    <ProjectReference Include="../Orbyss.Foundation.Json.AspNetCore/Orbyss.Foundation.Json.AspNetCore.csproj" />
+    <EmbeddedResource Include="browser/*" />
+    <None Include="browser/*" Pack="true" PackagePath="browser/" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

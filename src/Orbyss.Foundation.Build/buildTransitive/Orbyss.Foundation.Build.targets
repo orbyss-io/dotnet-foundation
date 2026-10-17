@@ -19,6 +19,12 @@
       Dormant="$(FoundationFeatureDormant)" ComposeForOpenApi="$(FoundationComposeForOpenApi)" />
   </Target>
   <UsingTask TaskName="Orbyss.Foundation.Build.EmitSettingsMetadata" AssemblyFile="$(FoundationBuildTaskAssembly)" />
+  <UsingTask TaskName="Orbyss.Foundation.Build.InspectSettingsSourceBindings" AssemblyFile="$(FoundationBuildTaskAssembly)" />
+  <!-- Explicit inspection never refreshes declarations, builds code or mints compiled provenance. -->
+  <Target Name="FoundationInspectSettingsSourceBindings">
+    <Orbyss.Foundation.Build.InspectSettingsSourceBindings ProjectDirectory="$(MSBuildProjectDirectory)"
+      SourceFiles="@(Compile)" OutputFile="$(IntermediateOutputPath)orbyss-foundation/settings-source-bindings.json" />
+  </Target>
   <PropertyGroup><FoundationSettingsMetadata>$(IntermediateOutputPath)orbyss-foundation/settings.json</FoundationSettingsMetadata></PropertyGroup>
   <ItemGroup Condition="'$(FoundationSettingsMetadataSource)' != ''">
     <None Include="$(FoundationSettingsMetadata)" Pack="true" PackagePath="orbyss-foundation/settings.json" Visible="false" />

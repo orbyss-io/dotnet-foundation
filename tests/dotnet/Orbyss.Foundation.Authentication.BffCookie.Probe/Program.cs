@@ -11,12 +11,15 @@ using CShells.Lifecycle.Blueprints;
 using Microsoft.Extensions.Configuration;
 
 if (args is ["--serve-recovery"]) { await RecoveryProbe.RunAsync(serve: true); return; }
+if (args is ["--presentation"]) { await BrowserPresentationProbe.RunAsync(); return; }
+if (args is ["--serve-presentation"]) { await BrowserPresentationProbe.RunAsync(serve: true); return; }
 VerifyLocalHttpDevelopmentCookies();
 VerifyProductionCookies();
 OptionsBindingProbe.Run();
 await IdentityProjectionProbe.RunAsync();
 await CallbackRoutingProbe.RunAsync();
 await RecoveryProbe.RunAsync();
+await BrowserPresentationProbe.RunAsync();
 
 static void VerifyLocalHttpDevelopmentCookies()
 {

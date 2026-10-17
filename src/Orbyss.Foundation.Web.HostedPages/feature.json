@@ -18,7 +18,7 @@
   "sourceSha256": {
     "AdmittedHostedPageRoute.cs": "d9c05233bd52bff929a516575be03277b2b6cb838ea968e03d985739320d4bd3",
     "AdmittedHostedRevision.cs": "f82eac4f42d8354bfc38517027dfb980f7fd2f576f260516c6d1a9a4cc7c8bb5",
-    "FoundationHostedPagesFeature.cs": "9d0584062e883b919b270723f1b2003967b89a31a2774d0a109b8b33d869d053",
+    "FoundationHostedPagesFeature.cs": "9d66194f5c5f732300dfc07801621fdd32944455fc388030c46222a79d0040d5",
     "HostedAssetAdmission.cs": "bf0899130f1380befbdc0f36b30e40725a53e144889b56c7fc40bbdd9b4f0160",
     "HostedAssetDescriptor.cs": "76e2a21c960803e3c096ad34cba17d5026d0f9c863d5ee8ef1668e9a5ee7a596",
     "HostedBrandLocale.cs": "6f6618812a06b83a9f51a388160ef4161c17842f6954187725e31f2b7a1bb737",

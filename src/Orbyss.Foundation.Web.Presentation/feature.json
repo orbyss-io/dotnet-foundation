@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.Presentation",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Web.Presentation",
+      "featureDependencies": [
+        "Orbyss.Foundation.WebDefaults",
+        "Orbyss.Foundation.Web.ProblemDetails",
+        "Orbyss.Foundation.Json.AspNetCore"
+      ],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false,
+      "dynamicRoutesFromConfiguration": true
+    }
+  ],
+  "sourceSha256": {
+    "BrowserPageRendering.cs": "49cd164ef8a10a990d1c9c421a116dbe902bfaf6a8f214d3c39c8c5dd98fa571",
+    "BrowserPresentationBootstrap.cs": "ff5c01de6ca2d0aee2a5fbb003dca378bb4ca24bd5fab09c61b6cfbcbd2f8593",
+    "BrowserPresentationCatalog.cs": "c312e5b0efb7c39c525fa640858ebe06739575ee52705eba3b12511bfd91c31f",
+    "BrowserPresentationOptions.cs": "d93aae75b8ea1b85ee04a231991f07438092974b30b22ac6e019ad33a510421e",
+    "BrowserProblemPageRenderer.cs": "6967e691180189495d78fe819649d250fc8818cdd4a07a53e6dfdf7130545b0d",
+    "FoundationBrowserPresentationFeature.cs": "e59f9db054d2b8b051ae15ed26416ab409fcd419f3f5f956596b93dc7f3e147e"
+  }
+}

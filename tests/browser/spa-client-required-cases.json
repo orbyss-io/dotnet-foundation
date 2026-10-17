@@ -1,0 +1,11 @@
+[
+  "native-pkce-code-state-token-exchange",
+  "confirmation-cancel-zero-provider-effects-raw-draft-retained",
+  "native-popup-fresh-activation-local-store-cleared-first",
+  "provider-unavailable-local-termination-no-retry",
+  "fresh-userinfo-unavailable-private-hidden-no-invented-logout",
+  "real-observation-timeout-private-hidden",
+  "actual-history-private-revalidation",
+  "native-provider-logout-confirmed-independently",
+  "native-invalid-nonce-rejected"
+]
