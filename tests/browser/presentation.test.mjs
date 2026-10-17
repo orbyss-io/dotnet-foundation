@@ -3,6 +3,50 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createSignOutControl, unsavedWork } from '../../src/Orbyss.Foundation.Web.Presentation/browser/presentation.mjs';
+import { loadBrowserPresentation } from '../../src/Orbyss.Foundation.Web.Presentation/browser/configuration.mjs';
+
+test('native configuration admits exact nested BFF and client-owned contracts without protocol acquisition', async () => {
+  const priorFetch = globalThis.fetch; const priorLocation = globalThis.location;
+  const value = { contract: 'foundation-browser-presentation/v1', surface: '/nested/app', signOutConfirmation: 'when-unsaved',
+    modulePath: '/nested/app/account/assets/v1/presentation.mjs', bffModulePath: '/nested/app/account/assets/v1/bff.mjs',
+    antiforgeryPath: '/nested/app/bff/antiforgery', logoutPath: '/nested/app/bff/logout' };
+  const calls = [];
+  globalThis.location = new URL('https://application.example/nested/app/');
+  globalThis.fetch = async (path, options) => { calls.push({ path, options }); return Response.json(value); };
+  try {
+    const selected = await loadBrowserPresentation('/nested/app/account/configuration');
+    assert.deepEqual(selected, value); assert(Object.isFrozen(selected)); assert.equal(calls.length, 1);
+    assert.equal(calls[0].path, '/nested/app/account/configuration');
+    assert.equal(calls[0].options.redirect, 'error'); assert.equal(calls[0].options.cache, 'no-store');
+    value.bffModulePath = value.antiforgeryPath = value.logoutPath = null;
+    assert.equal((await loadBrowserPresentation('/nested/app/account/configuration')).bffModulePath, null);
+  } finally { globalThis.fetch = priorFetch; if (priorLocation === undefined) delete globalThis.location; else globalThis.location = priorLocation; }
+});
+
+test('native configuration refuses route substitution, mixed transports, excess fields and oversized bodies', async () => {
+  const priorFetch = globalThis.fetch; const priorLocation = globalThis.location;
+  const value = { contract: 'foundation-browser-presentation/v1', surface: '/', signOutConfirmation: 'always',
+    modulePath: '/auth/assets/v1/presentation.mjs', bffModulePath: null, antiforgeryPath: null, logoutPath: null };
+  globalThis.location = new URL('https://application.example/');
+  try {
+    let calls = 0;
+    globalThis.fetch = async () => { calls++; return Response.json(value); };
+    for (const path of ['https://other.example/auth/configuration', '//other/auth/configuration', '/a/../auth/configuration', '/auth/configuration?next=other'])
+      await assert.rejects(loadBrowserPresentation(path), TypeError);
+    assert.equal(calls, 0);
+    for (const patch of [{ modulePath: 'https://other.example/presentation.mjs' }, { surface: '/foreign' },
+      { antiforgeryPath: '/bff/antiforgery' }, { authenticated: true }, { signOutConfirmation: 'sometimes' }]) {
+      globalThis.fetch = async () => Response.json({ ...value, ...patch });
+      await assert.rejects(loadBrowserPresentation('/auth/configuration'), TypeError);
+    }
+    globalThis.fetch = async () => new Response(' '.repeat(16385), { headers: { 'content-type': 'application/json' } });
+    await assert.rejects(loadBrowserPresentation('/auth/configuration'), /read budget/u);
+    globalThis.fetch = async () => new Response('{}', { status: 503, headers: { 'content-type': 'application/json' } });
+    await assert.rejects(loadBrowserPresentation('/auth/configuration'), /unavailable/u);
+    const cancelled = new AbortController(); cancelled.abort();
+    await assert.rejects(loadBrowserPresentation('/auth/configuration', { signal: cancelled.signal }), { name: 'AbortError' });
+  } finally { globalThis.fetch = priorFetch; if (priorLocation === undefined) delete globalThis.location; else globalThis.location = priorLocation; }
+});
 
 function fixture(mode = 'when-unsaved') {
   const surface = crypto.randomUUID();

@@ -4,6 +4,15 @@ import { prepareBffSignOut } from '../../src/Orbyss.Foundation.Web.Presentation/
 import { createSpaSignOutControl, observeSpaSession } from '../../src/Orbyss.Foundation.Web.Presentation/browser/spa.mjs';
 import { UserManager, InMemoryWebStorage, WebStorageStateStore, type User } from 'oidc-client-ts';
 import { observeBffSession } from '../../src/Orbyss.Foundation.Web.Presentation/browser/session.mjs';
+import { loadBrowserPresentation } from '../../src/Orbyss.Foundation.Web.Presentation/browser/configuration.mjs';
+void loadBrowserPresentation('/nested/auth/configuration', { signal: new AbortController().signal }).then(configuration => {
+  const contract: 'foundation-browser-presentation/v1' = configuration.contract;
+  void contract;
+  // @ts-expect-error The public configuration is immutable and proves no session state.
+  configuration.surface = '/changed';
+  // @ts-expect-error Session proof comes from the selected protocol observer.
+  void configuration.authenticated;
+});
 
 let state: UnsavedWorkState = 'unknown';
 const registry = unsavedWork('typed-application');

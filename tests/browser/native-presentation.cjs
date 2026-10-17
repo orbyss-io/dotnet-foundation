@@ -56,7 +56,8 @@ async function run() {
             if (/\/bff\/(?:antiforgery|logout)$/u.test(new URL(request.url()).pathname)) transportRequests.push(request.method());
           });
           await page.evaluate(async () => {
-            const selected = await (await fetch('/pages-failure/auth/configuration')).json();
+            const { loadBrowserPresentation } = await import('/pages-failure/auth/assets/v1/configuration.mjs');
+            const selected = await loadBrowserPresentation('/pages-failure/auth/configuration');
             const { prepareBffSignOut } = await import(selected.bffModulePath);
             const { unsavedWork } = await import(selected.modulePath);
             window.disposeSource = unsavedWork(selected.surface).register({ getState: () => 'dirty' });

@@ -7,7 +7,7 @@
     "BrowserPresentationCatalog.cs": "c312e5b0efb7c39c525fa640858ebe06739575ee52705eba3b12511bfd91c31f",
     "BrowserPresentationOptions.cs": "d93aae75b8ea1b85ee04a231991f07438092974b30b22ac6e019ad33a510421e",
     "BrowserProblemPageRenderer.cs": "6967e691180189495d78fe819649d250fc8818cdd4a07a53e6dfdf7130545b0d",
-    "FoundationBrowserPresentationFeature.cs": "0ef6fe3ad2ad8fce0eb928b671a1e54ad4e544360be0935111c6df074497065c"
+    "FoundationBrowserPresentationFeature.cs": "e59f9db054d2b8b051ae15ed26416ab409fcd419f3f5f956596b93dc7f3e147e"
   },
   "imports": [],
   "contracts": [

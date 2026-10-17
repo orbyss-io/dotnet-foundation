@@ -36,7 +36,8 @@ secrets. Browser files and checked ESM types are embedded in the assembly, inclu
 in the package's `browser/` folder and served at `/auth/assets/v1/`.
 
 ```js
-const selected = await (await fetch('/auth/configuration')).json();
+const { loadBrowserPresentation } = await import('/auth/assets/v1/configuration.mjs');
+const selected = await loadBrowserPresentation('/auth/configuration');
 const { unsavedWork } = await import(selected.modulePath);
 const { prepareBffSignOut } = await import(selected.bffModulePath);
 const unregister = unsavedWork(selected.surface).register({ getState: () => 'unknown' });
@@ -47,6 +48,12 @@ const control = await prepareBffSignOut({ surface: selected.surface,
 button.onclick = () => control.request({ returnFocus: button });
 // Component disposal: unregister(); control.dispose();
 ```
+
+`loadBrowserPresentation` bounds the native configuration read, validates exact
+module/transport paths against the configured route and native shell surface, and
+returns its checked immutable ESM contract. It acquires no antiforgery token and
+proves no session state. Import the package's declarations for strict application
+type checking; keep runtime modules served by the selected native feature.
 
 Each editable component supplies synchronous `clean`, `dirty` or `unknown` state.
 Pending saves are unknown. The registry neither saves nor discards work. Controls
