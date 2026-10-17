@@ -50,6 +50,7 @@ jobs:
         run: |
           python tests/validate_openapi_exporter.py --packages artifacts/nuget
           python tests/validate_legacy_assurance_export.py --package "$PACKAGE"
+          python tests/validate_exporter_runtime_closure.py --package "$PACKAGE"
       - name: Validate exact descriptor build package
         if: steps.selected.outputs.kind == 'build'
         env:
