@@ -55,7 +55,9 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
             var correlation = AdmitCorrelation((string)problem.Extensions[ProblemExtensionNames.CorrelationId]!);
             bytes = profile.Serialize(new FoundationProblemEnvelope(Type: "about:blank",
                 Title: definition.Title ?? "Request Failed", Status: definition.StatusCode, Code: definition.Code,
-                CorrelationId: correlation, TraceId: correlation, FieldErrors: definition.FieldErrors, Detail: definition.Detail),
+                CorrelationId: correlation, TraceId: correlation,
+                FieldErrors: definition.FieldErrors.Select(field => new FoundationProblemFieldError(field.Field, field.Code, field.Message)).ToArray(),
+                Detail: definition.Detail),
                 profile.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             page = new AdmittedProblemPage(definition.StatusCode, definition.Code,
                 definition.Title ?? "Request Failed", correlation, AdmitPathBase(http),
@@ -69,7 +71,7 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 error.GetType().Name, correlation);
             bytes = fallback.Serialize(new FoundationProblemEnvelope(Type: "about:blank", Title: "Request Failed",
                 Status: 500, Code: ProblemCodes.RequestFailed, CorrelationId: correlation, TraceId: correlation,
-                FieldErrors: Array.Empty<ProblemFieldError>(), Detail: null),
+                FieldErrors: Array.Empty<FoundationProblemFieldError>(), Detail: null),
                 fallback.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             context.ProblemDetails.Status = 500;
             page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation, AdmitPathBase(http));
