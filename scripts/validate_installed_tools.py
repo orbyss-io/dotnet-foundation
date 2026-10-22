@@ -21,6 +21,7 @@ def main():
     for test in ('validate_feature_build','validate_settings_build','validate_settings_graph','validate_settings_no_build'):
         subprocess.run([sys.executable,str(ROOT/'tests'/(test+'.py')),'--package',str(tools['Orbyss.Foundation.Build'])],cwd=ROOT,check=True)
     subprocess.run([sys.executable,str(ROOT/'tests/validate_legacy_assurance_export.py'),'--package',str(tools['Orbyss.Foundation.OpenApi.Exporter'])],cwd=ROOT,check=True)
+    subprocess.run([sys.executable,str(ROOT/'tests/validate_exporter_runtime_closure.py'),'--package',str(tools['Orbyss.Foundation.OpenApi.Exporter'])],cwd=ROOT,check=True)
 
 
 if __name__=='__main__': main()

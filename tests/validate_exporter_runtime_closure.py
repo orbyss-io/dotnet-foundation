@@ -4,10 +4,12 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import tempfile
 import urllib.request
 import zipfile
+from xml.etree import ElementTree
 import validate_openapi_exporter as fixture
 
 ROOT = fixture.ROOT
@@ -27,6 +29,27 @@ def public_package(identity, version, destination):
 def create_closure(work, runtime, configuration):
     project = work / 'feature'
     project.mkdir(parents=True)
+    # Bind the compile-time shared ABI to the exact public runtime producer.
+    # An old fixture pin must not conceal a newer runtime's assembly identity.
+    reference = public_package('Orbyss.Foundation.Web.OpenApi', runtime, work / 'public-runtime.nupkg')
+    with zipfile.ZipFile(reference) as archive:
+        names = [name for name in archive.namelist() if name.lower().endswith('.nuspec')]
+        assert len(names) == 1
+        metadata = ElementTree.fromstring(archive.read(names[0]))
+    repository = next(node for node in metadata.iter() if node.tag.rsplit('}', 1)[-1] == 'repository')
+    commit = repository.get('commit', '')
+    assert re.fullmatch('[a-f0-9]{40}', commit)
+    assert repository.get('url', '').removesuffix('.git').rstrip('/') == 'https://github.com/orbyss-io/dotnet-foundation'
+    url = 'https://raw.githubusercontent.com/orbyss-io/dotnet-foundation/' + commit + '/Directory.Packages.props'
+    with urllib.request.urlopen(url, timeout=30) as response:
+        source = response.read(1_048_577)
+    assert len(source) <= 1_048_576
+    pins = {node.get('Include'): node.get('Version') for node in ElementTree.fromstring(source).iter('PackageVersion')}
+    shared = {name: pins[name] for name in ('CShells.Abstractions', 'CShells.AspNetCore.Abstractions')}
+    assert all(re.fullmatch(r'\d+\.\d+\.\d+', version) for version in shared.values())
+    fixture.write_json(work / 'runtime-inputs.json', {'runtime': runtime, 'sourceCommit': commit,
+        'packageSha256': hashlib.sha256(reference.read_bytes()).hexdigest(), 'sourceUrl': url,
+        'sourceSha256': hashlib.sha256(source).hexdigest(), 'sharedAbi': shared})
     for name in ('Directory.Build.props', 'Directory.Build.targets', 'Directory.Packages.props'):
         (work / name).write_text('<Project/>\n')
     source = ROOT / 'tests/openapi-exporter/ClosureProbeFeature.cs'
@@ -38,8 +61,9 @@ def create_closure(work, runtime, configuration):
         'sourceSha256': {source.name: hashlib.sha256(source.read_bytes().replace(b'\r\n', b'\n')).hexdigest()}})
     references = ''.join(f'<PackageReference Include="{name}" Version="{version}"{private}/>' for name, version, private in (
         ('Orbyss.Foundation.Json.AspNetCore', runtime, ''), ('Orbyss.Foundation.Web.OpenApi', runtime, ''),
-        ('Orbyss.Foundation.Build', '0.3.1', ' PrivateAssets="all"'),
-        ('CShells.Abstractions', '0.0.30', ' PrivateAssets="all"'), ('CShells.AspNetCore.Abstractions', '0.0.30', ' PrivateAssets="all"')))
+        ('Orbyss.Foundation.Build', '0.3.2' if runtime == '0.3.6' else '0.3.1', ' PrivateAssets="all"'),
+        ('CShells.Abstractions', shared['CShells.Abstractions'], ' PrivateAssets="all"'),
+        ('CShells.AspNetCore.Abstractions', shared['CShells.AspNetCore.Abstractions'], ' PrivateAssets="all"')))
     csproj = project / (PACKAGE + '.csproj')
     csproj.write_text('<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile><Version>1.0.0-fixture.1</Version><FoundationFeatureDescriptorSource>feature.json</FoundationFeatureDescriptorSource></PropertyGroup><ItemGroup><FrameworkReference Include="Microsoft.AspNetCore.App"/>' + references + '</ItemGroup></Project>')
     fixture.run(['dotnet', 'restore', str(csproj), '--configfile', str(ROOT / 'NuGet.config')], ROOT, work / 'restore.log')
@@ -110,8 +134,9 @@ def main():
     parser.add_argument('--package', type=Path, required=True)
     parser.add_argument('--configuration', choices=('Debug', 'Release'), default='Release')
     parser.add_argument('--public-version', help='Also download and execute this exact public tool version.')
+    parser.add_argument('--work-root', type=Path, help='Owned evidence parent, including a short native Windows path.')
     args = parser.parse_args()
-    parent = ROOT / 'artifacts/exporter-runtime-closure'
+    parent = args.work_root.resolve() if args.work_root else ROOT / 'artifacts/exporter-runtime-closure'
     parent.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix='qualification-', dir=parent))
     package = args.package.resolve()
@@ -120,7 +145,8 @@ def main():
     rows = []
     public = public_package(fixture.TOOL_ID, args.public_version, work / ('public-'+args.public_version+'.nupkg')) if args.public_version else None
     old = public_package(fixture.TOOL_ID, '0.2.5', work / 'regression-0.2.5.nupkg')
-    for runtime in ('0.3.3', '0.3.4'):
+    previous = public_package(fixture.TOOL_ID, '0.2.6', work / 'regression-0.2.6.nupkg')
+    for runtime in ('0.3.3', '0.3.4', '0.3.5', '0.3.6'):
         current = work / runtime
         closure = create_closure(current, runtime, args.configuration)
         for label, tool in [('candidate', package)] + ([('public', public)] if public else []):
@@ -139,8 +165,16 @@ def main():
             rows.append({'runtime': runtime, 'tool': fixture.package_version(tool), 'mode': label, 'status': 'passed'})
         regression = current / 'old-public'
         env = install_tool(old, regression)
-        diagnostic = export(regression, closure, env, expected=2 if runtime == '0.3.4' else 0)
+        diagnostic = export(regression, closure, env, expected=0 if runtime == '0.3.3' else 2)
         if runtime == '0.3.4': assert 'manifest definition does not match' in diagnostic and 'Microsoft.AspNetCore.OpenApi' in diagnostic
+        prior = current / 'previous-public'
+        env = install_tool(previous, prior)
+        diagnostic = export(prior, closure, env, expected=2 if runtime == '0.3.6' else 0)
+        if runtime == '0.3.6':
+            assert 'CShells.AspNetCore.Abstractions' in diagnostic and 'Version=0.0.31.0' in diagnostic
+            assert 'manifest definition does not match' in diagnostic
+        rows.append({'runtime': runtime, 'tool': '0.2.6', 'mode': 'previous-public',
+            'status': 'rejected-as-incompatible' if runtime == '0.3.6' else 'passed'})
         invalid = current / 'invalid-metadata'
         invalid_closure = current / 'invalid-closure'
         shutil.copytree(closure, invalid_closure)
