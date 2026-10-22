@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "contractId": "source-readability-v1",
+  "property": "FoundationSourceReadability",
+  "requiredDiagnosticIds": ["ORB1007", "ORB1008", "ORB1009", "ORB1010"],
+  "severity": "Error",
+  "generatedCode": "excluded",
+  "semanticReviewRequired": ["async ownership", "cancellation", "deadlines", "cleanup", "evaluation order", "resource lifetime"]
+}
