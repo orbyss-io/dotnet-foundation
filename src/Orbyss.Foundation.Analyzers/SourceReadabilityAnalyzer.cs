@@ -87,18 +87,26 @@ public sealed class SourceReadabilityAnalyzer : DiagnosticAnalyzer
         context.RegisterCompilationStartAction(ConfigureCompilation);
     }
 
+    /// <summary>Reads the one compiler-visible source profile shared by native policy producers.</summary>
+    /// <param name="options">The compilation's actual native analyzer options.</param>
+    /// <returns>Whether the source-readability profile is explicitly selected.</returns>
+    internal static bool IsSelected(AnalyzerOptions options) => IsSelected(options.AnalyzerConfigOptionsProvider);
+
+    /// <summary>Reads the same native selection from analyzer and generator configuration.</summary>
+    internal static bool IsSelected(AnalyzerConfigOptionsProvider provider) =>
+        provider.GlobalOptions.TryGetValue(
+            "build_property.FoundationSourceReadability",
+            out var enabled
+        ) && string.Equals(
+            enabled,
+            "true",
+            StringComparison.OrdinalIgnoreCase
+        );
+
     /// <summary>Registers only the explicitly selected contract, without changing other publisher profiles.</summary>
     private static void ConfigureCompilation(CompilationStartAnalysisContext start)
     {
-        if (!start.Options.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue(
-                "build_property.FoundationSourceReadability",
-                out var enabled
-        )
-            || !string.Equals(
-                enabled,
-                "true",
-                StringComparison.OrdinalIgnoreCase
-            ))
+        if (!IsSelected(start.Options))
         {
             return;
         }

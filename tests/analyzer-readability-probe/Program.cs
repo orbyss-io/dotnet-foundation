@@ -104,9 +104,13 @@ internal static class Program
         var ownedSources = new[]
         {
             "src/Orbyss.Foundation.Analyzers/SourceReadabilityAnalyzer.cs",
+            "src/Orbyss.Foundation.Analyzers/FoundationAnalyzer.cs",
+            "src/Orbyss.Foundation.Analyzers/SelectedFoundationAnalyzer.cs",
+            "src/Orbyss.Foundation.Analyzers/SourceSuppressionPolicyGenerator.cs",
             "tests/analyzer-readability-probe/Program.cs",
             "tests/analyzer-readability-probe/ProbeOptions.cs",
             "tests/analyzer-readability-probe/ProbeOptionsProvider.cs",
+            "tests/analyzer-readability-probe/ExistingPolicyControls.cs",
         };
         var noDiagnostics = Array.Empty<string>();
         var ownedTexts = new List<string>();
@@ -128,6 +132,7 @@ internal static class Program
         );
 
         Console.WriteLine($"Source-readability controls passed ({cases.Length + specialCases.Length + 1} separately compiled cases).");
+        await ExistingPolicyControls.Run();
     }
 
     /// <summary>Rejects compiler failures separately from intended analyzer failures.</summary>

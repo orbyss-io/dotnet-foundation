@@ -39,7 +39,8 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
         "Lifecycle",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "CShells creates a provider per shell generation, while the Generic Host starts hosted services only from the root provider.");
+        description: "CShells creates a provider per shell generation, while the Generic Host starts hosted services only from the root provider."
+    );
 
     /// <summary>Defines the complex-call named-argument diagnostic.</summary>
     private static readonly DiagnosticDescriptor NamedArgumentsRule = new(
@@ -49,7 +50,8 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
         "Style",
         DiagnosticSeverity.Info,
         isEnabledByDefault: true,
-        description: "Orbyss Foundation Policy B asks complex call sites to name arguments while preserving concise obvious calls.");
+        description: "Orbyss Foundation Policy B asks complex call sites to name arguments while preserving concise obvious calls."
+    );
 
     /// <summary>Defines the one-declared-type-per-file diagnostic.</summary>
     private static readonly DiagnosticDescriptor OneTypePerFileRule = new(
@@ -59,7 +61,8 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
         "Structure",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "One named type per file keeps ownership, navigation, and source history explicit.");
+        description: "One named type per file keeps ownership, navigation, and source history explicit."
+    );
 
     /// <summary>Defines the private-method ordering diagnostic.</summary>
     private static readonly DiagnosticDescriptor PrivateMethodsLastRule = new(
@@ -69,7 +72,8 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
         "Structure",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "The externally meaningful flow appears before its private implementation helpers.");
+        description: "The externally meaningful flow appears before its private implementation helpers."
+    );
 
     /// <summary>Defines the required XML-documentation diagnostic.</summary>
     private static readonly DiagnosticDescriptor XmlDocumentationRule = new(
@@ -79,7 +83,8 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
         "Documentation",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Every declared type and member has concise contract documentation; design rationale belongs in Architecture or an ADR.");
+        description: "Every declared type and member has concise contract documentation; design rationale belongs in Architecture or an ADR."
+    );
 
     /// <summary>Defines the feature-identity convergence diagnostic.</summary>
     private static readonly DiagnosticDescriptor FeatureIdentityRule = new(
@@ -89,36 +94,68 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
         "Architecture",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "The CLR feature identity must equal the package descriptor and configured shell identity exactly.");
+        description: "The CLR feature identity must equal the package descriptor and configured shell identity exactly."
+    );
+
+    /// <summary>Retains the existing configurable diagnostics for unselected consumers.</summary>
+    private static readonly ImmutableArray<DiagnosticDescriptor> LegacyRules = ImmutableArray.Create(
+        ShellHostedServiceRule,
+        NamedArgumentsRule,
+        OneTypePerFileRule,
+        PrivateMethodsLastRule,
+        XmlDocumentationRule,
+        FeatureIdentityRule
+    );
+
+    /// <summary>Protects errors only in the explicitly selected source profile.</summary>
+    private static readonly ImmutableArray<DiagnosticDescriptor> SelectedRules = LegacyRules
+        .Select(ProtectMandatory)
+        .ToImmutableArray();
+
+    /// <summary>Indexes immutable selected descriptors without shared mutable compilation state.</summary>
+    private static readonly ImmutableDictionary<string, DiagnosticDescriptor> SelectedRuleById = SelectedRules.ToImmutableDictionary(DiagnosticIdentity);
 
     /// <inheritdoc />
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(
-            ShellHostedServiceRule,
-            NamedArgumentsRule,
-            OneTypePerFileRule,
-            PrivateMethodsLastRule,
-            XmlDocumentationRule,
-            FeatureIdentityRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => LegacyRules;
+
+    /// <summary>Exposes the same existing policies through the selected native analyzer.</summary>
+    internal static ImmutableArray<DiagnosticDescriptor> SelectedDiagnostics => SelectedRules;
 
     /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
+        context.RegisterCompilationStartAction(ConfigureLegacyCompilation);
+    }
+
+    /// <summary>Registers one mutually exclusive producer for the existing policy checks.</summary>
+    /// <param name="context">The compilation whose immutable profile choice controls descriptor selection.</param>
+    /// <param name="selected">Whether the explicitly selected profile protects mandatory errors.</param>
+    internal static void RegisterRules(
+        CompilationStartAnalysisContext context,
+        bool selected
+    )
+    {
+        Action<OperationAnalysisContext> invocation = operation => AnalyzeInvocation(operation, selected);
+        Action<SymbolAnalysisContext> identity = symbol => AnalyzeFeatureIdentity(symbol, selected);
+        Action<SyntaxNodeAnalysisContext> compilationUnit = syntax => AnalyzeCompilationUnit(syntax, selected);
+        Action<SyntaxNodeAnalysisContext> privateOrder = syntax => AnalyzePrivateMethodOrder(syntax, selected);
+        Action<SyntaxNodeAnalysisContext> documentation = syntax => AnalyzeDocumentation(syntax, selected);
+        context.RegisterOperationAction(invocation, OperationKind.Invocation);
         context.RegisterOperationAction(AnalyzeObjectCreation, OperationKind.ObjectCreation);
-        context.RegisterSyntaxNodeAction(AnalyzeCompilationUnit, SyntaxKind.CompilationUnit);
-        context.RegisterSymbolAction(AnalyzeFeatureIdentity, SymbolKind.NamedType);
+        context.RegisterSyntaxNodeAction(compilationUnit, SyntaxKind.CompilationUnit);
+        context.RegisterSymbolAction(identity, SymbolKind.NamedType);
         context.RegisterSyntaxNodeAction(
-            AnalyzePrivateMethodOrder,
+            privateOrder,
             SyntaxKind.ClassDeclaration,
             SyntaxKind.RecordDeclaration,
             SyntaxKind.RecordStructDeclaration,
             SyntaxKind.StructDeclaration,
-            SyntaxKind.InterfaceDeclaration);
+            SyntaxKind.InterfaceDeclaration
+        );
         context.RegisterSyntaxNodeAction(
-            AnalyzeDocumentation,
+            documentation,
             SyntaxKind.ClassDeclaration,
             SyntaxKind.RecordDeclaration,
             SyntaxKind.RecordStructDeclaration,
@@ -136,40 +173,68 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
             SyntaxKind.EventDeclaration,
             SyntaxKind.EventFieldDeclaration,
             SyntaxKind.OperatorDeclaration,
-            SyntaxKind.ConversionOperatorDeclaration);
+            SyntaxKind.ConversionOperatorDeclaration
+        );
+    }
+
+    /// <summary>Preserves legacy configurability only when the source profile is unselected.</summary>
+    private static void ConfigureLegacyCompilation(CompilationStartAnalysisContext context)
+    {
+        if (!SourceReadabilityAnalyzer.IsSelected(context.Options))
+            RegisterRules(context, selected: false);
     }
 
     /// <summary>Requires a packaged shell feature to declare the exact MSBuild-governed identity.</summary>
     /// <param name="context">The current symbol-analysis context.</param>
-    private static void AnalyzeFeatureIdentity(SymbolAnalysisContext context)
+    /// <param name="selected">Whether the source profile protects this mandatory error.</param>
+    private static void AnalyzeFeatureIdentity(
+        SymbolAnalysisContext context,
+        bool selected
+    )
     {
         if (context.Symbol is not INamedTypeSymbol { TypeKind: TypeKind.Class, IsAbstract: false } type
             || !ImplementsShellFeature(type)
             || !context.Options.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue(
-                "build_property.FoundationFeatureIdentity", out var expected)
+                "build_property.FoundationFeatureIdentity",
+                out var expected
+            )
             || string.IsNullOrWhiteSpace(expected))
         {
             return;
         }
 
-        var attribute = type.GetAttributes().SingleOrDefault(candidate =>
-            candidate.AttributeClass?.ToDisplayString() == "CShells.Features.ShellFeatureAttribute");
+        var attributes = type.GetAttributes();
+        Func<AttributeData, bool> isShellFeature = candidate =>
+            candidate.AttributeClass?.ToDisplayString() == "CShells.Features.ShellFeatureAttribute";
+        var attribute = attributes.SingleOrDefault(isShellFeature);
         var actual = attribute is { ConstructorArguments.Length: > 0 }
             ? attribute.ConstructorArguments[0].Value as string
             : null;
-        if (!string.Equals(actual, expected, StringComparison.Ordinal))
+        if (!string.Equals(
+            actual,
+            expected,
+            StringComparison.Ordinal
+        ))
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                FeatureIdentityRule,
-                type.Locations.FirstOrDefault(),
+            var rule = SelectRule(FeatureIdentityRule, selected);
+            var location = type.Locations.FirstOrDefault();
+            var diagnostic = Diagnostic.Create(
+                rule,
+                location,
                 type.Name,
-                expected));
+                expected
+            );
+            context.ReportDiagnostic(diagnostic);
         }
     }
 
     /// <summary>Rejects hosted-service registration from a CShells feature and evaluates invocation arguments.</summary>
     /// <param name="context">The invocation operation context.</param>
-    private static void AnalyzeInvocation(OperationAnalysisContext context)
+    /// <param name="selected">Whether the source profile protects this mandatory error.</param>
+    private static void AnalyzeInvocation(
+        OperationAnalysisContext context,
+        bool selected
+    )
     {
         var invocation = (IInvocationOperation)context.Operation;
         if (invocation.TargetMethod.Name == "AddHostedService"
@@ -178,7 +243,14 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
             && ImplementsShellFeature(context.ContainingSymbol.ContainingType))
         {
             var serviceName = invocation.TargetMethod.TypeArguments.FirstOrDefault()?.Name ?? "hosted service";
-            context.ReportDiagnostic(Diagnostic.Create(ShellHostedServiceRule, invocation.Syntax.GetLocation(), serviceName));
+            var rule = SelectRule(ShellHostedServiceRule, selected);
+            var location = invocation.Syntax.GetLocation();
+            var diagnostic = Diagnostic.Create(
+                rule,
+                location,
+                serviceName
+            );
+            context.ReportDiagnostic(diagnostic);
         }
 
         AnalyzeArguments(context, invocation.Arguments);
@@ -197,7 +269,8 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
     /// <param name="arguments">The arguments supplied by the operation.</param>
     private static void AnalyzeArguments(
         OperationAnalysisContext context,
-        ImmutableArray<IArgumentOperation> arguments)
+        ImmutableArray<IArgumentOperation> arguments
+    )
     {
         if (arguments.Length < 4)
             return;
@@ -210,35 +283,53 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            context.ReportDiagnostic(Diagnostic.Create(
+            var location = argument.Syntax.GetLocation();
+            var parameterName = argument.Parameter?.Name ?? "argument";
+            var diagnostic = Diagnostic.Create(
                 NamedArgumentsRule,
-                argument.Syntax.GetLocation(),
-                argument.Parameter?.Name ?? "argument"));
+                location,
+                parameterName
+            );
+            context.ReportDiagnostic(diagnostic);
         }
     }
 
     /// <summary>Reports every named type after the first declaration in a source file.</summary>
     /// <param name="context">The compilation-unit syntax context.</param>
-    private static void AnalyzeCompilationUnit(SyntaxNodeAnalysisContext context)
+    /// <param name="selected">Whether the source profile protects this mandatory error.</param>
+    private static void AnalyzeCompilationUnit(
+        SyntaxNodeAnalysisContext context,
+        bool selected
+    )
     {
         var compilationUnit = (CompilationUnitSyntax)context.Node;
-        var declarations = compilationUnit
-            .DescendantNodes()
-            .Where(node => node is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax)
+        var descendants = compilationUnit.DescendantNodes();
+        Func<SyntaxNode, bool> isNamedType = node => node is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax;
+        var declarations = descendants
+            .Where(isNamedType)
             .ToArray();
 
         foreach (var declaration in declarations.Skip(1))
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                OneTypePerFileRule,
-                declaration.GetLocation(),
-                GetDeclarationName(declaration)));
+            var rule = SelectRule(OneTypePerFileRule, selected);
+            var location = declaration.GetLocation();
+            var name = GetDeclarationName(declaration);
+            var diagnostic = Diagnostic.Create(
+                rule,
+                location,
+                name
+            );
+            context.ReportDiagnostic(diagnostic);
         }
     }
 
     /// <summary>Reports private methods that have a non-private-helper member below them.</summary>
     /// <param name="context">The containing type syntax context.</param>
-    private static void AnalyzePrivateMethodOrder(SyntaxNodeAnalysisContext context)
+    /// <param name="selected">Whether the source profile protects this mandatory error.</param>
+    private static void AnalyzePrivateMethodOrder(
+        SyntaxNodeAnalysisContext context,
+        bool selected
+    )
     {
         var declaration = (TypeDeclarationSyntax)context.Node;
         for (var index = 0; index < declaration.Members.Count; index++)
@@ -249,34 +340,49 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            var hasLaterNonPrivateHelper = declaration.Members
-                .Skip(index + 1)
-                .Any(member => member is not MethodDeclarationSyntax laterMethod
-                    || !IsPrivateMethod(context, laterMethod));
+            var laterMembers = declaration.Members.Skip(index + 1);
+            Func<MemberDeclarationSyntax, bool> isNonPrivate = member =>
+                member is not MethodDeclarationSyntax laterMethod || !IsPrivateMethod(context, laterMethod);
+            var hasLaterNonPrivateHelper = laterMembers.Any(isNonPrivate);
             if (hasLaterNonPrivateHelper)
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    PrivateMethodsLastRule,
-                    method.Identifier.GetLocation(),
-                    method.Identifier.ValueText));
+                var rule = SelectRule(PrivateMethodsLastRule, selected);
+                var location = method.Identifier.GetLocation();
+                var diagnostic = Diagnostic.Create(
+                    rule,
+                    location,
+                    method.Identifier.ValueText
+                );
+                context.ReportDiagnostic(diagnostic);
             }
         }
     }
 
     /// <summary>Reports a declaration when it has no leading XML documentation trivia.</summary>
     /// <param name="context">The declaration syntax context.</param>
-    private static void AnalyzeDocumentation(SyntaxNodeAnalysisContext context)
+    /// <param name="selected">Whether the source profile protects this mandatory error.</param>
+    private static void AnalyzeDocumentation(
+        SyntaxNodeAnalysisContext context,
+        bool selected
+    )
     {
-        var hasDocumentation = context.Node.GetLeadingTrivia().Any(trivia =>
+        var leadingTrivia = context.Node.GetLeadingTrivia();
+        Func<SyntaxTrivia, bool> isDocumentation = trivia =>
             trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)
-            || trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
+            || trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia);
+        var hasDocumentation = leadingTrivia.Any(isDocumentation);
         if (hasDocumentation)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(
-            XmlDocumentationRule,
-            context.Node.GetLocation(),
-            GetDeclarationName(context.Node)));
+        var rule = SelectRule(XmlDocumentationRule, selected);
+        var location = context.Node.GetLocation();
+        var name = GetDeclarationName(context.Node);
+        var diagnostic = Diagnostic.Create(
+            rule,
+            location,
+            name
+        );
+        context.ReportDiagnostic(diagnostic);
     }
 
     /// <summary>Determines whether a method's declared accessibility is private.</summary>
@@ -285,8 +391,12 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
     /// <returns><see langword="true"/> when the method is private; otherwise, <see langword="false"/>.</returns>
     private static bool IsPrivateMethod(
         SyntaxNodeAnalysisContext context,
-        MethodDeclarationSyntax method) =>
-        context.SemanticModel.GetDeclaredSymbol(method, context.CancellationToken)?.DeclaredAccessibility
+        MethodDeclarationSyntax method
+    ) =>
+        context.SemanticModel.GetDeclaredSymbol(
+            method,
+            context.CancellationToken
+        )?.DeclaredAccessibility
             == Accessibility.Private;
 
     /// <summary>Gets a stable diagnostic name for a declared syntax node.</summary>
@@ -303,17 +413,61 @@ public sealed class FoundationAnalyzer : DiagnosticAnalyzer
             MethodDeclarationSyntax method => method.Identifier.ValueText,
             PropertyDeclarationSyntax property => property.Identifier.ValueText,
             IndexerDeclarationSyntax => "this[]",
-            BaseFieldDeclarationSyntax field => string.Join(", ", field.Declaration.Variables.Select(item => item.Identifier.ValueText)),
+            BaseFieldDeclarationSyntax field => GetFieldNames(field),
             EventDeclarationSyntax @event => @event.Identifier.ValueText,
             OperatorDeclarationSyntax @operator => "operator " + @operator.OperatorToken.ValueText,
             ConversionOperatorDeclarationSyntax conversion => conversion.Type.ToString(),
-            _ => declaration.Kind().ToString()
+            _ => GetDeclarationKind(declaration)
         };
 
     /// <summary>Determines whether a type implements the CShells feature contract.</summary>
     /// <param name="type">The type to inspect.</param>
     /// <returns><see langword="true"/> when the type implements the feature contract.</returns>
     private static bool ImplementsShellFeature(INamedTypeSymbol? type) =>
-        type is not null && type.AllInterfaces.Any(candidate =>
-            candidate.ToDisplayString() == "CShells.Features.IShellFeature");
+        type is not null && type.AllInterfaces.Any(IsShellFeatureInterface);
+
+    /// <summary>Formats declared field names without burying deferred work inside a call argument.</summary>
+    private static string GetFieldNames(BaseFieldDeclarationSyntax field)
+    {
+        Func<VariableDeclaratorSyntax, string> name = item => item.Identifier.ValueText;
+        var names = field.Declaration.Variables.Select(name);
+        return string.Join(", ", names);
+    }
+
+    /// <summary>Matches the existing provider feature contract by its fully qualified identity.</summary>
+    private static bool IsShellFeatureInterface(INamedTypeSymbol candidate) =>
+        candidate.ToDisplayString() == "CShells.Features.IShellFeature";
+
+    /// <summary>Formats the existing fallback syntax kind through an explicit prepared value.</summary>
+    private static string GetDeclarationKind(SyntaxNode declaration)
+    {
+        var kind = declaration.Kind();
+        return kind.ToString();
+    }
+    /// <summary>Selects immutable profile descriptors while reusing the same source policy.</summary>
+    private static DiagnosticDescriptor SelectRule(DiagnosticDescriptor rule, bool selected) =>
+        selected ? SelectedRuleById[rule.Id] : rule;
+
+    /// <summary>Retains recommendations while protecting selected mandatory errors.</summary>
+    private static DiagnosticDescriptor ProtectMandatory(DiagnosticDescriptor rule)
+    {
+        if (rule.DefaultSeverity != DiagnosticSeverity.Error)
+            return rule;
+
+        return new DiagnosticDescriptor(
+            rule.Id,
+            rule.Title,
+            rule.MessageFormat,
+            rule.Category,
+            rule.DefaultSeverity,
+            rule.IsEnabledByDefault,
+            rule.Description,
+            rule.HelpLinkUri,
+            WellKnownDiagnosticTags.NotConfigurable
+        );
+    }
+
+    /// <summary>Indexes descriptors by their stable existing diagnostic identity.</summary>
+    private static string DiagnosticIdentity(DiagnosticDescriptor rule) => rule.Id;
+
 }

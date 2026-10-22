@@ -2,8 +2,35 @@
   "schemaVersion": 1,
   "contractId": "source-readability-v1",
   "property": "FoundationSourceReadability",
-  "requiredDiagnosticIds": ["ORB1007", "ORB1008", "ORB1009", "ORB1010"],
+  "requiredDiagnosticIds": [
+    "ORB1001",
+    "ORB1003",
+    "ORB1004",
+    "ORB1005",
+    "ORB1006",
+    "ORB1007",
+    "ORB1008",
+    "ORB1009",
+    "ORB1010"
+  ],
+  "recommendationDiagnosticIds": [
+    "ORB1002"
+  ],
   "severity": "Error",
   "generatedCode": "excluded",
-  "semanticReviewRequired": ["async ownership", "cancellation", "deadlines", "cleanup", "evaluation order", "resource lifetime"]
+  "semanticReviewRequired": [
+    "async ownership",
+    "cancellation",
+    "deadlines",
+    "cleanup",
+    "evaluation order",
+    "resource lifetime"
+  ],
+  "sourceSuppressionGuard": {
+    "policyId": "FoundationSourceSuppressionPolicy",
+    "kind": "generated-compiler-error",
+    "errorId": "CS1029",
+    "includesGeneratedCompileInputs": true,
+    "excludesSiblingGeneratorOutputs": true
+  }
 }

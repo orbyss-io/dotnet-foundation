@@ -31,8 +31,14 @@ def validate_readability(root: Path) -> None:
             raise AssertionError(f"Expected one local analyzer package, found {packages}")
         with zipfile.ZipFile(packages[0]) as archive:
             marker = json.loads(archive.read("buildTransitive/source-readability-contract.json"))
-            if marker["contractId"] != "source-readability-v1" or marker["requiredDiagnosticIds"] != ["ORB1007", "ORB1008", "ORB1009", "ORB1010"]:
+            required_ids = ["ORB1001", "ORB1003", "ORB1004", "ORB1005", "ORB1006", "ORB1007", "ORB1008", "ORB1009", "ORB1010"]
+            if marker["contractId"] != "source-readability-v1" or marker["requiredDiagnosticIds"] != required_ids or marker["recommendationDiagnosticIds"] != ["ORB1002"]:
                 raise AssertionError(f"Unexpected analyzer capability marker: {marker}")
+            expected_guard = {"policyId": "FoundationSourceSuppressionPolicy", "kind": "generated-compiler-error",
+                              "errorId": "CS1029", "includesGeneratedCompileInputs": True, "excludesSiblingGeneratorOutputs": True}
+            if marker.get("sourceSuppressionGuard") != expected_guard:
+                raise AssertionError(f"Missing native source-suppression compiler guard: {marker}")
+            layout_ids = ["ORB1007", "ORB1008", "ORB1009", "ORB1010"]
             # A local candidate package is tested at its existing source version, never published.
             import xml.etree.ElementTree as ET
             metadata = ET.fromstring(archive.read("Orbyss.Foundation.Analyzers.nuspec"))
@@ -70,21 +76,21 @@ class Sample {
         run(temporary, ["dotnet", "restore", str(project), "--nologo"])
         rejected = subprocess.run(["dotnet", "build", str(project), "--no-restore", "--nologo"], cwd=temporary, capture_output=True, text=True)
         output = rejected.stdout + rejected.stderr
-        if rejected.returncode == 0 or any(rule not in output for rule in marker["requiredDiagnosticIds"]):
+        if rejected.returncode == 0 or any(rule not in output for rule in layout_ids):
             raise AssertionError(f"The packaged native build missed mandatory diagnostics.\n{output}")
         if "error CS" in output or "AD0001" in output:
             raise AssertionError(f"Compiler/analyzer execution failure cannot count as the intended rejection.\n{output}")
         bad_source = source.read_text(encoding="utf-8")
         editorconfig = temporary / ".editorconfig"
         editorconfig.write_text("root = true\n[*.cs]\n" + "".join(
-            f"dotnet_diagnostic.{identity}.severity = none\n" for identity in marker["requiredDiagnosticIds"]), encoding="utf-8")
+            f"dotnet_diagnostic.{identity}.severity = none\n" for identity in layout_ids), encoding="utf-8")
         for mode, arguments in (("editorconfig", []), ("nowarn", ["-p:NoWarn=ORB1007%3BORB1008%3BORB1009%3BORB1010"]), ("pragma", [])):
             if mode != "editorconfig":
                 editorconfig.write_text("root = true\n", encoding="utf-8")
             source.write_text(("#pragma warning disable ORB1007, ORB1008, ORB1009, ORB1010\n" if mode == "pragma" else "") + bad_source, encoding="utf-8")
             suppression = subprocess.run(["dotnet", "build", str(project), "--no-restore", "--nologo", *arguments], cwd=temporary, capture_output=True, text=True)
             suppressed_output = suppression.stdout + suppression.stderr
-            if suppression.returncode == 0 or any(identity not in suppressed_output for identity in marker["requiredDiagnosticIds"]) or "error CS" in suppressed_output or "AD0001" in suppressed_output:
+            if suppression.returncode == 0 or any(identity not in suppressed_output for identity in layout_ids) or "error CS" in suppressed_output or "AD0001" in suppressed_output:
                 raise AssertionError(f"The selected mandatory contract was waived through {mode}, or failed before its intended diagnostics.\n{suppressed_output}")
         source.write_text('''/// <summary>Native conformance control.</summary>
 class Sample {
@@ -111,6 +117,8 @@ class Sample {
 ''', encoding="utf-8")
         run(temporary, ["dotnet", "build", str(project), "--no-restore", "--nologo"])
         print("Packaged source-readability opt-in rejected authored violations and accepted the repaired source.")
+        from analyzer_profile_fixture import validate_existing_profile
+        validate_existing_profile(temporary, version)
 
 
 def main() -> int:

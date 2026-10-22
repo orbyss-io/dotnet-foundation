@@ -31,11 +31,25 @@ continues. A baseline, hidden source exclusion, or severity suppression is not c
 resolved package and a native negative control before claiming capability. An unpublished source candidate
 does not establish availability of a public package version. Existing ORB1002 remains an Info recommendation.
 
-Once selected, ORB1007–ORB1010 are nonconfigurable mandatory errors: EditorConfig severity, NoWarn and
-warning pragmas cannot turn them into passing source. The consuming profile must also require analyzer
-execution; a disabled compiler analyzer pipeline cannot evaluate any diagnostic.
+Once selected, the nine mandatory errors ORB1001, ORB1003–ORB1010 are nonconfigurable: EditorConfig
+severity, NoWarn and warning pragmas cannot waive them. The selected
+native analyzer reuses the existing Foundation policy checks and chooses protected descriptors for
+that compilation; the legacy producer is mutually exclusive. Without selection, existing diagnostic
+configurability remains unchanged. ORB1002 stays a configurable Info recommendation in both modes.
+The consuming profile must also require analyzer execution and delivery of compiler-visible properties;
+a disabled analyzer or generated-config pipeline cannot evaluate the selected contract.
 
-Generated code is excluded through Roslyn's native generated-code treatment. The analyzer reports one list
+The package's incremental generator rejects typed SuppressMessage and UnconditionalSuppressMessage
+attributes targeting mandatory IDs with a descriptive `FoundationSourceSuppressionPolicy` compiler
+`#error` (CS1029). This also inspects generated GlobalSuppressions already present as Compile inputs; source attributes cannot
+waive that compiler error. ORB1002 and unrelated suppression attributes remain allowed. The capability
+marker describes this separately from the nine analyzer diagnostics. Like other Roslyn generators, it
+cannot inspect suppression attributes emitted by sibling generators in the same generator run; those
+outputs remain a source-review boundary. By default, selected builds treat native
+generator failures CS8784/CS8785 as errors; a mandatory consuming profile must reject explicit
+NoWarn or WarningsNotAsErrors overrides for those failures.
+
+Generated syntax is excluded from source-quality rules through Roslyn's native generated-code treatment. The analyzer reports one list
 diagnostic, one prepared-value diagnostic per offending argument, one per offending chain, and one per
 misplaced field. It supplies no automatic refactoring: moving calls can change evaluation order, deferred
 activation, cancellation and disposal. It does not certify XML comment meaning, abstraction quality, async
