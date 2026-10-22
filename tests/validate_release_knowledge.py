@@ -1,6 +1,8 @@
 """Publisher knowledge includes schemas, interfaces, capabilities and exact payload bindings."""
 import importlib.util
 from pathlib import Path
+import hashlib
+import json
 import tempfile
 import unittest
 import zipfile
@@ -40,6 +42,24 @@ class KnowledgeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'No publisher'): m.build(self.root,self.packages,'0.3.0','a'*40)
         self.package('0.2.4')
         with self.assertRaisesRegex(ValueError,'exact selected'): m.build(self.root,self.packages,'0.3.0','a'*40)
+
+    def test_readability_capability_is_exported_from_exact_package_payload(self):
+        path = self.package()
+        marker = 'buildTransitive/source-readability-contract.json'
+        contract = (ROOT / 'src/Orbyss.Foundation.Analyzers' / marker).read_bytes()
+        with zipfile.ZipFile(path, 'a') as archive:
+            archive.writestr(marker, contract)
+            archive.writestr('buildTransitive/unrelated.json', '{"notPublisherKnowledge":true}')
+        package = m.build(self.root, self.packages, '0.3.0', 'a'*40)['packages'][0]
+        self.assertEqual(contract.decode(), package['facts'][marker])
+        self.assertEqual(hashlib.sha256(contract).hexdigest(), package['payloadFiles'][marker])
+        self.assertEqual('source-readability-v1', json.loads(package['facts'][marker])['contractId'])
+        self.assertNotIn('buildTransitive/unrelated.json', package['facts'])
+
+    def test_absent_readability_payload_cannot_invent_the_capability(self):
+        self.package()
+        package = m.build(self.root, self.packages, '0.3.0', 'a'*40)['packages'][0]
+        self.assertNotIn('buildTransitive/source-readability-contract.json', package['facts'])
 
 
 if __name__=='__main__': unittest.main()
