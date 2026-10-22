@@ -23,7 +23,7 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.5, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.7, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {

@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup Condition="'$(FoundationSourceReadability)' == 'true'">
+    <!-- A failed native guard generator must fail selected builds. -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS8784;CS8785</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

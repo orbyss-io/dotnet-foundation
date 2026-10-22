@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <FoundationSourceReadabilityContract>source-readability-v1</FoundationSourceReadabilityContract>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="FoundationSourceReadability" />
+  </ItemGroup>
+</Project>

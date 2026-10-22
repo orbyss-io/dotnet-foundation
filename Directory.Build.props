@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <FoundationVersion>0.3.6</FoundationVersion>
+    <FoundationVersion>0.3.7</FoundationVersion>
     <Version>$(FoundationVersion)</Version>
     <PackageVersion>$(FoundationVersion)</PackageVersion>
     <!-- Private qualification binds the complete changed browser/authentication owner closure. -->

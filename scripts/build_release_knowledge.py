@@ -37,6 +37,7 @@ def build(root, packages, version, commit):
                 data = archive.read(item)
                 files[item.filename] = sha(data)
                 if (item.filename.startswith(('orbyss-foundation/','schemas/')) and item.filename.endswith('.json')
+                        or item.filename == 'buildTransitive/source-readability-contract.json'
                         or item.filename.endswith('.xml') and item.filename.startswith('lib/')
                         or item.filename.rsplit('/',1)[-1].casefold() == 'readme.md'):
                     if len(data) > 2 * 1024 * 1024:
