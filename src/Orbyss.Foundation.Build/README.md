@@ -36,6 +36,17 @@ resolved assets file. Consumers retain their qualified exact locks when a newer
 resolved version satisfies that minimum. These facts are distinct from
 application dependency selection and grant no compatibility approval.
 
+Build0.3.3 selects the native pack framework/runtime target and follows runtime
+dependency roots through its exact restored graph. `PrivateAssets="all"` controls
+NuGet exposure; it does not remove a runtime requirement. A verified restored
+`developmentDependency` package, such as private EF Design, is a tooling root;
+its exclusively tooling dependencies are excluded while shared runtime transitives
+remain. A runtime branch requiring a development-only package fails with a publisher
+diagnostic. Explicit publisher host requirements remain; overlapping inferred and
+explicit requirements retain the stronger minimum version. The Build package
+itself is marked development-only; native EF commands and package integrity checks
+are unchanged.
+
 Routes may name a configuration path and suffixes for a configurable prefix.
 Dynamic routes require host integration acceptance. Platform metadata can exclude
 host-only adapters from offline endpoint composition; application features remain

@@ -14,8 +14,8 @@
   <Target Name="FoundationEmitFeatureDescriptor" BeforeTargets="GenerateNuspec" Condition="'$(FoundationFeatureIdentity)' != '' or '$(FoundationFeatureDescriptorSource)' != ''">
     <Orbyss.Foundation.Build.EmitFeatureDescriptor OutputFile="$(FoundationFeatureDescriptor)" Identity="$(FoundationFeatureIdentity)" PackageId="$(PackageId)"
       FeatureDependencies="$(FoundationFeatureDependencies)" RuntimeDependencies="$(FoundationRuntimeDependencies)" Routes="$(FoundationFeatureRoutes)"
-      DescriptorSource="$(FoundationFeatureDescriptorSource)" AssetsFile="$(ProjectAssetsFile)"
-      ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)"
+      DescriptorSource="$(FoundationFeatureDescriptorSource)" AssetsFile="$(ProjectAssetsFile)" TargetFramework="$(TargetFramework)" RuntimeIdentifier="$(RuntimeIdentifier)"
+      ProjectDirectory="$(MSBuildProjectDirectory)" SourceFiles="@(Compile)" ProjectReferences="@(ProjectReference)"
       Dormant="$(FoundationFeatureDormant)" ComposeForOpenApi="$(FoundationComposeForOpenApi)" />
   </Target>
   <UsingTask TaskName="Orbyss.Foundation.Build.EmitSettingsMetadata" AssemblyFile="$(FoundationBuildTaskAssembly)" />

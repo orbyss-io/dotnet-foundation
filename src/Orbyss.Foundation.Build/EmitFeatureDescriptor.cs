@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using NuGet.Versioning;
 
 namespace Orbyss.Foundation.Build;
 
@@ -30,15 +31,21 @@ public sealed class EmitFeatureDescriptor : Microsoft.Build.Utilities.Task
     public string DescriptorSource { get; set; } = "";
     /// <summary>Gets or sets the resolved NuGet assets file used for private runtime facts.</summary>
     public string AssetsFile { get; set; } = "";
+    /// <summary>Gets or sets the exact target framework evaluated by native packing.</summary>
+    public string TargetFramework { get; set; } = "";
+    /// <summary>Gets or sets the optional native runtime target.</summary>
+    public string RuntimeIdentifier { get; set; } = "";
     /// <summary>Gets or sets the publisher project directory.</summary>
     public string ProjectDirectory { get; set; } = "";
     /// <summary>Gets or sets the compilation source inventory.</summary>
     public ITaskItem[] SourceFiles { get; set; } = [];
+    /// <summary>Gets or sets evaluated native project reference roles.</summary>
+    public ITaskItem[] ProjectReferences { get; set; } = [];
     /// <inheritdoc />
     public override bool Execute()
     {
         try { return ExecuteCore(); }
-        catch (Exception error) when (error is IOException or InvalidDataException or JsonException or InvalidOperationException or ArgumentException)
+        catch (Exception error) when (error is IOException or InvalidDataException or JsonException or System.Xml.XmlException or InvalidOperationException or ArgumentException)
         {
             Log.LogError($"PKFD001 invalid publisher descriptor: {error.Message}");
             return false;
@@ -107,17 +114,17 @@ public sealed class EmitFeatureDescriptor : Microsoft.Build.Utilities.Task
         }
         if (!string.IsNullOrEmpty(AssetsFile) && File.Exists(AssetsFile))
         {
-            var assets = JsonNode.Parse(File.ReadAllText(AssetsFile))!.AsObject();
-            var libraries = assets["libraries"]!.AsObject();
-            var target = assets["targets"]!.AsObject().First().Value!.AsObject();
-            var runtime = new JsonArray();
-            foreach (var (key, value) in target.OrderBy(item => item.Key, StringComparer.Ordinal))
+            var inferred = RuntimeDependencyGraph.Read(AssetsFile, TargetFramework, RuntimeIdentifier, ProjectDirectory, ProjectReferences);
+            // Explicit publisher requirements remain declarations, not disposable inferred state.
+            var runtime = descriptor["hostProvidedDependencies"]?.DeepClone().AsArray() ?? new JsonArray();
+            var declared = runtime.Select(item => item!.AsObject()).ToDictionary(item => item["packageId"]!.GetValue<string>(), StringComparer.OrdinalIgnoreCase);
+            foreach (var dependency in inferred)
             {
-                if (libraries[key]?["type"]?.GetValue<string>() != "package" || value?["runtime"] is not JsonObject files
-                    || !files.Any(file => file.Key.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
-                    continue;
-                var split = key.LastIndexOf('/');
-                runtime.Add(new JsonObject { ["packageId"] = key[..split], ["minimumVersion"] = key[(split + 1)..] });
+                var identity = dependency["packageId"]!.GetValue<string>();
+                if (!declared.TryGetValue(identity, out var requirement)) runtime.Add(dependency);
+                else if (NuGetVersion.Parse(dependency["minimumVersion"]!.GetValue<string>())
+                    > NuGetVersion.Parse(requirement["minimumVersion"]!.GetValue<string>()))
+                    requirement["minimumVersion"] = dependency["minimumVersion"]!.DeepClone();
             }
             descriptor["hostProvidedDependencies"] = runtime;
         }
