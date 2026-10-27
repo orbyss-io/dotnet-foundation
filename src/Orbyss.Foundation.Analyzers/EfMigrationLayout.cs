@@ -46,6 +46,9 @@ internal static class EfMigrationLayout
     {
         foreach (var child in node.DescendantNodesAndSelf())
         {
+            if (child is AnonymousFunctionExpressionSyntax lambda && !IsDeclarativeLambda(context, lambda))
+                return false;
+
             if (child is InvocationExpressionSyntax call && !IsNativeBuilderCall(context, call))
                 return false;
 
@@ -54,7 +57,9 @@ internal static class EfMigrationLayout
                 or AssignmentExpressionSyntax
                 or ThrowExpressionSyntax
                 or ThrowStatementSyntax
-                or LocalFunctionStatementSyntax)
+                or LocalFunctionStatementSyntax
+                or PostfixUnaryExpressionSyntax
+                || child is PrefixUnaryExpressionSyntax prefix && prefix.OperatorToken.Text is "++" or "--")
             {
                 return false;
             }
@@ -62,6 +67,54 @@ internal static class EfMigrationLayout
 
         return true;
     }
+
+    /// <summary>Accepts generated column/projection lambdas and finite sequences of native constraints.</summary>
+    private static bool IsDeclarativeLambda(SyntaxNodeAnalysisContext context, AnonymousFunctionExpressionSyntax lambda)
+    {
+        if (lambda is not SimpleLambdaExpressionSyntax simple)
+            return false;
+
+        var parameter = simple.Parameter.Identifier.ValueText;
+        if (simple.Body is BlockSyntax block)
+        {
+            foreach (var statement in block.Statements)
+            {
+                if (statement is not ExpressionStatementSyntax expression
+                    || expression.Expression is not InvocationExpressionSyntax call
+                    || !IsNativeBuilderCall(context, call))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (simple.Body is InvocationExpressionSyntax invocation)
+            return IsNativeBuilderCall(context, invocation);
+
+        if (simple.Body is AnonymousObjectCreationExpressionSyntax columns)
+        {
+            foreach (var column in columns.Initializers)
+            {
+                if (column.Expression is InvocationExpressionSyntax call && IsNativeBuilderCall(context, call))
+                    continue;
+
+                if (!IsProjection(column.Expression, parameter))
+                    return false;
+            }
+
+            return true;
+        }
+
+        return simple.Body is ExpressionSyntax value && IsProjection(value, parameter);
+    }
+
+    /// <summary>Recognizes generated key selectors without admitting captured computations.</summary>
+    private static bool IsProjection(ExpressionSyntax expression, string parameter) =>
+        expression is MemberAccessExpressionSyntax member
+        && member.Expression is IdentifierNameSyntax receiver
+        && receiver.Identifier.ValueText == parameter;
 
     /// <summary>Uses exact EF relational symbols, never filenames, namespaces alone or package prefixes.</summary>
     private static bool IsNativeBuilderCall(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax call)

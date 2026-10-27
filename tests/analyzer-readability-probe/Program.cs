@@ -136,6 +136,24 @@ internal static class Program
             helperMigration,
             listDiagnostics
         );
+        var conditionalMigration = nativeMigration.Replace(
+            "table.PrimaryKey(\"PK_items\", x => x.Id);",
+            "if (System.DateTime.UtcNow.Ticks > 0) { } table.PrimaryKey(\"PK_items\", x => x.Id);"
+        );
+        await Check(
+            "authored-conditional-in-constraint-remains-checked",
+            conditionalMigration,
+            constraintDiagnostics
+        );
+        var incrementMigration = nativeMigration.Replace(
+            "table.PrimaryKey(\"PK_items\", x => x.Id);",
+            "int counter = 0; counter++; table.PrimaryKey(\"PK_items\", x => x.Id);"
+        );
+        await Check(
+            "authored-increment-in-constraint-remains-checked",
+            incrementMigration,
+            constraintDiagnostics
+        );
         var ordinaryHelper = "using Microsoft.EntityFrameworkCore.Migrations; "
             + "class Sample { void Up(MigrationBuilder builder) { builder.CreateIndex(\"ix\", \"items\", \"Id\"); } }";
         await Check(
@@ -195,7 +213,7 @@ internal static class Program
             companionSources: companionSources
         );
 
-        Console.WriteLine($"Source-readability controls passed ({cases.Length + specialCases.Length + 7} separately compiled cases).");
+        Console.WriteLine($"Source-readability controls passed ({cases.Length + specialCases.Length + 9} separately compiled cases).");
         await ExistingPolicyControls.Run();
     }
 
