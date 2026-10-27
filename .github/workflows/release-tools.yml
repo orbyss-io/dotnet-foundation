@@ -2,7 +2,7 @@ name: Release Foundation build tools
 
 on:
   push:
-    tags: ["exporter-v*.*.*", "build-v*.*.*"]
+    tags: ["exporter-v*.*.*", "build-v*.*.*", "analyzer-v*.*.*"]
 
 permissions:
   contents: write
@@ -60,6 +60,11 @@ jobs:
           python tests/validate_settings_build.py --package "$PACKAGE"
           python tests/validate_settings_graph.py --package "$PACKAGE"
           python tests/validate_settings_no_build.py --package "$PACKAGE"
+      - name: Validate exact analyzer package and native generated migrations
+        if: steps.selected.outputs.kind == 'analyzer'
+        env:
+          PACKAGE: ${{ steps.selected.outputs.package_path }}
+        run: python tests/validate_analyzer.py --package "$PACKAGE"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

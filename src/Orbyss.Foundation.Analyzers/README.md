@@ -49,6 +49,15 @@ outputs remain a source-review boundary. By default, selected builds treat nativ
 generator failures CS8784/CS8785 as errors; a mandatory consuming profile must reject explicit
 NoWarn or WarningsNotAsErrors overrides for those failures.
 
+Native EF Core main migrations deliberately remain editable and may have no generated header.
+Within the actual EF relational `Migration.Up`/`Down` override, ORB1007–ORB1009 accept declarative
+calls to the native MigrationBuilder/column/operation/table builders, including generated column and
+constraint lambdas and annotation chains. Recognition uses exact relational assembly/type symbols,
+not a migrations folder, filename or package prefix. This does not label the whole file generated:
+authored helpers, local functions and declarations containing arbitrary calls remain checked, as do
+the other source/lifecycle rules. Review migration operations/SQL normally; no header, formatter,
+rewritten operations, alternate generator or global analyzer suppression is needed for this layout.
+
 Generated syntax is excluded from source-quality rules through Roslyn's native generated-code treatment. The analyzer reports one list
 diagnostic, one prepared-value diagnostic per offending argument, one per offending chain, and one per
 misplaced field. It supplies no automatic refactoring: moving calls can change evaluation order, deferred

@@ -10,13 +10,14 @@ import zipfile
 TOOLS = {
     'exporter': ('Orbyss.Foundation.OpenApi.Exporter', 'ExporterVersion'),
     'build': ('Orbyss.Foundation.Build', 'BuildToolsVersion'),
+    'analyzer': ('Orbyss.Foundation.Analyzers', 'AnalyzerVersion'),
 }
-TAG = re.compile(r'(exporter|build)-v(\d+\.\d+\.\d+(?:-preview\.\d+)?)')
+TAG = re.compile(r'(exporter|build|analyzer)-v(\d+\.\d+\.\d+(?:-preview\.\d+)?)')
 
 
 def plan(root: Path, tag: str) -> dict:
     match = TAG.fullmatch(tag)
-    if match is None: raise ValueError('Only independent exporter-v or build-v version tags may publish tools')
+    if match is None: raise ValueError('Only independent exporter-v, build-v or analyzer-v version tags may publish tools')
     kind, version = match.groups()
     package_id, property_name = TOOLS[kind]
     project = 'src/' + package_id + '/' + package_id + '.csproj'

@@ -1,0 +1,21 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace NativeEfAnalyzer;
+
+/// <summary>Retains an intentionally invalid authored call inside a real migration override.</summary>
+public sealed class AuthoredMigrationControl : Migration
+{
+    /// <inheritdoc />
+    protected override void Up(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.Sql(GetSql());
+    }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+    }
+
+    /// <summary>Supplies authored SQL that must be prepared before the native call.</summary>
+    private static string GetSql() => "SELECT 1";
+}

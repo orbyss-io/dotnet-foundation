@@ -6,5 +6,6 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
   </ItemGroup>
 </Project>

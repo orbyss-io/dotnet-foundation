@@ -18,6 +18,12 @@
   ],
   "severity": "Error",
   "generatedCode": "excluded",
+  "nativeMigrationLayout": {
+    "rules": ["ORB1007", "ORB1008", "ORB1009"],
+    "scope": "declarative native relational builders in actual EF Migration.Up/Down overrides",
+    "authoredHelpersAndArbitraryCalls": "checked",
+    "wholeFileExclusion": false
+  },
   "semanticReviewRequired": [
     "async ownership",
     "cancellation",

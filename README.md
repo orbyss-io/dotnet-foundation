@@ -63,13 +63,14 @@ public key tokens for unsigned shared assemblies. Invalid shared identities fail
 Stable tags must exactly match `VERSION`. The release workflow publishes the NuGet family through
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.
 
-The exporter and `Orbyss.Foundation.Build` have independent versions. The runtime
-publication gate packs exactly 31 runtime/analyzer packages with
+The exporter, `Orbyss.Foundation.Build` and `Orbyss.Foundation.Analyzers` have independent versions. The runtime
+publication gate packs exactly 30 runtime packages with
 `-p:FoundationRuntimeOnly=true`. An `exporter-v<version>` tag qualifies and publishes
 only the exporter; a `build-v<version>` tag qualifies and publishes only the descriptor
-build package. Both use the protected `release-tools.yml` workflow with exact source
-version and single-package checks. Advancing either tool never republishes the other
-or the runtime family. Configure NuGet trusted publishing for that workflow before
+build package; an `analyzer-v<version>` tag qualifies and publishes only the analyzer.
+All use the protected `release-tools.yml` workflow with exact source version,
+single-package checks and installed-package validation. Advancing a tool never republishes
+another tool or the runtime family. Configure NuGet trusted publishing for that workflow before
 its first publication; CI packing supplies no public availability authority.
 
 Publisher projects own canonical `orbyss-foundation/feature.json` descriptors.

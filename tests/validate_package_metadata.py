@@ -32,10 +32,10 @@ def main() -> int:
     expected_ids = {
         project.stem
         for project in (ROOT / "src").glob("Orbyss.Foundation*/*.csproj")
-        if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build", "Orbyss.Foundation.OpenApi.Exporter"}
+        if project.stem not in {"Orbyss.Foundation.Host", "Orbyss.Foundation.Build", "Orbyss.Foundation.OpenApi.Exporter", "Orbyss.Foundation.Analyzers"}
     }
-    if len(expected_ids) != 31:
-        raise AssertionError(f"Expected 31 Foundation package projects, found {len(expected_ids)}.")
+    if len(expected_ids) != 30:
+        raise AssertionError(f"Expected 30 Foundation runtime package projects, found {len(expected_ids)}.")
 
     found: set[str] = set()
     for package in sorted(args.packages.glob("*.nupkg")):
@@ -81,7 +81,7 @@ def main() -> int:
 
     if found != expected_ids:
         raise AssertionError(f"Package set mismatch. Missing={sorted(expected_ids - found)}, extra={sorted(found - expected_ids)}")
-    print("Exact 31-package Orbyss Foundation NuGet metadata contract passed.")
+    print("Exact 30-package Orbyss Foundation runtime NuGet metadata contract passed.")
     return 0
 
 

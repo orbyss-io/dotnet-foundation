@@ -33,6 +33,15 @@ qualify and adopt that release without guessing which older documentation applie
 Published versions remain immutable; update jobs open PRs and do not publish or
 rewrite existing tags.
 
+The analyzer follows the same independent-tool route as Build and the exporter:
+its project owns `AnalyzerVersion`, `analyzer-v<version>` selects one exact archive,
+and the protected tool workflow validates the packaged analyzer before publication.
+Runtime-family packing excludes all three independent tools, so an analyzer repair
+does not advance or republish Host/runtime packages. Dependency-update qualification
+still packs and tests each tool separately. This publication scope does not waive
+the maintenance requirements above or turn an earlier source's evidence into proof
+for a changed candidate.
+
 The policy explicitly selects anonymous GitHub metadata for the public
 `aquasecurity/setup-trivy` and `aquasecurity/trivy` repositories. Authenticated
 Actions-token lookups failed before mutation in the preserved maintenance run
