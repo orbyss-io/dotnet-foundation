@@ -72,6 +72,7 @@ def main():
     run('packaged-web-policies',[sys.executable,'tests/validate_web_policies.py','--package',str(packages/('Orbyss.Foundation.WebDefaults.'+version+'.nupkg')),'--bff-package',str(packages/('Orbyss.Foundation.Authentication.BffCookie.'+version+'.nupkg'))])
     run('pack-build-tool',['dotnet','pack','src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj','-c','Release','--no-restore','--output',str(tools)])
     run('pack-exporter-tool',['dotnet','pack','src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj','-c','Release','--no-restore','--output',str(tools)])
+    run('pack-analyzer-tool',['dotnet','pack','src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj','-c','Release','--no-restore','--output',str(tools)])
     for test in ('validate_dependency_updates','validate_release_knowledge','validate_update_workflow','validate_tool_release',
                  'validate_host_settings_publish'):
         run(test,[sys.executable,'tests/'+test+'.py'])

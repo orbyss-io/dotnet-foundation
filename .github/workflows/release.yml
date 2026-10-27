@@ -84,7 +84,7 @@ jobs:
         run: |
           shopt -s nullglob
           packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 31 ]] || { echo "Expected 30 Foundation runtime packages plus the analyzer, found ${#packages[@]}." >&2; exit 1; }
+          [[ ${#packages[@]} -eq 30 ]] || { echo "Expected 30 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
           for package in "${packages[@]}"; do
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done
@@ -173,7 +173,7 @@ jobs:
         run: python scripts/verify_nuget_publication.py --packages artifacts/nuget --timeout-seconds 900
 
       - name: Sign in to GitHub Container Registry
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

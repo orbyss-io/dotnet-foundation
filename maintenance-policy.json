@@ -13,7 +13,8 @@
     ".python-version",
     ".nvmrc",
     "tests/browser/package.json",
-    "tests/loader-fixture/LoaderFixture.csproj"
+    "tests/loader-fixture/LoaderFixture.csproj",
+    "src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj"
   ],
   "additionalPins": [],
   "metadataOverrides": {

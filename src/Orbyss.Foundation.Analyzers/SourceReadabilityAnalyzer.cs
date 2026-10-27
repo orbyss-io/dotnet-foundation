@@ -148,6 +148,9 @@ public sealed class SourceReadabilityAnalyzer : DiagnosticAnalyzer
         if (IsNameOf(context, list.Parent))
             return;
 
+        if (EfMigrationLayout.IsDeclaration(context, list.Parent))
+            return;
+
         AnalyzeLayout(
             context,
             list.OpenParenToken,
@@ -247,6 +250,8 @@ public sealed class SourceReadabilityAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeChain(SyntaxNodeAnalysisContext context)
     {
         var expression = (ExpressionSyntax)context.Node;
+        if (EfMigrationLayout.IsDeclaration(context, expression))
+            return;
         var top = (SyntaxNode)expression;
         while (top.Parent is ParenthesizedExpressionSyntax
             || top.Parent is MemberAccessExpressionSyntax member && member.Expression == top

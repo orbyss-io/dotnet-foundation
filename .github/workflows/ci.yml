@@ -101,6 +101,7 @@ jobs:
 
       - name: Pack independently released Foundation tools
         run: |
+          dotnet pack src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj -c Release --no-restore --output artifacts/tools
           dotnet pack src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj -c Release --no-restore --output artifacts/tools
           dotnet pack src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj -c Release --no-restore --output artifacts/tools
 

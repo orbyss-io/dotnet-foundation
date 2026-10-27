@@ -19,7 +19,8 @@ class IndependentUpdateTests(unittest.TestCase):
                      'run_contract_package_qualification','validate_hosted_package_consumption',
                      'validate_feature_build','validate_settings_no_build','validate_legacy_assurance_export',
                      'packaged-web-policies','tests/validate_web_policies.py','build_release_knowledge.py',
-                     'foundation-knowledge-candidate.json','Commit prepared source'):
+                     'foundation-knowledge-candidate.json','Commit prepared source',
+                     'pack-analyzer-tool','AnalyzerVersion','validate_analyzer.py'):
             self.assertIn(name,script)
 
     def test_runtime_dockerfiles_share_the_same_exact_base(self):

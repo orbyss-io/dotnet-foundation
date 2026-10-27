@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AnalyzerVersion>0.3.8</AnalyzerVersion>
+    <Version>$(AnalyzerVersion)</Version>
+    <PackageVersion>$(Version)</PackageVersion>
+    <IsPackable Condition="'$(FoundationRuntimeOnly)' != 'true'">true</IsPackable>
+    <IsPackable Condition="'$(FoundationRuntimeOnly)' == 'true'">false</IsPackable>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Roslyn analyzers for Orbyss Foundation lifecycle and call-site policies.</Description>
     <PackageId>Orbyss.Foundation.Analyzers</PackageId>

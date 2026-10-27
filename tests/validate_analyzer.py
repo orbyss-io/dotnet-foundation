@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import subprocess
+import argparse
 import json
+import shutil
 import tempfile
 import zipfile
 from pathlib import Path
@@ -15,17 +17,23 @@ def run(root: Path, arguments: list[str]) -> str:
     return output
 
 
-def validate_readability(root: Path) -> None:
+def validate_readability(root: Path, package: Path | None = None) -> None:
     """Prove semantic controls and actual packaged opt-in wiring independently."""
     probe = root / "tests/analyzer-readability-probe/AnalyzerReadabilityProbe.csproj"
     run(root, ["dotnet", "restore", str(probe), "--locked-mode", "--nologo"])
     print(run(root, ["dotnet", "run", "--project", str(probe), "-c", "Release", "--no-restore"]).strip())
     with tempfile.TemporaryDirectory(prefix="foundation-readability-") as directory:
         temporary = Path(directory)
+        # A caller-owned TEMP can live inside a checkout; the package probe is standalone.
+        for name in ('Directory.Build.props', 'Directory.Build.targets', 'Directory.Packages.props'):
+            (temporary / name).write_text('<Project/>', encoding='utf-8')
         feed = temporary / "feed"
         feed.mkdir()
         analyzer = root / "src/Orbyss.Foundation.Analyzers/Orbyss.Foundation.Analyzers.csproj"
-        run(root, ["dotnet", "pack", str(analyzer), "-c", "Release", "--no-build", "--no-restore", "-o", str(feed), "--nologo"])
+        if package is None:
+            run(root, ["dotnet", "pack", str(analyzer), "-c", "Release", "--no-build", "--no-restore", "-o", str(feed), "--nologo"])
+        else:
+            shutil.copyfile(package, feed / package.name)
         packages = list(feed.glob("*.nupkg"))
         if len(packages) != 1:
             raise AssertionError(f"Expected one local analyzer package, found {packages}")
@@ -44,7 +52,9 @@ def validate_readability(root: Path) -> None:
             metadata = ET.fromstring(archive.read("Orbyss.Foundation.Analyzers.nuspec"))
             version = next(element.text for element in metadata.iter() if element.tag.endswith("}version"))
         (temporary / "NuGet.Config").write_text(
-            f'<configuration><packageSources><clear/><add key="local" value="{feed.as_posix()}"/></packageSources></configuration>',
+            f'<configuration><packageSources><clear/><add key="local" value="{feed.as_posix()}"/></packageSources>'
+            '<packageSourceMapping><clear/><packageSource key="local"><package pattern="*"/>'
+            '</packageSource></packageSourceMapping></configuration>',
             encoding="utf-8",
         )
         project = temporary / "Probe.csproj"
@@ -119,9 +129,21 @@ class Sample {
         print("Packaged source-readability opt-in rejected authored violations and accepted the repaired source.")
         from analyzer_profile_fixture import validate_existing_profile
         validate_existing_profile(temporary, version)
+        from ef_migration_analyzer_fixture import validate as validate_native_migrations
+        validate_native_migrations(root, packages[0], '10.0.13', '10.0.3')
+        import xml.etree.ElementTree as ET
+        selected = {node.get('Include'): node.get('Version')
+                    for node in ET.parse(root / 'Directory.Packages.props').iter('PackageVersion')}
+        if (selected['Microsoft.EntityFrameworkCore'], selected['Npgsql.EntityFrameworkCore.PostgreSQL']) != ('10.0.13', '10.0.3'):
+            validate_native_migrations(root, packages[0])
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate analyzer source controls and exact packaged integration.")
+    parser.add_argument('--package', type=Path, help='Exact already-packed archive; never rebuild publication bytes')
+    args = parser.parse_args()
+    if args.package and not args.package.is_file():
+        parser.error('The exact analyzer archive is missing')
     root = Path(__file__).resolve().parents[1]
     project = root / "tests/analyzer-probe/AnalyzerProbe.csproj"
     restore = subprocess.run(
@@ -160,7 +182,7 @@ def main() -> int:
             f"[ShellFeature] name diverges.\n{feature_output}"
         )
 
-    validate_readability(root)
+    validate_readability(root, args.package.resolve() if args.package else None)
     print("Orbyss Foundation C# structure, documentation, feature-identity and source-readability analyzers passed.")
     return 0
 

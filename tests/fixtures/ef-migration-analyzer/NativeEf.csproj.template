@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <FoundationSourceReadability>true</FoundationSourceReadability>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Orbyss.Foundation.Analyzers" Version="@ANALYZER_VERSION@" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="@EF_VERSION@" PrivateAssets="all" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="@PROVIDER_VERSION@" />
+  </ItemGroup>
+  <Target Name="RequireActualAnalyzerContract" BeforeTargets="CoreCompile">
+    <Error Condition="'$(FoundationSourceReadabilityContract)' != 'source-readability-v1'" Text="Exact analyzer package capability was not imported." />
+  </Target>
+</Project>

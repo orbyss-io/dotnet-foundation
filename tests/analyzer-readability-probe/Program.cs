@@ -90,6 +90,87 @@ internal static class Program
             ("implicit-stackalloc-value", "class Sample { void M() { Take(stackalloc[] { 1 }); } void Take(System.Span<int> value) {} }", ["ORB1008"], true, "Sample.cs"),
             ("prepared-stackalloc-value", "class Sample { void M() { System.Span<int> prepared = stackalloc int[2]; Take(prepared); } void Take(System.Span<int> value) {} }", [], true, "Sample.cs"),
         };
+        var nativeMigration = "using Microsoft.EntityFrameworkCore.Migrations;\n"
+            + "public partial class Initial : Migration { "
+            + "protected override void Up(MigrationBuilder migrationBuilder) { "
+            + "migrationBuilder.CreateTable(name: \"items\", schema: \"owned\", columns: table => new { "
+            + "Id = table.Column<long>(type: \"bigint\", nullable: false)"
+            + ".Annotation(\"Npgsql:ValueGenerationStrategy\", 1), "
+            + "Value = table.Column<string>(type: \"text\", nullable: false) }, "
+            + "constraints: table => { table.PrimaryKey(\"PK_items\", x => x.Id); }); } "
+            + "protected override void Down(MigrationBuilder migrationBuilder) { "
+            + "migrationBuilder.DropTable(name: \"items\", schema: \"owned\"); } }";
+        var emptyDiagnostics = Array.Empty<string>();
+        await Check(
+            "native-ef-declarations-without-generated-header",
+            nativeMigration,
+            emptyDiagnostics
+        );
+        var authoredMigration = nativeMigration.Replace(
+            "migrationBuilder.DropTable(name: \"items\", schema: \"owned\");",
+            "migrationBuilder.Sql(GetSql()); } string GetSql() => \"select 1\"; void Authored() { Take(1, 2, 3); } void Take(params int[] values) {"
+        );
+        var authoredDiagnostics = new[] { "ORB1007", "ORB1008" };
+        await Check(
+            "authored-migration-code-remains-checked",
+            authoredMigration,
+            authoredDiagnostics
+        );
+        var arbitraryConstraint = nativeMigration.Replace(
+            "table.PrimaryKey(\"PK_items\", x => x.Id);",
+            "System.Console.WriteLine(\"authored work\"); table.PrimaryKey(\"PK_items\", x => x.Id);"
+        );
+        var constraintDiagnostics = new[] { "ORB1007", "ORB1008", "ORB1008" };
+        await Check(
+            "authored-work-in-native-declaration-remains-checked",
+            arbitraryConstraint,
+            constraintDiagnostics
+        );
+        var helperMigration = nativeMigration.Replace(
+            "migrationBuilder.DropTable(name: \"items\", schema: \"owned\");",
+            "Nested(); void Nested() { migrationBuilder.CreateIndex(\"ix\", \"items\", \"Id\"); }"
+        );
+        var listDiagnostics = new[] { "ORB1007" };
+        await Check(
+            "authored-local-function-remains-checked",
+            helperMigration,
+            listDiagnostics
+        );
+        var conditionalMigration = nativeMigration.Replace(
+            "table.PrimaryKey(\"PK_items\", x => x.Id);",
+            "if (System.DateTime.UtcNow.Ticks > 0) { } table.PrimaryKey(\"PK_items\", x => x.Id);"
+        );
+        await Check(
+            "authored-conditional-in-constraint-remains-checked",
+            conditionalMigration,
+            constraintDiagnostics
+        );
+        var incrementMigration = nativeMigration.Replace(
+            "table.PrimaryKey(\"PK_items\", x => x.Id);",
+            "int counter = 0; counter++; table.PrimaryKey(\"PK_items\", x => x.Id);"
+        );
+        await Check(
+            "authored-increment-in-constraint-remains-checked",
+            incrementMigration,
+            constraintDiagnostics
+        );
+        var ordinaryHelper = "using Microsoft.EntityFrameworkCore.Migrations; "
+            + "class Sample { void Up(MigrationBuilder builder) { builder.CreateIndex(\"ix\", \"items\", \"Id\"); } }";
+        await Check(
+            "ordinary-helper-named-up-remains-checked",
+            ordinaryHelper,
+            listDiagnostics
+        );
+        var fakeEf = "namespace Microsoft.EntityFrameworkCore.Migrations { "
+            + "abstract class Migration { protected abstract void Up(MigrationBuilder builder); } "
+            + "class MigrationBuilder { public void CreateIndex(params string[] values) {} } "
+            + "class Sample : Migration { protected override void Up(MigrationBuilder builder) { "
+            + "builder.CreateIndex(\"ix\", \"items\", \"Id\"); } } }";
+        await Check(
+            "fake-ef-symbols-remain-checked",
+            fakeEf,
+            listDiagnostics
+        );
         foreach (var item in specialCases)
         {
             await Check(
@@ -104,6 +185,7 @@ internal static class Program
         var ownedSources = new[]
         {
             "src/Orbyss.Foundation.Analyzers/SourceReadabilityAnalyzer.cs",
+            "src/Orbyss.Foundation.Analyzers/EfMigrationLayout.cs",
             "src/Orbyss.Foundation.Analyzers/FoundationAnalyzer.cs",
             "src/Orbyss.Foundation.Analyzers/SelectedFoundationAnalyzer.cs",
             "src/Orbyss.Foundation.Analyzers/SourceSuppressionPolicyGenerator.cs",
@@ -131,7 +213,7 @@ internal static class Program
             companionSources: companionSources
         );
 
-        Console.WriteLine($"Source-readability controls passed ({cases.Length + specialCases.Length + 1} separately compiled cases).");
+        Console.WriteLine($"Source-readability controls passed ({cases.Length + specialCases.Length + 9} separately compiled cases).");
         await ExistingPolicyControls.Run();
     }
 
