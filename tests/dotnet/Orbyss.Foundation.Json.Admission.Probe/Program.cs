@@ -8,6 +8,11 @@ using Orbyss.Foundation.Json.Admission.Probe;
 using Orbyss.Foundation.Web.ProblemDetails.Core;
 
 var mode = args.FirstOrDefault() ?? "http";
+if (mode == "ergonomics")
+{
+    await ErgonomicsProbe.RunAsync();
+    return;
+}
 if (mode.StartsWith("activation-", StringComparison.Ordinal))
 {
     await RejectActivationAsync(mode["activation-".Length..]);

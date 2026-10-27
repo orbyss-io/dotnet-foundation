@@ -9,6 +9,34 @@ namespace Orbyss.Foundation.Json.AspNetCore;
 /// <summary>Declares known wire types and enforces registered response-profile use per operation.</summary>
 public static class FoundationJsonEndpointExtensions
 {
+    /// <summary>Uses the operation-owned request definition and verifies it matches actual registration.</summary>
+    public static RouteHandlerBuilder WithJsonRequest<T>(this RouteHandlerBuilder builder, JsonContractMetadata<T> contract) where T : notnull
+    {
+        ArgumentNullException.ThrowIfNull(contract);
+        if (contract.Direction != JsonContractDirection.Request)
+            throw new ArgumentException("A request contract is required.", nameof(contract));
+
+        var verify = VerifyDefinition(contract);
+        builder.Add(verify);
+        return builder.WithJsonRequest<T>();
+    }
+
+    /// <summary>Uses the operation-owned response definition without duplicating its profile or supported capacity.</summary>
+    public static RouteHandlerBuilder WithJsonResponse<T>(
+        this RouteHandlerBuilder builder,
+        JsonContractMetadata<T> contract,
+        int statusCode = StatusCodes.Status200OK
+    )
+    {
+        ArgumentNullException.ThrowIfNull(contract);
+        if (contract.Direction != JsonContractDirection.Response)
+            throw new ArgumentException("A response contract is required.", nameof(contract));
+
+        var verify = VerifyDefinition(contract);
+        builder.Add(verify);
+        return builder.WithJsonResponse<T>(statusCode);
+    }
+
     /// <summary>Adds request metadata from the registered typed requirement without duplicated numbers.</summary>
     public static RouteHandlerBuilder WithJsonRequest<T>(this RouteHandlerBuilder builder) where T : notnull
     {
@@ -76,6 +104,18 @@ public static class FoundationJsonEndpointExtensions
         });
         return builder;
     }
+    /// <summary>Checks the mapped declaration against the same shell-local registration without resolving an operation.</summary>
+    private static Action<EndpointBuilder> VerifyDefinition<T>(JsonContractMetadata<T> contract)
+    {
+        void Verify(EndpointBuilder endpoint)
+        {
+            var actual = Resolve<T>(endpoint.ApplicationServices, contract.Direction);
+            JsonContractIdentity.RequireEquivalent(actual, contract);
+        }
+
+        return Verify;
+    }
+
     /// <summary>Requires exactly one contract so registration cannot silently replace or omit metadata.</summary>
     private static IJsonContractMetadata Resolve<T>(IServiceProvider provider, JsonContractDirection direction)
     {

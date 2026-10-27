@@ -3,16 +3,52 @@ namespace Orbyss.Foundation.Json;
 /// <summary>Declares supported contract capacity/strictness; deployment budgets stay in profile settings.</summary>
 public sealed class JsonProfileRequirement
 {
+    /// <summary>Declares supported strict-request capacity; configured transport limits remain separate.</summary>
+    public static JsonProfileRequirement StrictRequest(
+        int minimumBytes = 1,
+        int maximumBytes = 16_777_216,
+        int minimumDepth = 1,
+        int maximumDepth = 64
+    ) => new(
+        JsonProfileKeys.StrictRequest,
+        minimumBytes,
+        maximumBytes,
+        minimumDepth,
+        maximumDepth
+    );
+
+    /// <summary>Declares supported tolerant-response capacity without choosing deployment budgets.</summary>
+    public static JsonProfileRequirement TolerantResponse(
+        int minimumBytes = 1,
+        int maximumBytes = 16_777_216,
+        int minimumDepth = 1,
+        int maximumDepth = 64
+    ) => new(
+        JsonProfileKeys.TolerantResponse,
+        minimumBytes,
+        maximumBytes,
+        minimumDepth,
+        maximumDepth
+    );
+
     /// <summary>Creates a supported interval and strictness requirement.</summary>
-    public JsonProfileRequirement(string preset, int minimumBytes = 1, int maximumBytes = 16_777_216,
-        int minimumDepth = 1, int maximumDepth = 64)
+    public JsonProfileRequirement(
+        string preset,
+        int minimumBytes = 1,
+        int maximumBytes = 16_777_216,
+        int minimumDepth = 1,
+        int maximumDepth = 64
+    )
     {
         if (preset is not (JsonProfileKeys.StrictRequest or JsonProfileKeys.TolerantResponse)
             || minimumBytes < 1 || maximumBytes < minimumBytes || maximumBytes > 16_777_216
             || minimumDepth < 1 || maximumDepth < minimumDepth || maximumDepth > 64)
             throw new ArgumentException("JSON contract has invalid supported requirements.");
-        Preset = preset; MinimumBytes = minimumBytes; MaximumBytes = maximumBytes;
-        MinimumDepth = minimumDepth; MaximumDepth = maximumDepth;
+        Preset = preset;
+        MinimumBytes = minimumBytes;
+        MaximumBytes = maximumBytes;
+        MinimumDepth = minimumDepth;
+        MaximumDepth = maximumDepth;
     }
     /// <summary>Gets required strictness.</summary>
     public string Preset { get; }

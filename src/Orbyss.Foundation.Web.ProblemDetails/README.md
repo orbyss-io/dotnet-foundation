@@ -82,3 +82,15 @@ and Kestrel. It retains event ID, category, severity, safe failure type and admi
 IDs while dropping raw exception/state/formatter content. It does not suppress entire error categories.
 This feature cannot retract committed output. Application logs, external telemetry, additional logger
 factories and log scopes containing private values remain their owner's redaction responsibility.
+
+## Operation failure metadata
+
+`.ProducesFoundationProblems(definitions)` publishes the real operation's `ProblemDefinition` statuses as the
+shared `FoundationProblemEnvelope` media type, deduplicating repeated statuses. Prepare a reusable definitions
+array under its actual owner. Where another native owner supplies runtime definitions, use
+`.ProducesFoundationProblemStatuses(statusCodes)` with the actual HTTP error statuses instead of inventing
+new error definitions. It validates all statuses (400–599) before adding metadata and deduplicates the array.
+This is descriptive endpoint metadata; it does not add exception translation,
+storage filters or failures that the operation cannot actually produce. Service registration alone cannot
+correctly describe per-operation responses. Authentication/JSON enforcement and application error mapping
+retain their native owners.

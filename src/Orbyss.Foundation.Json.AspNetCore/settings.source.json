@@ -2,12 +2,12 @@
   "schemaVersion": 2,
   "packageId": "Orbyss.Foundation.Json.AspNetCore",
   "sourceSha256": {
-    "FoundationJsonEndpointExtensions.cs": "2b051b476ec7266e3ac4d2c59575cf4d76d8cfee83489563160afb214b75fcfb",
-    "FoundationJsonFeature.cs": "e6a75dbc079576ad477a57dd58b3a1dffceba4f572b293f653ff7d29e7dc1e0c",
+    "FoundationJsonEndpointExtensions.cs": "07facdfb3e27d9bf7737b61c98758d8cf8f4e9378e1602746878f5a0abe55c64",
+    "FoundationJsonFeature.cs": "211f71e2ea03318be74985613babb3b093eebdb27054ee17c138809ffe747d43",
     "FoundationJsonOptions.cs": "ac87eee0ae1958fe20c17a73c27b2da0a914b87e5a80ee0368253c8e36d82559",
     "FoundationJsonRequestExceptionHandler.cs": "49c01e2ec35783ca4a86e2c96e3b18f78783326f72f3d75f285183994c8d6c0a",
     "FoundationJsonResponseExceptionHandler.cs": "c9a8fb095d17f574dd01f9e1cc25c6e425b1e5bf796a077427e582ade85dbe44",
-    "FoundationJsonServiceCollectionExtensions.cs": "589a4b2caf5247bc5fa744c0229abfac5bdf370ee4315d5947765cd0495a5ba3",
+    "FoundationJsonServiceCollectionExtensions.cs": "18cf107b976cfe79e4e03cfa7407092f5b65946c458904204989ec3ac837f6ae",
     "IJsonContractMetadata.cs": "3f298dbdc166f07191b84ed717d5740f4c2ccbe23dbfc184eec764f6549846e6",
     "IJsonProfileResult.cs": "d6842a0e6efc65588ba23640b9fb96922b3dd7fa1b0fe34f5dcad4b87f4dd197",
     "IJsonRequestReader.cs": "556f48fe694968b8ddd306bcc1ddc407c057e96287390703586f172c93c61309",
@@ -20,8 +20,14 @@
     "JsonAdmissionState.cs": "44216a09ccfa325bcd7fedca3cdf31bea9aee83353a3b0abcd2206156340f5f1",
     "JsonAdmissionStream.cs": "cc1bc4c6c32d3084471110b32802cc52fe97ce4ac529abfe77332ace2f9857ab",
     "JsonContractDirection.cs": "abff4b897a0f0a1e64a471b87bd7d782ea87e70badea2564f13334ab55057613",
-    "JsonContractMetadata.cs": "d65bbeb3a39e6f4f46ace1b172935c10d5fdfe26d6a7584f1897163e07b4c8cd",
+    "JsonContractIdentity.cs": "9daf903df1c6eb37b009ed8afd34efbfc9da512985900f349f4ace2d82226379",
+    "JsonContractMetadata.cs": "8580e09d7f169a92afca78e095491b95f3aae6ba7c4b7283c38a19b410464cbf",
     "JsonContractOperationTransformer.cs": "2e0da06b2847c8e2b5e6959a27363bd05a0677d6b5414d41ab0173ff1158f0db",
+    "JsonContractSchemaPlan.cs": "47b814d5b7a4de75a24de6f47f90db6cd5f412cdcb6f9c05f38dc0bbbf5d190c",
+    "JsonContractSchemaTransformer.cs": "5dcebabe2dd82ee61bf7972f0646c7d2ebe03edab301b8ad4f85fe7c686615f1",
+    "JsonNumericSchemaPolicy.cs": "87bc6c91dca377e485b4930075ed189b2d05dcd4084a1a12a8b9b418d227d746",
+    "JsonNumericSchemaShape.cs": "43e874ed0fc5ff219696bda710f8a8ea5d74682116c359fa2e920b9a942a086e",
+    "JsonNumericStringKind.cs": "7eff4eaddcb54955ad1327b219b2386b81d4465817bddd053536e431a4f494b5",
     "JsonPageOptions.cs": "c8096fc696471f9e4670a4ad115f5e25cf6e1d815a5666a8ab199497be09014d",
     "JsonProfileResult.cs": "cf770b3a3dd90d9aa909d31df7da3afc8e25f662a7ef7d1140f319e7de37764f",
     "JsonRequestReader.cs": "c76387551f72a50bb84c5bd6f5cf94e6a41e09456c3ad839e23736080a5cc351",
@@ -94,9 +100,18 @@
           "path": "Foundation:Json:Profiles:{profileName}:Preset",
           "required": false,
           "secret": false,
-          "constraints": { "enum": ["strict-request", "tolerant-response"] },
+          "constraints": {
+            "enum": [
+              "strict-request",
+              "tolerant-response"
+            ]
+          },
           "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
-          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "precedence": [
+            "typed source profile defaults",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
           "reload": "restart",
           "description": "Fixed admission preset of one configured or custom named profile."
         },
@@ -105,9 +120,16 @@
           "path": "Foundation:Json:Profiles:{profileName}:MaxBytes",
           "required": false,
           "secret": false,
-          "constraints": { "minimum": 1, "maximum": 16777216 },
+          "constraints": {
+            "minimum": 1,
+            "maximum": 16777216
+          },
           "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
-          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "precedence": [
+            "typed source profile defaults",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
           "reload": "restart",
           "description": "Maximum encoded bytes of one configured or custom named profile."
         },
@@ -116,9 +138,16 @@
           "path": "Foundation:Json:Profiles:{profileName}:MaxDepth",
           "required": false,
           "secret": false,
-          "constraints": { "minimum": 1, "maximum": 64 },
+          "constraints": {
+            "minimum": 1,
+            "maximum": 64
+          },
           "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
-          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "precedence": [
+            "typed source profile defaults",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
           "reload": "restart",
           "description": "Maximum nesting depth of one configured or custom named profile."
         },
@@ -127,9 +156,15 @@
           "path": "Foundation:Json:Profiles:{profileName}:Extensions",
           "required": false,
           "secret": false,
-          "constraints": { "uniqueItems": true },
+          "constraints": {
+            "uniqueItems": true
+          },
           "binding": "The shell binder merges each named profile into FoundationJsonOptions.Profiles; JsonProfileSettings defaults and native admission belong to the imported Json owner.",
-          "precedence": ["typed source profile defaults", "ordered shell configuration providers", "code configuration registered after binding"],
+          "precedence": [
+            "typed source profile defaults",
+            "ordered shell configuration providers",
+            "code configuration registered after binding"
+          ],
           "reload": "restart",
           "description": "Explicit registered extension identities for one configured or custom named profile."
         }
@@ -142,8 +177,12 @@
       ],
       "appliesTo": {
         "kind": "shell",
-        "features": ["Orbyss.Foundation.Json.AspNetCore"],
-        "configuration": ["Foundation:Json:Profiles"]
+        "features": [
+          "Orbyss.Foundation.Json.AspNetCore"
+        ],
+        "configuration": [
+          "Foundation:Json:Profiles"
+        ]
       }
     },
     {

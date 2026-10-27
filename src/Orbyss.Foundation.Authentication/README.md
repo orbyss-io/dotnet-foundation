@@ -36,3 +36,10 @@ The immutable value and stable claim/error vocabulary are exported by the framew
 `Orbyss.Foundation.Authentication.Core` package. Role and permission configuration cannot select
 reserved projection claim names. Authentication errors use the shared Problem Details integration;
 applications can replace the reader or the authentication error writer through DI.
+
+## Operation permission metadata
+
+Minimal API operations can use `.RequirePermission(FeaturePermissions.Read)` to select the canonical native
+permission policy. Own shared permission constants in the feature's semantic contract, beside their meaning;
+avoid cross-project references to endpoint implementation classes. The helper declares authorization only:
+it does not register grants, infer roles or replace existing authentication/permission mapping.

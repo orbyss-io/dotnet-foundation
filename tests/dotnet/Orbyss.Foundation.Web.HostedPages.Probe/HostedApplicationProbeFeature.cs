@@ -54,7 +54,7 @@ public sealed class HostedApplicationProbeFeature : IWebShellFeature
         }).WithMetadata(new WebResponseMetadata(Private: true)).AllowAnonymous();
         endpoints.MapGet("/api/data/{owner}", (HttpContext context, string owner) =>
             owner == context.User.FindFirst(AuthenticationClaimTypes.ValidatedSubject)?.Value ? Results.Text("synthetic owned data") : Results.NotFound())
-            .WithMetadata(new WebResponseMetadata(Private: true)).RequireAuthorization(PermissionPolicyNames.ForPermission(AuthenticatedPagesProbe.DataPermission));
+            .WithMetadata(new WebResponseMetadata(Private: true)).RequirePermission(AuthenticatedPagesProbe.DataPermission);
         endpoints.MapGet("/fixture/error", (Func<IResult>)(() => throw new InvalidOperationException(AuthenticatedPagesProbe.PrivateMarker))).WithMetadata(new WebResponseMetadata(Private: true)).RequireAuthorization();
         endpoints.MapGet("/fixture/redirect", () => Results.Redirect("/p/session")).WithMetadata(new WebResponseMetadata(Private: true)).RequireAuthorization();
     }
