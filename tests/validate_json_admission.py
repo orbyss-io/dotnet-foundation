@@ -15,5 +15,5 @@ if arguments.development_sdk_substitute:
     print("Explicit development SDK substitute: " + version + "; the Foundation source pin is unchanged.", flush=True)
 subprocess.run(["dotnet", "restore", str(project), "--locked-mode"], cwd=working_directory, check=True)
 subprocess.run(["dotnet", "build", str(project), "-c", "Release", "--no-restore"], cwd=working_directory, check=True)
-for case in ("http", "activation-native", "activation-preset", "activation-capacity", "activation-resolver"):
+for case in ("http", "activation-native", "activation-preset", "activation-capacity", "activation-resolver", "ergonomics"):
     subprocess.run(["dotnet", "run", "--project", str(project), "-c", "Release", "--no-build", "--", case], cwd=working_directory, check=True)

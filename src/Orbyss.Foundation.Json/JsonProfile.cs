@@ -109,6 +109,13 @@ public sealed class JsonProfile
         catch (JsonException) { throw new JsonResponseContractException(JsonFailureCodes.ResponseInvalidContract); }
     }
 
+    /// <summary>Resolves runtime metadata for an explicitly declared contract or its reachable wire members.</summary>
+    public JsonTypeInfo TypeInfo(Type type)
+    {
+        ArgumentNullException.ThrowIfNull(type);
+        return options.GetTypeInfo(type);
+    }
+
     /// <summary>Reads at most the configured byte limit plus one detection byte, honoring cancellation.</summary>
     public async Task<T> ReadAsync<T>(Stream stream, CancellationToken cancellationToken = default)
     {

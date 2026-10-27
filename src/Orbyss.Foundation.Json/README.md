@@ -69,3 +69,10 @@ Do not replace legacy readers or wire algorithms without old byte/digest fixture
 The dependency assessment and approved implementation exception are in
 [the repository decision record](https://github.com/orbyss-io/dotnet-foundation/blob/main/docs/json-canonicalization-decision.md).
 Run `python tests/validate_json.py` after the Release build; Node provides independent V8 vectors.
+
+## Descriptive support requirements
+
+`JsonProfileRequirement.StrictRequest(...)` and `.TolerantResponse(...)` name supported byte/depth intervals
+without choosing deployment budgets. Their defaults preserve the existing constructor's supported range.
+`profile.TypeInfo(Type)` exposes the same frozen serializer metadata as `TypeInfo<T>()` for native schema
+integration; code-owned converters/resolvers retain their original admission rules.

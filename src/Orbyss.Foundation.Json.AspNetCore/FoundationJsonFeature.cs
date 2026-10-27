@@ -33,7 +33,7 @@ public sealed class FoundationJsonFeature(ShellSettings settings) : IMiddlewareS
             options.MaxDepth = profile.MaxDepth;
             options.Preset = profile.Preset;
         });
-        services.Configure<OpenApiOptions>("v1", options => options.AddOperationTransformer<JsonContractOperationTransformer>());
+        services.Configure<OpenApiOptions>("v1", ConfigureOpenApi);
         services.AddSingleton(provider =>
         {
             var options = provider.GetRequiredService<IOptions<FoundationJsonOptions>>().Value;
@@ -69,6 +69,13 @@ public sealed class FoundationJsonFeature(ShellSettings settings) : IMiddlewareS
             }
         });
     }
+    /// <summary>Uses the same registered contract definitions for public metadata and numeric wire shapes.</summary>
+    private static void ConfigureOpenApi(OpenApiOptions options)
+    {
+        options.AddOperationTransformer<JsonContractOperationTransformer>();
+        options.AddSchemaTransformer<JsonContractSchemaTransformer>();
+    }
+
     /// <summary>Restores guarded transport ownership before writing a separately bounded common failure.</summary>
     private static async Task WriteFailureAsync(HttpContext context, ProblemDefinition definition)
     {
