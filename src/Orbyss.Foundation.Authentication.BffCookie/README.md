@@ -41,6 +41,22 @@ Foreign keys cannot be read, renewed or removed through another shell's ticket s
 validated claim URNs remain compatible. Older unbound session keys cannot establish shell ownership
 and therefore require a new login after this update; no account or persisted application identity changes.
 
+Session creation and renewal are distinct. Only a new login creates an opaque key and a new absolute
+deadline. Renewal requires a live existing server entry, preserves that entry's original absolute
+deadline and cannot recreate a ticket removed by logout or idle/absolute expiry. For the default exact
+`MemoryDistributedCache`, native creation, conditional renewal and removal share synchronization
+across all ticket-store instances using that cache instance. A request authenticated before logout
+can still finish and emit a late opaque cookie; that cookie cannot restore the removed server session.
+
+Custom `IDistributedCache` replacements must also implement `IBffSessionTicketCache` on the registered
+cache. Its `TryRenewAsync` must atomically compare the current live bytes and replace the entry,
+ordered with expiry/removal and independent clients in the actual backend. Unsupported replacements
+fail explicitly when resolving the native ticket store; no process-local lock is claimed to protect
+a remote backend. A competing renewal can win the comparison; subsequent requests use the current
+server ticket. No Redis or other remote provider is supplied by this package. Existing custom-cache
+integrations need that native capability before adopting this correction; shell key ownership and
+the wire cookie/session-key format remain unchanged. Ordinary applications retain the default cache.
+
 `RemoteAuthenticationTimeoutSeconds` defaults to 900 seconds, including human time entering
 credentials, MFA and consent. Positive explicit overrides remain effective for both the remote flow
 and native nonce lifetime. Expired state/correlation still fails safely and needs a fresh sign-in.
