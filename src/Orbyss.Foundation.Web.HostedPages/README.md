@@ -5,9 +5,15 @@ admitted public runtime/branding assets. Host stays application-neutral. Require
 its dependency is selected by the feature declaration. Explicit authenticated routes additionally
 require the independently selected Foundation BFF-cookie feature.
 
-The route/access extension described here is local source development based on 0.3.2. The released
-0.3.2 contract has only public PagePath hosting. Adoption requires a newly qualified package family,
-Host payload/image and versioned publisher knowledge; this README does not establish availability.
+The typed route/access extension is released from Foundation 0.3.3 and is included in 0.3.9.
+Foundation 0.3.2 had only public PagePath hosting. Consumers must select the corresponding qualified
+package family and Host image rather than inferring support from an older profile.
+
+This feature holds deployment snapshots, including initial metadata and bootstrap. It does not
+perform current resource/publication lookup. Keep revocable business data out of manifests and public
+assets. The separately selected [DynamicPages](../Orbyss.Foundation.Web.DynamicPages/README.md)
+source addition supplies request-time consumer resolution and precommit verification; it is not yet
+part of a published release. Ordinary application IWebShellFeature endpoints are also supported.
 
 ## Settings-only consumption
 

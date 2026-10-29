@@ -34,6 +34,7 @@ public sealed class FoundationBrowserPresentationFeature(ShellSettings settings)
         services.Configure<BrowserPresentationOptions>(options => configuration.Bind(options, binder => binder.ErrorOnUnknownConfiguration = true));
         services.AddSingleton(provider => new BrowserPresentationCatalog(provider.GetRequiredService<IOptions<BrowserPresentationOptions>>().Value));
         services.TryAddSingleton<IProblemPageRenderer, BrowserProblemPageRenderer>();
+        services.TryAddSingleton<IBrowserRecoveryPageRenderer, DefaultBrowserRecoveryPageRenderer>();
         services.AddJsonResponseContract<BrowserPresentationBootstrap>(new JsonProfileKey(JsonProfileKeys.SuccessResponse),
             new JsonProfileRequirement(JsonProfileKeys.TolerantResponse));
     }
@@ -69,20 +70,21 @@ public sealed class FoundationBrowserPresentationFeature(ShellSettings settings)
             endpoints.MapMethods(route, ["GET", "HEAD"], (HttpContext context) =>
             {
                 var pathBase = PathBase(context, catalog);
+                var text = catalog.Select(context);
                 var active = session?.IsAuthenticated(context);
-                var content = "<p>" + BrowserPageRendering.E(catalog.Copy[active switch { true => "active", false => "anonymous", _ => "unobserved" }]) + "</p>";
+                var content = "<p>" + BrowserPageRendering.E(text.Copy[active switch { true => "active", false => "anonymous", _ => "unobserved" }]) + "</p>";
                 if (kind == "signed-out" && context.Request.Query["remote"] == "unavailable")
-                    content += "<p role=\"status\">" + BrowserPageRendering.E(catalog.Copy["remote"]) + "</p>";
+                    content += "<p role=\"status\">" + BrowserPageRendering.E(text.Copy["remote"]) + "</p>";
                 if (session is null)
-                    content += "<p>" + BrowserPageRendering.E(catalog.Copy["client-authentication"]) + "</p>";
+                    content += "<p>" + BrowserPageRendering.E(text.Copy["client-authentication"]) + "</p>";
                 else if (kind == "sign-out")
                 {
                     var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
                     var tokens = antiforgery.GetAndStoreTokens(context);
-                    content += "<p>" + BrowserPageRendering.E(catalog.Copy["confirm"]) + "</p><form method=\"post\" action=\""
+                    content += "<p>" + BrowserPageRendering.E(text.Copy["confirm"]) + "</p><form method=\"post\" action=\""
                         + BrowserPageRendering.E(MappedPath(context, route)) + "\"><input type=\"hidden\" name=\""
                         + BrowserPageRendering.E(tokens.FormFieldName) + "\" value=\"" + BrowserPageRendering.E(tokens.RequestToken!)
-                        + "\"><button type=\"submit\">" + BrowserPageRendering.E(catalog.Copy["sign-out"]) + "</button></form>";
+                        + "\"><button type=\"submit\">" + BrowserPageRendering.E(text.Copy["sign-out"]) + "</button></form>";
                 }
                 else if (kind != "denied" || active != true)
                 {
@@ -90,10 +92,13 @@ public sealed class FoundationBrowserPresentationFeature(ShellSettings settings)
                     content += "<form method=\"post\" action=\"" + BrowserPageRendering.E(MappedPath(context, catalog.RoutePrefix + "/sign-in"))
                         + "\"><input type=\"hidden\" name=\"" + BrowserPageRendering.E(tokens.FormFieldName)
                         + "\" value=\"" + BrowserPageRendering.E(tokens.RequestToken!)
-                        + "\"><button type=\"submit\">" + BrowserPageRendering.E(catalog.Copy["sign-in"]) + "</button></form>";
+                        + "\"><button type=\"submit\">" + BrowserPageRendering.E(text.Copy["sign-in"]) + "</button></form>";
                 }
-                context.Response.Headers.ContentLanguage = catalog.Locale;
-                return Results.Content(BrowserPageRendering.Page(catalog, catalog.Copy[kind], content, pathBase), "text/html; charset=utf-8");
+                if (active == true)
+                    content += "<p><a href=\"" + BrowserPageRendering.E(pathBase + catalog.ReturnPath) + "\">"
+                        + BrowserPageRendering.E(text.Copy["continue"]) + "</a></p>";
+                var titleKey = kind == "expired" && active == true ? "active" : kind;
+                return RenderRecovery(context, new AdmittedBrowserRecoveryPage(catalog, text, text.Copy[titleKey], content, pathBase, active), catalog);
             }).WithName(routeNamespace + route).WithMetadata(PageMetadata(catalog),
                 new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage)).AllowAnonymous().ExcludeFromDescription();
         }
@@ -111,7 +116,7 @@ public sealed class FoundationBrowserPresentationFeature(ShellSettings settings)
                 else await session!.SignOutAsync(context).ConfigureAwait(false);
             }).WithMetadata(PageMetadata(catalog), new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage))
                 .AllowAnonymous().ExcludeFromDescription();
-        foreach (var file in new[] { "configuration.mjs", "configuration.d.mts", "presentation.mjs", "presentation.d.mts", "bff.mjs", "bff.d.mts", "spa.mjs", "spa.d.mts", "session.mjs", "session.d.mts", "page.css" })
+        foreach (var file in new[] { "configuration.mjs", "configuration.d.mts", "presentation.mjs", "presentation.d.mts", "bff.mjs", "bff.d.mts", "spa.mjs", "spa.d.mts", "session.mjs", "session.d.mts", "page.css", "recovery-focus.mjs" })
         {
             using var resource = typeof(FoundationBrowserPresentationFeature).Assembly.GetManifestResourceStream(
                 "Orbyss.Foundation.Web.Presentation.browser." + file) ?? throw new InvalidDataException("Presentation asset is missing.");
@@ -137,6 +142,26 @@ public sealed class FoundationBrowserPresentationFeature(ShellSettings settings)
     /// <summary>Derives the native prefix from a mapped route without trusting headers or a query target.</summary>
     private string PathBase(HttpContext context, BrowserPresentationCatalog catalog) =>
         MappedPath(context, catalog.RoutePrefix + "/sign-in")[..^(catalog.RoutePrefix.Length + "/sign-in".Length)];
+    /// <summary>Bounds custom/default output before commitment and fails without reentering a failed renderer.</summary>
+    private static IResult RenderRecovery(HttpContext context, AdmittedBrowserRecoveryPage page, BrowserPresentationCatalog catalog)
+    {
+        context.RequestAborted.ThrowIfCancellationRequested();
+        try
+        {
+            var html = context.RequestServices.GetRequiredService<IBrowserRecoveryPageRenderer>().Render(page);
+            var encoding = new System.Text.UTF8Encoding(false, true);
+            if (encoding.GetByteCount(html) > catalog.MaxPageBytes) throw new InvalidOperationException("Recovery page exceeds its byte budget.");
+            context.RequestAborted.ThrowIfCancellationRequested();
+            context.Response.Headers.ContentLanguage = page.Locale;
+            context.Response.Headers.Vary = "Accept-Language";
+            return Results.Content(html, "text/html; charset=utf-8");
+        }
+        catch (Exception) when (!context.RequestAborted.IsCancellationRequested)
+        {
+            return Results.Content("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Request failed</title><main><h1>Request failed</h1></main></html>",
+                "text/html; charset=utf-8", statusCode: 500);
+        }
+    }
     /// <summary>Selects private response headers for every recovery page and protocol action.</summary>
     private static WebResponseMetadata PageMetadata(BrowserPresentationCatalog catalog) =>
         new(Policy: catalog.ResponsePolicy, Private: true, NoIndex: true) { NoFollow = true };

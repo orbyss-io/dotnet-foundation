@@ -64,7 +64,7 @@ Stable tags must exactly match `VERSION`. The release workflow publishes the NuG
 NuGet.org trusted publishing and then publishes `ghcr.io/orbyss-io/foundation-host`.
 
 The exporter, `Orbyss.Foundation.Build` and `Orbyss.Foundation.Analyzers` have independent versions. The runtime
-publication gate packs exactly 30 runtime packages with
+publication gate packs exactly 31 runtime packages with
 `-p:FoundationRuntimeOnly=true`. An `exporter-v<version>` tag qualifies and publishes
 only the exporter; a `build-v<version>` tag qualifies and publishes only the descriptor
 build package; an `analyzer-v<version>` tag qualifies and publishes only the analyzer.
@@ -93,3 +93,11 @@ Host's real native binding behavior; they do not claim vendor publisher emission
 defaults from sample configuration. No-build publication revalidates typed metadata and
 source/assembly provenance without refreshing it. Feature descriptors remain the activation
 authority, and settings metadata does not initialize applications, storage or identity clients.
+
+## Request-time pages and recovery extension seams
+
+Foundation 0.3.9 already supplies configurable Web.Presentation and IProblemPageRenderer.
+The unreleased [dynamic-page and recovery additions](docs/dynamic-page-and-recovery-adoption.md)
+add separately selected request-time resource pages, locale catalogs and a full recovery
+layout override. Publication eligibility and resource authorization remain consumer-owned;
+no deployment snapshot can establish their current state.

@@ -1,13 +1,33 @@
 {
   "schemaVersion": 2,
   "packageId": "Foundation.ContractFixture.HostedPages",
-  "features": [{
-    "identity": "Foundation.HostedAccessFixture",
-    "featureDependencies": ["Orbyss.Foundation.Authentication.BffCookie"],
-    "runtimeDependencies": [],
-    "routes": ["/fixture/session/{identity}", "/api/data/{owner}"],
-    "dormant": true,
-    "composeForOpenApi": false,
-    "requiresContractCoverage": false
-  }]
+  "features": [
+    {
+      "identity": "Foundation.HostedAccessFixture",
+      "featureDependencies": [
+        "Orbyss.Foundation.Authentication.BffCookie"
+      ],
+      "runtimeDependencies": [],
+      "routes": [
+        "/fixture/session/{identity}",
+        "/api/data/{owner}"
+      ],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    },
+    {
+      "identity": "Foundation.DynamicPageFixture",
+      "featureDependencies": [
+        "Orbyss.Foundation.Web.DynamicPages"
+      ],
+      "runtimeDependencies": [],
+      "routes": [
+        "/fixture/unpublish"
+      ],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false
+    }
+  ]
 }

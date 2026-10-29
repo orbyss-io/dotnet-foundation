@@ -13,8 +13,9 @@ using Microsoft.Extensions.Configuration;
 if (args is ["--serve-ticket-renewal"]) { await TicketRenewalProbe.RunAsync(serve: true); return; }
 if (args is ["--ticket-renewal"]) { await TicketRenewalProbe.RunAsync(); return; }
 if (args is ["--serve-recovery"]) { await RecoveryProbe.RunAsync(serve: true); return; }
-if (args is ["--presentation"]) { await BrowserPresentationProbe.RunAsync(); return; }
+if (args is ["--presentation"]) { await BrowserPresentationProbe.RunAsync(); await RecoveryEnhancementProbe.RunAsync(); return; }
 if (args is ["--serve-presentation"]) { await BrowserPresentationProbe.RunAsync(serve: true); return; }
+if (args is ["--serve-enhanced-recovery"]) { await RecoveryEnhancementProbe.RunAsync(serve: true); return; }
 VerifyLocalHttpDevelopmentCookies();
 VerifyProductionCookies();
 OptionsBindingProbe.Run();
@@ -23,6 +24,7 @@ await TicketRenewalProbe.RunAsync();
 await CallbackRoutingProbe.RunAsync();
 await RecoveryProbe.RunAsync();
 await BrowserPresentationProbe.RunAsync();
+await RecoveryEnhancementProbe.RunAsync();
 
 static void VerifyLocalHttpDevelopmentCookies()
 {

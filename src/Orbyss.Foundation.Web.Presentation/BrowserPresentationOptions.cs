@@ -23,4 +23,8 @@ public sealed class BrowserPresentationOptions
     public string AssetResponsePolicy { get; set; } = "default";
     /// <summary>Gets or sets selected localized copy; absent keys use English copy.</summary>
     public Dictionary<string, string> Copy { get; set; } = new(StringComparer.Ordinal);
+    /// <summary>Gets or sets at most 32 canonical locale catalogs; request language weights and culture parents select one.</summary>
+    public Dictionary<string, Dictionary<string, string>> Locales { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Gets or sets the maximum encoded recovery page bytes, between 512 bytes and 1 MiB.</summary>
+    public int MaxPageBytes { get; set; } = 65536;
 }

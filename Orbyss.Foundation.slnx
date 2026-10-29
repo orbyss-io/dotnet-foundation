@@ -24,6 +24,7 @@
     <Project Path="src/Orbyss.Foundation.Web.Discovery.Abstractions/Orbyss.Foundation.Web.Discovery.Abstractions.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.Discovery/Orbyss.Foundation.Web.Discovery.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.HostedPages/Orbyss.Foundation.Web.HostedPages.csproj" />
+    <Project Path="src/Orbyss.Foundation.Web.DynamicPages/Orbyss.Foundation.Web.DynamicPages.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.Presentation/Orbyss.Foundation.Web.Presentation.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.OpenApi/Orbyss.Foundation.Web.OpenApi.csproj" />
     <Project Path="src/Orbyss.Foundation.Web.ProblemDetails/Orbyss.Foundation.Web.ProblemDetails.csproj" />
@@ -49,6 +50,7 @@
     <Project Path="tests/dotnet/Orbyss.Foundation.Json.Probe/Orbyss.Foundation.Json.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Web.Discovery.Probe/Orbyss.Foundation.Web.Discovery.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Web.HostedPages.Probe/Orbyss.Foundation.Web.HostedPages.Probe.csproj" />
+    <Project Path="tests/dotnet/Orbyss.Foundation.Web.DynamicPages.Probe/Orbyss.Foundation.Web.DynamicPages.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.WebDefaults.Probe/Orbyss.Foundation.WebDefaults.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Collections.Probe/Orbyss.Foundation.Collections.Probe.csproj" />
     <Project Path="tests/dotnet/Orbyss.Foundation.Json.Admission.Probe/Orbyss.Foundation.Json.Admission.Probe.csproj" />

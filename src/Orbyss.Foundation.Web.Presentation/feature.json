@@ -18,11 +18,15 @@
     }
   ],
   "sourceSha256": {
-    "BrowserPageRendering.cs": "49cd164ef8a10a990d1c9c421a116dbe902bfaf6a8f214d3c39c8c5dd98fa571",
+    "AdmittedBrowserRecoveryPage.cs": "ca6d6200c76c940ab5abb35baed204211a49a3fd73b5e1bcdc38101c1b18b912",
+    "BrowserPageRendering.cs": "7acacb29907e6ead26a75762d5504249b1f7501d4cf0595e881805b7d7ff352d",
     "BrowserPresentationBootstrap.cs": "ff5c01de6ca2d0aee2a5fbb003dca378bb4ca24bd5fab09c61b6cfbcbd2f8593",
-    "BrowserPresentationCatalog.cs": "c312e5b0efb7c39c525fa640858ebe06739575ee52705eba3b12511bfd91c31f",
-    "BrowserPresentationOptions.cs": "d93aae75b8ea1b85ee04a231991f07438092974b30b22ac6e019ad33a510421e",
-    "BrowserProblemPageRenderer.cs": "6967e691180189495d78fe819649d250fc8818cdd4a07a53e6dfdf7130545b0d",
-    "FoundationBrowserPresentationFeature.cs": "e59f9db054d2b8b051ae15ed26416ab409fcd419f3f5f956596b93dc7f3e147e"
+    "BrowserPresentationCatalog.cs": "10e6c5abc56c4ab4d0bad8a46670b46e2b4abf642a8c968faac404146ae64cd4",
+    "BrowserPresentationOptions.cs": "6023844f0657bc1e8619f6d96c3a30c838c051db2689dc58d2eeb5d5ee535107",
+    "BrowserPresentationText.cs": "1b63f76fc2692148697966d9e293f43ff87f1b7d350d732d489c3bad3b2c6fd5",
+    "BrowserProblemPageRenderer.cs": "441e46adebb0d1038d707ede1889a723fa183ea5aaf2b9b5dd9bfb2ebf8b21f7",
+    "DefaultBrowserRecoveryPageRenderer.cs": "92ebc2c2baaa7bb1ce0177580b3986c50a4dc2dc33edacf118a667b886257da8",
+    "FoundationBrowserPresentationFeature.cs": "ef95b7cdb7b6842033080d1e60347d79b97c98fc3b6eee20457600c038bf5c02",
+    "IBrowserRecoveryPageRenderer.cs": "393531ee91951cafb1f3bd7ac5e5f510c68442c655f093d826f79a5c9008c287"
   }
 }
