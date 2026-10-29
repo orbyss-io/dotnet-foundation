@@ -8,6 +8,8 @@ using Orbyss.Foundation.Web.DynamicPages;
 var values = new Dictionary<string, string?>();
 var valid = new[] { "a", "b", "custom", "public-only" };
 foreach (var name in valid) Configure(values, name);
+// Browser documents use the independently selected native HTML problem presentation.
+foreach (var name in valid) values["CShells:Shells:" + name + ":Features:Orbyss.Foundation.Web.Presentation"] = "true";
 var invalid = new[] { "missing-mode", "unknown-resolver", "private-no-bff", "public-permission", "unknown-setting", "catchall", "unknown-policy", "empty-routes", "sparse-routes", "duplicate-resolver" };
 foreach (var name in invalid) Configure(values, name);
 Set("missing-mode", "Routes:0:Mode", "");
@@ -157,6 +159,7 @@ static void Configure(Dictionary<string, string?> values, string name)
     values[web + ":ClientSecret"] = "synthetic-only";
     values[web + ":Audience"] = "fixture";
     values[web + ":AllowHttpForLocalDevelopment"] = "true";
+    values[web + ":LogoutLandingPath"] = "/auth/signed-out";
     var dynamic = root + ":Configuration:Foundation:DynamicPages";
     values[dynamic + ":TimeoutSeconds"] = "1";
     values[dynamic + ":Routes:0:Id"] = "stall";

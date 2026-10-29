@@ -46,6 +46,8 @@ async function run() {
       assert.deepEqual(failures, []);
       const hidden = await page.goto(base + '/a/app/stalls/hidden');
       assert.equal(hidden.status(), 404);
+      assert.match(hidden.headers()['content-type'], /^text\/html/);
+      assert.equal(hidden.headers()['cache-control'], 'no-store');
       assert(!(await page.content()).includes('Fresh stall'));
       await page.goto(base + '/custom/app/stalls/market');
       assert.equal(await page.locator('[data-custom-layout]').count(), 1);

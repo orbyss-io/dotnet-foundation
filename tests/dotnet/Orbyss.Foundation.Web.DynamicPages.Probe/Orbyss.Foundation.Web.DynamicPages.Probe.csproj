@@ -9,5 +9,6 @@
     <PackageReference Include="CShells.AspNetCore" />
     <ProjectReference Include="../../../src/Orbyss.Foundation.Web.DynamicPages/Orbyss.Foundation.Web.DynamicPages.csproj" />
     <ProjectReference Include="../../../src/Orbyss.Foundation.Authentication.BffCookie/Orbyss.Foundation.Authentication.BffCookie.csproj" />
+    <ProjectReference Include="../../../src/Orbyss.Foundation.Web.Presentation/Orbyss.Foundation.Web.Presentation.csproj" />
   </ItemGroup>
 </Project>
