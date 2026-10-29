@@ -11,5 +11,5 @@ internal sealed record ValueResponse(
 )
 {
     /// <summary>Declares supported response metadata once, independently of deployment byte limits.</summary>
-    internal static JsonContractMetadata<ValueResponse> Contract { get; } = JsonContractMetadata<ValueResponse>.Response();
+    internal static JsonContractMetadata<ValueResponse> Contract { get; } = JsonContractFactory.Response<ValueResponse>();
 }

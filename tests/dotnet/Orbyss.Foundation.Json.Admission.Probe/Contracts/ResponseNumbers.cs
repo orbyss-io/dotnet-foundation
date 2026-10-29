@@ -17,5 +17,5 @@ internal sealed record ResponseNumbers(
 )
 {
     /// <summary>Owns supported response metadata for the native result factory and schema producer.</summary>
-    internal static JsonContractMetadata<ResponseNumbers> Contract { get; } = JsonContractMetadata<ResponseNumbers>.Response();
+    internal static JsonContractMetadata<ResponseNumbers> Contract { get; } = JsonContractFactory.Response<ResponseNumbers>();
 }

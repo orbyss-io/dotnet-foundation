@@ -12,6 +12,6 @@ internal sealed record CustomNumbers(int? Number, long? Ordinary)
     private static JsonContractMetadata<CustomNumbers> CreateContract()
     {
         var profile = new JsonProfileKey("custom-integer");
-        return JsonContractMetadata<CustomNumbers>.Response(profile: profile);
+        return JsonContractFactory.Response<CustomNumbers>(profile: profile);
     }
 }

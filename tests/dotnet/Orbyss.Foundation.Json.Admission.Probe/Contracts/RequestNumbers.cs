@@ -17,5 +17,5 @@ internal sealed record RequestNumbers(
 )
 {
     /// <summary>Owns the actual registered request profile.</summary>
-    internal static JsonContractMetadata<RequestNumbers> Contract { get; } = JsonContractMetadata<RequestNumbers>.Request();
+    internal static JsonContractMetadata<RequestNumbers> Contract { get; } = JsonContractFactory.Request<RequestNumbers>();
 }

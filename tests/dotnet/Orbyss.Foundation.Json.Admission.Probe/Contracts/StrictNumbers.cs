@@ -6,7 +6,7 @@ namespace Orbyss.Foundation.Json.Admission.Probe.Contracts;
 internal sealed record StrictNumbers(int? Count, long? Size)
 {
     /// <summary>Uses the actual profile's strict numeric default without attributes.</summary>
-    internal static JsonContractMetadata<StrictNumbers> Request { get; } = JsonContractMetadata<StrictNumbers>.Request();
+    internal static JsonContractMetadata<StrictNumbers> Request { get; } = JsonContractFactory.Request<StrictNumbers>();
     /// <summary>Publishes the identical numeric wire shape in the response direction.</summary>
-    internal static JsonContractMetadata<StrictNumbers> Response { get; } = JsonContractMetadata<StrictNumbers>.Response();
+    internal static JsonContractMetadata<StrictNumbers> Response { get; } = JsonContractFactory.Response<StrictNumbers>();
 }

@@ -9,5 +9,5 @@ internal sealed record NumericNamedRequest(
 )
 {
     /// <summary>Declares a request whose string branch is the named-literal enum.</summary>
-    internal static JsonContractMetadata<NumericNamedRequest> Contract { get; } = JsonContractMetadata<NumericNamedRequest>.Request();
+    internal static JsonContractMetadata<NumericNamedRequest> Contract { get; } = JsonContractFactory.Request<NumericNamedRequest>();
 }

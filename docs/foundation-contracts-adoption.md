@@ -73,11 +73,20 @@ actual packaged shell/PostgreSQL run before package and image publication.
 Register operation-owned wire types and requirements in the API feature:
 
 ```csharp
-services.AddJsonRequestContract<RenameRequest>(
-    new(JsonProfileKeys.StrictRequest), new(JsonProfileKeys.StrictRequest));
-services.AddJsonResponseContract<RenameResponse>(
-    new(JsonProfileKeys.SuccessResponse), new(JsonProfileKeys.TolerantResponse));
+var request = JsonContractFactory.Request<RenameRequest>();
+var response = JsonContractFactory.Response<RenameResponse>();
+services.AddJsonContract(request);
+services.AddJsonContract(response);
 ```
+
+Prefer the non-generic `JsonContractFactory` in `Orbyss.Foundation.Json.AspNetCore` for consumer
+metadata construction, with the wire type supplied to `Request<T>()` or `Response<T>()`. Keep one
+shared declaration on its DTO or operation owner and pass it to registration and endpoint mapping.
+Use named overrides such as `minimumDepth: 2` or `maximumBytes: 4096`; omit unchanged defaults
+(1 byte through 16 MiB, nesting depth 1 through 64). The optional typed `profile` parameter selects
+a custom configured key. Request strictness and response tolerance remain fixed by direction;
+these supported intervals are separate from the shell's active byte/depth budgets. Existing
+`JsonContractMetadata<T>.Request/Response` declarations remain supported.
 
 Inject `IJsonRequestReader<RenameRequest>` and `IJsonResponseFactory<RenameResponse>` into the
 endpoint instance. Read through the reader and return `responses.Create(value)`; map denials through

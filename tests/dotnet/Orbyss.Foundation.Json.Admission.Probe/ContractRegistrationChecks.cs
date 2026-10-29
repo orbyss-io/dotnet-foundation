@@ -10,6 +10,7 @@ internal static class ContractRegistrationChecks
     /// <summary>Requires idempotent equivalence, complete metadata pairs and visible conflicts before mutation.</summary>
     internal static void Run()
     {
+        ContractFactoryChecks.Run();
         var services = new ServiceCollection();
         services.AddJsonContract(Request.Contract);
         var equivalent = JsonContractMetadata<Request>.Request();
