@@ -2,7 +2,7 @@
 
 The browser presentation feature and `IProblemPageRenderer` are already released in
 Foundation 0.3.9. The locale catalogs, full recovery layout override, explicit language
-headers and bounded landing-page output below are **unreleased additions**. Source
+headers and bounded landing-page output below are introduced in **Foundation 0.3.11**. Source
 availability does not change a consumer's selected published package/profile.
 
 Select `Orbyss.Foundation.Web.Presentation` independently in a shell. It composes

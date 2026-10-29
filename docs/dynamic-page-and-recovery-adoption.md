@@ -1,6 +1,6 @@
 # Dynamic page and browser recovery adoption
 
-Status: unreleased source proposal implemented on the current Foundation development line.
+Introduced in Foundation 0.3.11. Public availability requires its successful Release workflow.
 The selected Foundation 0.3.9 baseline remains valid and unchanged. It already contains
 Web.Presentation, IProblemPageRenderer, IAuthenticationErrorWriter, native BFF controls,
 and public/authenticated literal HostedPages routes. It has no dynamic-page resolver.

@@ -12,8 +12,8 @@ package family and Host image rather than inferring support from an older profil
 This feature holds deployment snapshots, including initial metadata and bootstrap. It does not
 perform current resource/publication lookup. Keep revocable business data out of manifests and public
 assets. The separately selected [DynamicPages](../Orbyss.Foundation.Web.DynamicPages/README.md)
-source addition supplies request-time consumer resolution and precommit verification; it is not yet
-part of a published release. Ordinary application IWebShellFeature endpoints are also supported.
+feature introduced in 0.3.11 supplies request-time consumer resolution and precommit verification;
+select its published qualified family after the Release workflow succeeds. Ordinary application IWebShellFeature endpoints are also supported.
 
 ## Settings-only consumption
 

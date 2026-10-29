@@ -13,6 +13,8 @@ class IndependentUpdateTests(unittest.TestCase):
                 'update_dependencies.py --export-knowledge','dependency_maintenance.py scan','git push','gh pr create']
         offsets=[workflow.index(stage) for stage in stages]
         self.assertEqual(sorted(offsets),offsets)
+        self.assertIn('create_pull_request:', workflow)
+        self.assertIn("github.event_name != 'workflow_dispatch' || inputs.create_pull_request", workflow)
         script=(ROOT/'scripts/update_dependencies.py').read_text()+(ROOT/'scripts/validate_installed_tools.py').read_text()
         self.assertNotIn('program-kit',script.lower())
         for name in ('refresh_vendor_metadata','refresh_test_locks','validate_foundation',
@@ -22,6 +24,8 @@ class IndependentUpdateTests(unittest.TestCase):
                      'foundation-knowledge-candidate.json','Commit prepared source',
                      'pack-analyzer-tool','AnalyzerVersion','validate_analyzer.py'):
             self.assertIn(name,script)
+        for scenario in ('tests/browser/dynamic-pages.cjs', 'tests/browser/recovery-localization.cjs'):
+            self.assertIn(scenario, script)
 
     def test_runtime_dockerfiles_share_the_same_exact_base(self):
         lines=[]

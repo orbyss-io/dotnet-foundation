@@ -97,7 +97,7 @@ authority, and settings metadata does not initialize applications, storage or id
 ## Request-time pages and recovery extension seams
 
 Foundation 0.3.9 already supplies configurable Web.Presentation and IProblemPageRenderer.
-The unreleased [dynamic-page and recovery additions](docs/dynamic-page-and-recovery-adoption.md)
+The Foundation 0.3.11 [dynamic-page and recovery additions](docs/dynamic-page-and-recovery-adoption.md)
 add separately selected request-time resource pages, locale catalogs and a full recovery
 layout override. Publication eligibility and resource authorization remain consumer-owned;
 no deployment snapshot can establish their current state.

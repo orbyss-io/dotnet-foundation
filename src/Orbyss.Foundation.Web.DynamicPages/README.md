@@ -1,9 +1,9 @@
 # Request-time application pages
 
 `Orbyss.Foundation.Web.DynamicPages` is a separately selected, optional CShells feature.
-This addition is **unreleased source**; Foundation 0.3.9 has HostedPages and browser
+This feature is introduced in **Foundation 0.3.11**; Foundation 0.3.9 has HostedPages and browser
 presentation, but has no DynamicPages package. Select a newly published and qualified
-package family before consumer adoption. Foundation Host remains application-neutral.
+package family after its successful Release workflow before consumer adoption. Foundation Host remains application-neutral.
 
 Use this feature for resource-specific initial HTML and metadata, with an unrestricted
 application layout implemented in trusted code. Use HostedPages for deployment-defined

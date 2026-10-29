@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — dynamic pages and recovery
+## 0.3.11 — dynamic pages and recovery
 
 - Add separately selected Web.DynamicPages with consumer-scoped current resolution, bounded safe metadata/bootstrap rendering and mandatory precommit version/eligibility verification.
 - Add negotiated recovery locale catalogs, bounded full-page custom layouts and actual-language headers while preserving native BFF/machine contracts.

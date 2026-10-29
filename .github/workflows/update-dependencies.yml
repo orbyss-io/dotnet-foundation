@@ -1,6 +1,11 @@
 name: Update dependencies
 on:
   workflow_dispatch:
+    inputs:
+      create_pull_request:
+        description: Open a PR after qualification; disable when a maintainer will create it with an authorized account.
+        type: boolean
+        default: true
   schedule:
     - cron: '0 5 * * 1'
 permissions:
@@ -63,14 +68,17 @@ jobs:
           version: v0.76.1
       - name: Scan candidate images
         run: python scripts/dependency_maintenance.py scan --image artifacts/host-candidate.tar
-      - name: Prepare the tested update pull request
+      - name: Push the qualified update branch
         if: steps.candidate.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           git diff --exit-code
           test -z "$(git ls-files --others --exclude-standard)"
           git push origin "$(git branch --show-current)"
+      - name: Prepare the tested update pull request
+        if: steps.candidate.outputs.changed == 'true' && (github.event_name != 'workflow_dispatch' || inputs.create_pull_request)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           gh pr create --title "Update external dependencies" --body "Upgraded active tooling and packages, refreshed native publisher metadata, passed all deterministic checks, and scanned both candidate image platforms. See this workflow's preserved evidence."
       - name: Preserve update evidence
         if: always()
