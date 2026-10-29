@@ -13,6 +13,8 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="CShells.AspNetCore.Abstractions" Version="[$(CShellsCandidateVersion)]" PrivateAssets="all" />
     <PackageReference Include="Orbyss.Foundation.Authentication.BffCookie" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Web.DynamicPages" Version="[$(FoundationCandidateVersion)]" />
+    <PackageReference Include="Orbyss.Foundation.Web.Presentation" Version="[$(FoundationCandidateVersion)]" />
     <None Include="feature.json" Pack="true" PackagePath="orbyss-foundation/feature.json" />
   </ItemGroup>
 </Project>

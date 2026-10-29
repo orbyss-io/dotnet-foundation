@@ -11,6 +11,11 @@ package consumption and PostgreSQL, and scans both candidate image platforms.
 Only a passing job opens an update PR. Failed lookups or checks stop the update and
 preserve diagnostics; fix the failure and rerun. No dependency review forms are needed.
 
+Where GitHub Actions is not permitted to create pull requests, dispatch with
+`create_pull_request=false`. The workflow still upgrades, qualifies and scans the exact
+candidate before pushing its branch; the maintainer creates its PR with an authorized
+account. This option skips only PR creation, never qualification or publication gates.
+
 For local release preparation, run
 `python scripts/update_dependencies.py --upgrade --prepare-source` with Docker,
 Node, Python and the selected .NET SDK available. This refreshes source inputs and

@@ -63,9 +63,11 @@ jobs:
           node --test tests/browser/presentation.test.mjs tests/browser/spa-presentation.test.mjs
           node tests/browser/presentation-browser.cjs
           node tests/browser/hosted-pages.cjs
+          node tests/browser/dynamic-pages.cjs
           node tests/browser/authentication-recovery.cjs
           node tests/browser/ticket-renewal-race.cjs
           node tests/browser/native-presentation.cjs
+          node tests/browser/recovery-localization.cjs
           node tests/browser/spa-client-browser.cjs
 
       - name: Verify installed response-policy and BFF candidate packages
@@ -85,7 +87,7 @@ jobs:
         run: |
           shopt -s nullglob
           packages=(artifacts/nuget/*.nupkg)
-          [[ ${#packages[@]} -eq 30 ]] || { echo "Expected 30 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
+          [[ ${#packages[@]} -eq 31 ]] || { echo "Expected 31 Foundation runtime packages, found ${#packages[@]}." >&2; exit 1; }
           for package in "${packages[@]}"; do
             [[ "$(basename "$package")" == Orbyss.Foundation.* ]] || { echo "Unexpected package: $package" >&2; exit 1; }
           done

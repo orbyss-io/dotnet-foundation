@@ -22,8 +22,8 @@
       "orbyss.foundation.authentication.downstreamapi": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Authentication.ClientCredentials": "[0.3.10, )",
-          "Orbyss.Foundation.Authentication.TokenExchange": "[0.3.10, )"
+          "Orbyss.Foundation.Authentication.ClientCredentials": "[0.3.11, )",
+          "Orbyss.Foundation.Authentication.TokenExchange": "[0.3.11, )"
         }
       },
       "orbyss.foundation.authentication.tokenexchange": {

@@ -61,7 +61,7 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 profile.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             page = new AdmittedProblemPage(definition.StatusCode, definition.Code,
                 definition.Title ?? "Request Failed", correlation, AdmitPathBase(http),
-                http.RequestServices.GetService<IProblemPageSessionReader>()?.ReadLocalSession(http));
+                http.RequestServices.GetService<IProblemPageSessionReader>()?.ReadLocalSession(http), AdmitLocales(http));
         }
         catch (Exception error) when (error is JsonResponseContractException or ArgumentException
             or InvalidOperationException or InvalidCastException or KeyNotFoundException)
@@ -74,19 +74,25 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 FieldErrors: Array.Empty<FoundationProblemFieldError>(), Detail: null),
                 fallback.TypeInfo<FoundationProblemEnvelope>(), http.RequestAborted);
             context.ProblemDetails.Status = 500;
-            page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation, AdmitPathBase(http));
+            page = new AdmittedProblemPage(500, ProblemCodes.RequestFailed, "Request Failed", correlation, AdmitPathBase(http), preferredLocales: AdmitLocales(http));
         }
         var contentType = "application/problem+json";
+        string? contentLanguage = null;
         if (ProblemPageNegotiation.AllowsHtml(http))
         {
             try
             {
-                var html = http.RequestServices.GetService<IProblemPageRenderer>()?.Render(page);
+                var renderer = http.RequestServices.GetService<IProblemPageRenderer>();
+                var html = renderer?.Render(page);
                 if (html is not null)
                 {
                     var encoding = new UTF8Encoding(false, true);
                     if (encoding.GetByteCount(html) > profile.MaxBytes) throw new InvalidOperationException("Page output exceeds the problem response budget.");
                     bytes = encoding.GetBytes(html);
+                    contentLanguage = renderer!.GetContentLanguage(page);
+                    if (contentLanguage is not null && (contentLanguage.Length is < 1 or > 64
+                        || System.Globalization.CultureInfo.GetCultureInfo(contentLanguage).Name != contentLanguage))
+                        throw new InvalidOperationException("Problem page content language is invalid.");
                     contentType = "text/html; charset=utf-8";
                 }
             }
@@ -100,12 +106,18 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
                 bytes = Encoding.UTF8.GetBytes("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Request failed</title>"
                     + "<main><h1>Request failed</h1><p>Please try again later.</p><p>Reference: " + page.CorrelationId + "</p></main></html>");
                 contentType = "text/html; charset=utf-8";
+                contentLanguage = "en";
             }
         }
         http.RequestAborted.ThrowIfCancellationRequested();
         http.Response.StatusCode = context.ProblemDetails.Status ?? 500;
         http.Response.ContentType = contentType;
         http.Response.Headers.CacheControl = "no-store";
+        if (contentLanguage is not null)
+        {
+            http.Response.Headers.ContentLanguage = contentLanguage;
+            http.Response.Headers.Vary = "Accept-Language";
+        }
         if (contentType.StartsWith("text/html", StringComparison.Ordinal))
         {
             http.Response.Headers.XContentTypeOptions = "nosniff";
@@ -120,6 +132,26 @@ internal sealed class FoundationBoundedProblemDetailsWriter : IProblemDetailsWri
     private static string AdmitCorrelation(string value) => value.Length is >= 1 and <= 128
         && value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or ':' or '.')
         ? value : Guid.NewGuid().ToString("N");
+    /// <summary>Admits only bounded canonical culture names, retaining language weights without exposing request text to renderers.</summary>
+    private static IReadOnlyList<string> AdmitLocales(HttpContext context)
+    {
+        var result = new List<string>();
+        try
+        {
+            foreach (var item in (context.Request.GetTypedHeaders().AcceptLanguage ?? [])
+                .Where(item => (item.Quality ?? 1) > 0 && item.Value.Length <= 64).OrderByDescending(item => item.Quality ?? 1).Take(32))
+            {
+                try
+                {
+                    var culture = System.Globalization.CultureInfo.GetCultureInfo(item.Value.ToString());
+                    if (culture.Name.Length > 0) result.Add(culture.Name);
+                }
+                catch (System.Globalization.CultureNotFoundException) { }
+            }
+        }
+        catch (FormatException) { }
+        return result.AsReadOnly();
+    }
     /// <summary>Retains the native shell prefix after CShells restores outer endpoint paths.</summary>
     private static string AdmitPathBase(HttpContext context)
     {

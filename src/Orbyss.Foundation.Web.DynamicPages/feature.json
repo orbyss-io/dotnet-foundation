@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "packageId": "Orbyss.Foundation.Web.DynamicPages",
+  "features": [
+    {
+      "identity": "Orbyss.Foundation.Web.DynamicPages",
+      "featureDependencies": [
+        "Orbyss.Foundation.WebDefaults",
+        "Orbyss.Foundation.Web.ProblemDetails"
+      ],
+      "runtimeDependencies": [],
+      "routes": [],
+      "dormant": true,
+      "composeForOpenApi": false,
+      "requiresContractCoverage": false,
+      "dynamicRoutesFromConfiguration": true
+    }
+  ],
+  "sourceSha256": {
+    "AdmittedDynamicPage.cs": "aa4762d05c3617990a7cead556119407334c8d7fe4c91aa34cd71b9fecd25918",
+    "DefaultDynamicPageRenderer.cs": "92861b585694c81d882119ab00c06a1e79d1b117b3a97d968a42a95e802adf26",
+    "DynamicPageCatalog.cs": "0a5d68e4dbe3f95ab94ce07313f1b1d92060a3ebb9158a4a8141a96f39520f03",
+    "DynamicPageDocument.cs": "4a689230df87374fb0410ca08d3a53e11b9fa53a649ab33adbc5194d9c88afc4",
+    "DynamicPageOptions.cs": "88e82b5dd519cfd6114e5296b76cc2ee2cf6cf27b7742a0d61f5e3f6b0192c3e",
+    "DynamicPageRequest.cs": "2d5f075b7d6026331fc11866055c9fe0cf63e499f69893b0d218da6a9af64fd6",
+    "DynamicPageResolution.cs": "1538c0ac2d252ab86903f84db22f23dbf12e2e90a2fd0e6d62fa79534f72254d",
+    "DynamicPageResolverRegistration.cs": "388e5659efea4e928ed8360d41dfbbe407ba49470110c79d5217170d69be6ea1",
+    "DynamicPageRouteOptions.cs": "4ff6dbe30dadd31da5a50fde2ccc671f9eeb1e62a8c4b51b918b2eb6285af730",
+    "DynamicPageServiceCollectionExtensions.cs": "8283c575f9008c89904e5219f80c47e243cba355bff479874b70e463694e5be9",
+    "DynamicPageStatus.cs": "4cabd762ffb4aebd59efc644d395ab0cb3d095475576ce07ec6796bd90d30d73",
+    "FoundationDynamicPagesFeature.cs": "57ae65551c9964e1cc6e672c5e2844b62b1894a212abadd8299d7179376c4d42",
+    "IDynamicPageRenderer.cs": "2f9ece8ebe8aae22ec773bca20e11721629e27d3ae0d2623badf7af699a03f8b",
+    "IDynamicPageResolver.cs": "b5d745163090c48ffb64ab5d22d7fb81da0c9e2e0de301f3834e974b4e334264"
+  }
+}

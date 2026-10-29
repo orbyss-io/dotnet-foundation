@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.11 — dynamic pages and recovery
+
+- Add separately selected Web.DynamicPages with consumer-scoped current resolution, bounded safe metadata/bootstrap rendering and mandatory precommit version/eligibility verification.
+- Add negotiated recovery locale catalogs, bounded full-page custom layouts and actual-language headers while preserving native BFF/machine contracts.
+- Keep HostedPages deployment snapshots and public assets separate from resource publication decisions.
+
 ## 0.2.2
 
 - Register shell-owned OIDC sign-in, signed-out and remote-sign-out callback routes in the BFF feature, preserving handler validation and private response policies.

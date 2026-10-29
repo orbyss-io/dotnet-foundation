@@ -72,9 +72,11 @@ jobs:
           node --test tests/browser/presentation.test.mjs tests/browser/spa-presentation.test.mjs
           node tests/browser/presentation-browser.cjs
           node tests/browser/hosted-pages.cjs
+          node tests/browser/dynamic-pages.cjs
           node tests/browser/authentication-recovery.cjs
           node tests/browser/ticket-renewal-race.cjs
           node tests/browser/native-presentation.cjs
+          node tests/browser/recovery-localization.cjs
           node tests/browser/spa-client-browser.cjs
 
       - name: Pack Foundation packages

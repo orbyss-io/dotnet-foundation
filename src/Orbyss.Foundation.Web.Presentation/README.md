@@ -1,5 +1,10 @@
 # Browser presentation
 
+The browser presentation feature and `IProblemPageRenderer` are already released in
+Foundation 0.3.9. The locale catalogs, full recovery layout override, explicit language
+headers and bounded landing-page output below are introduced in **Foundation 0.3.11**. Source
+availability does not change a consumer's selected published package/profile.
+
 Select `Orbyss.Foundation.Web.Presentation` independently in a shell. It composes
 WebDefaults, ProblemDetails and Json.AspNetCore. Foundation stays independent of
 application tooling. The native Host retains a neutral document-navigation fallback
@@ -11,6 +16,43 @@ Configure `Foundation:Web:Presentation` with `ApplicationName`, `Locale`, bounde
 copy keys, paths, policies and confirmation modes fail activation. Native CShells
 validates mapped route collisions before generation publication. Keep presentation
 routes distinct from application pages and native API/control/callback routes.
+
+`Locale` remains the fallback and existing `Copy` remains supported. Optional `Locales`
+maps at most 32 canonical culture names to known copy-key dictionaries. Positive
+Accept-Language weights and culture parents select a catalog; unsupported/malformed
+preferences use Locale. For example, `Locales: { "nl": { "sign-in": "Aanmelden",
+"authorization-denied": "Je hebt geen toegang tot deze bron." } }` also serves nl-BE.
+Catalog values override Copy, which overrides English defaults. Complete translations
+remain consumer-owned: missing keys retain their fallback text. Authentication
+explanations use stable-code copy keys rather than untranslated protocol titles.
+Pages emit the actual Content-Language and Vary: Accept-Language without caching.
+
+The new optional `IBrowserRecoveryPageRenderer` replaces the layout of every recovery
+landing and the default problem renderer. Register it through the actual application
+feature; its admitted model has plain text fields that the renderer must encode, validated local URLs,
+independent local-session state and **native-generated safe BodyHtml**. BodyHtml includes
+the native antiforgery form where appropriate; preserve it rather than rebuilding
+authentication controls. It contains no provider credentials, OIDC state/nonce/token or
+raw error text. It does contain the normal antiforgery hidden field intended for HTML.
+Trusted code overrides must encode text/attributes and may include the supplied anonymous
+stylesheet/focus-module paths. They are not a tenant-template sandbox.
+
+`IProblemPageRenderer` remains the narrower error-only seam and existing implementations
+continue to work. Its optional default `GetContentLanguage` method can report the actual
+rendered canonical language. Native problem negotiation, status/code identity and machine
+errors remain outside both renderers. `IAuthenticationErrorWriter` is still available
+for an authentication-boundary override; it is unnecessary for ordinary branding.
+
+`MaxPageBytes` defaults to 65,536 and admits 512 bytes to 1 MiB. Native controls construct
+the page before commitment. Null/oversized/throwing layout output produces a small safe
+500 fallback without recursively calling the failed renderer. Problem pages additionally
+respect their independently configured problem-response budget. Custom code cannot
+weaken native endpoint authentication, antiforgery or final private-response policy.
+
+Default recovery pages use an external focus module that waits for a visible, active
+document and respects a control already chosen by the user. Native forms work without
+scripts. An expired URL with an independently valid session displays active-session
+recovery and a Continue action; a URL never supplies session or provider-logout proof.
 
 The feature maps public GET/HEAD pages `sign-in`, `sign-out`, `signed-out`, `expired`
 and `denied` below its prefix. Its admitted problem renderer handles explicit browser

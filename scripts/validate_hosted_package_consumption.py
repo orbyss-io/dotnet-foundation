@@ -119,7 +119,7 @@ def main():
         feed = root / "feed"
         feed.mkdir()
         identities = []
-        for name in ("Json", "WebDefaults", "Web.HostedPages", "Web.ProblemDetails", "Authentication.BffCookie"):
+        for name in ("Json", "WebDefaults", "Web.HostedPages", "Web.DynamicPages", "Web.Presentation", "Web.ProblemDetails", "Authentication.BffCookie"):
             package = packages / f"Orbyss.Foundation.{name}.{version}.nupkg"
             shutil.copy2(package, feed / package.name)
             identities.append("Orbyss.Foundation." + name)
@@ -195,6 +195,13 @@ def main():
                         'Bootstrap': {'Mode': 'Authenticated', 'ResponsePolicy': 'private'}} for name in ('alpha', 'beta')]}
             }}
         }
+        settings['CShells']['Shells']['dynamic'] = {
+            'Features': {'Foundation.DynamicPageFixture': True, 'Orbyss.Foundation.Web.Presentation': True},
+            'Configuration': {'WebRouting': {'Path': 'dynamic'}, 'Foundation': {
+                'DynamicPages': {'Routes': [{'Id':'stall','Path':'/stalls/{slug}','Resolver':'stalls','Mode':'Public'}]},
+                'Web': {'Presentation': {'ApplicationName':'Packaged recovery','Locales':{'nl':{'sign-in':'Aanmelden'}}}}
+            }}
+        }
         (root / "shells.json").write_text(json.dumps(settings))
         configuration = json.loads((root / "host/appsettings.json").read_text(encoding="utf-8"))
         nuplane = configuration.setdefault("Nuplane", {})
@@ -235,12 +242,25 @@ def main():
                     assert response.read() == runtime
                     assert "immutable" in response.headers["Cache-Control"]
                 private_checks = qualify_private_host(address, root)
+                with urllib.request.urlopen(address + '/dynamic/stalls/market', timeout=15) as response:
+                    assert b'Packaged live stall' in response.read() and response.headers['Cache-Control'] == 'no-store'
+                localized = urllib.request.Request(address + '/dynamic/auth/sign-in', headers={'Accept-Language': 'nl-BE'})
+                with urllib.request.urlopen(localized, timeout=15) as response:
+                    assert b'Aanmelden' in response.read() and response.headers['Content-Language'] == 'nl'
+                with urllib.request.urlopen(urllib.request.Request(address + '/dynamic/fixture/unpublish', data=b'', method='POST'), timeout=15) as response:
+                    assert response.status == 204
+                try:
+                    urllib.request.urlopen(urllib.request.Request(address + '/dynamic/stalls/market', headers={'If-None-Match':'*'}), timeout=15)
+                    raise AssertionError('Unpublished packaged resource remained available')
+                except urllib.error.HTTPError as error:
+                    assert error.code == 404 and b'Packaged live stall' not in error.read()
                 assert package_hashes == {path.name: packaged.sha256(path) for path in feed.glob("*.nupkg")}
                 assert all(packaged.sha256(root / "host" / relative) == digest
                            for relative, digest in host_hashes.items())
                 (root / "result.json").write_text(json.dumps({"status": "passed-local-http", "version": version,
                     "settingsOnlyActivation": True, "packageHashesVerified": True,
                     "hostRuntimeHashesVerified": True, "privateDispatchChecks": private_checks,
+                    "dynamicPublicationAndLocalizedRecovery": True,
                     "releaseQualification": False}, indent=2) + "\n", encoding="utf-8")
                 print("Actual Nuplane Host consumed public/private hosted pages with BFF/route/bootstrap/data/logout checks. Evidence: " + str(root))
             finally:

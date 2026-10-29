@@ -4,7 +4,7 @@ namespace Orbyss.Foundation.Web.ProblemDetails;
 public sealed class AdmittedProblemPage
 {
     /// <summary>Constructs the page input only after closed-envelope admission succeeds.</summary>
-    internal AdmittedProblemPage(int status, string code, string title, string correlationId, string applicationPathBase = "", bool? hasLocalSession = null)
+    internal AdmittedProblemPage(int status, string code, string title, string correlationId, string applicationPathBase = "", bool? hasLocalSession = null, IReadOnlyList<string>? preferredLocales = null)
     {
         Status = status;
         Code = code;
@@ -12,6 +12,7 @@ public sealed class AdmittedProblemPage
         CorrelationId = correlationId;
         ApplicationPathBase = applicationPathBase;
         HasLocalSession = hasLocalSession;
+        PreferredLocales = preferredLocales ?? [];
     }
     /// <summary>Gets the reserved HTTP failure status.</summary>
     public int Status { get; }
@@ -25,4 +26,6 @@ public sealed class AdmittedProblemPage
     public string ApplicationPathBase { get; }
     /// <summary>Gets an independent native local-session observation; null means unobserved, never signed out.</summary>
     public bool? HasLocalSession { get; }
+    /// <summary>Gets at most 32 canonical culture preferences, sorted by positive HTTP quality; never raw header text.</summary>
+    public IReadOnlyList<string> PreferredLocales { get; }
 }

@@ -26,6 +26,7 @@ VALIDATORS = (
     "validate_collection_json_contracts.py",
     "validate_postgresql.py",
     "validate_hosted_pages.py",
+    "validate_dynamic_pages.py",
     "validate_openapi_exporter.py",
     "validate_host_release_payload.py",
     "validate_host_settings_assembly.py",
