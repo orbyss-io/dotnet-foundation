@@ -21,5 +21,5 @@ internal sealed record NumericFamily(
 )
 {
     /// <summary>Declares one request-only wire shape so read permissiveness cannot broaden output.</summary>
-    internal static JsonContractMetadata<NumericFamily> Contract { get; } = JsonContractMetadata<NumericFamily>.Request();
+    internal static JsonContractMetadata<NumericFamily> Contract { get; } = JsonContractFactory.Request<NumericFamily>();
 }

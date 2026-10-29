@@ -6,5 +6,5 @@ namespace Orbyss.Foundation.Json.Admission.Probe.Operations.ChangeValue;
 internal sealed record Request(string Label, long? Sequence)
 {
     /// <summary>Shares the exact definition between service registration and route metadata.</summary>
-    internal static JsonContractMetadata<Request> Contract { get; } = JsonContractMetadata<Request>.Request();
+    internal static JsonContractMetadata<Request> Contract { get; } = JsonContractFactory.Request<Request>();
 }

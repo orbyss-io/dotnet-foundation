@@ -9,5 +9,5 @@ namespace Orbyss.Foundation.Json.Admission.Probe.Contracts;
 internal abstract record NumericBase
 {
     /// <summary>Requires schema discovery through declared derived metadata rather than assembly scanning.</summary>
-    internal static JsonContractMetadata<NumericBase> Contract { get; } = JsonContractMetadata<NumericBase>.Response();
+    internal static JsonContractMetadata<NumericBase> Contract { get; } = JsonContractFactory.Response<NumericBase>();
 }

@@ -12,5 +12,5 @@ internal sealed record NumericSpecialResponse(
 )
 {
     /// <summary>Owns the actual response-only number policy.</summary>
-    internal static JsonContractMetadata<NumericSpecialResponse> Contract { get; } = JsonContractMetadata<NumericSpecialResponse>.Response();
+    internal static JsonContractMetadata<NumericSpecialResponse> Contract { get; } = JsonContractFactory.Response<NumericSpecialResponse>();
 }

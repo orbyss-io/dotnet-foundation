@@ -83,7 +83,7 @@ referencePreserved,
     /// <summary>Preserves explicit annotation ownership even for text identical to the known producer artifact.</summary>
     private static async Task VerifyDeclaredPatternAsync(JsonProfileCatalog profiles, IServiceProvider provider)
     {
-        var definition = JsonContractMetadata<PatternNumbers>.Response();
+        var definition = JsonContractFactory.Response<PatternNumbers>();
         var definitions = new IJsonContractMetadata[] { definition };
         var transformer = new JsonContractSchemaTransformer(profiles, definitions);
         var property = new OpenApiSchema { Type = JsonSchemaType.Integer | JsonSchemaType.String | JsonSchemaType.Null, Pattern = "^-?(?:0|[1-9]\\d*)$" };

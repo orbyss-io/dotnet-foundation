@@ -20,6 +20,7 @@
     "JsonAdmissionState.cs": "44216a09ccfa325bcd7fedca3cdf31bea9aee83353a3b0abcd2206156340f5f1",
     "JsonAdmissionStream.cs": "cc1bc4c6c32d3084471110b32802cc52fe97ce4ac529abfe77332ace2f9857ab",
     "JsonContractDirection.cs": "abff4b897a0f0a1e64a471b87bd7d782ea87e70badea2564f13334ab55057613",
+    "JsonContractFactory.cs": "dc528743d34064b9a85a56a591c49dc7b5bd8e1cdc1d2521b8d552bddda35b6a",
     "JsonContractIdentity.cs": "9daf903df1c6eb37b009ed8afd34efbfc9da512985900f349f4ace2d82226379",
     "JsonContractMetadata.cs": "8580e09d7f169a92afca78e095491b95f3aae6ba7c4b7283c38a19b410464cbf",
     "JsonContractOperationTransformer.cs": "2e0da06b2847c8e2b5e6959a27363bd05a0677d6b5414d41ab0173ff1158f0db",

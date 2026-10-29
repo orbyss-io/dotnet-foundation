@@ -47,8 +47,7 @@ and reverse-proxy limits to deployment; neither is silently rewritten by a tenan
 An operation owns one immutable declaration used by registration and mapping:
 
 ```csharp
-var supported = JsonProfileRequirement.StrictRequest(maximumBytes: 1024);
-var contract = JsonContractMetadata<Request>.Request(supported);
+var contract = JsonContractFactory.Request<Request>(maximumBytes: 1024);
 services.AddJsonContract(contract);
 services.AddJsonEndpoint<Endpoint>();
 endpoints
@@ -56,9 +55,32 @@ endpoints
     .WithJsonRequest(contract);
 ```
 
-Keep the declaration on the wire contract or operation owner. `JsonContractMetadata<Response>.Response()`
-selects the configured success-response profile. Named requirement factories preserve existing supported
-defaults. Equivalent repeated typed/direction registrations are idempotent, allowing two operations to
+Keep the declaration on the wire contract or operation owner. Prefer `JsonContractFactory.Request<T>()`
+and `JsonContractFactory.Response<T>()` when constructing consumer metadata. They select the configured
+strict-request and success-response profiles respectively, without literal profile strings:
+
+```csharp
+public sealed record UploadInput(string FileName)
+{
+    public static JsonContractMetadata<UploadInput> Contract { get; }
+        = JsonContractFactory.Request<UploadInput>(minimumDepth: 2);
+}
+
+public sealed record UploadResult(Guid Id)
+{
+    public static JsonContractMetadata<UploadResult> Contract { get; }
+        = JsonContractFactory.Response<UploadResult>();
+}
+```
+
+Both methods accept named `minimumBytes` (default 1), `maximumBytes` (16,777,216; 16 MiB),
+`minimumDepth` (1), `maximumDepth` (64), and an optional typed `profile` key. Override only meaningful
+supported capacities; for example, retain `minimumDepth: 2` when simplifying an existing declaration
+that already requires it. A custom response key still requires the tolerant-response preset;
+request keys require strict-request. These intervals do not configure deployment budgets.
+`JsonContractMetadata<T>.Request/Response` and direct requirement construction remain compatible for
+existing consumers and specialized declarations. Equivalent repeated typed/direction registrations
+are idempotent, allowing two operations to
 register a shared response. Conflicting profile or capacity declarations fail before collection mutation.
 Matching metadata-only registrations receive their native reader/factory; intentionally registered custom
 implementations remain. Unknown metadata factories stay deferred; native activation rejects ambiguity.

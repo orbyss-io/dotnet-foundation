@@ -102,17 +102,17 @@
       "orbyss.foundation.authentication": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Authentication.Core": "[0.3.8, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.8, )"
+          "Orbyss.Foundation.Authentication.Core": "[0.3.10, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.10, )"
         }
       },
       "orbyss.foundation.authentication.bffcookie": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.OpenIdConnect": "[10.0.14, )",
-          "Orbyss.Foundation.Authentication": "[0.3.8, )",
-          "Orbyss.Foundation.Json.AspNetCore": "[0.3.8, )",
-          "Orbyss.Foundation.WebDefaults": "[0.3.8, )"
+          "Orbyss.Foundation.Authentication": "[0.3.10, )",
+          "Orbyss.Foundation.Json.AspNetCore": "[0.3.10, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.10, )"
         }
       },
       "orbyss.foundation.authentication.core": {
@@ -124,23 +124,23 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.8, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.10, )"
         }
       },
       "orbyss.foundation.json.aspnetcore": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": "[10.0.14, )",
-          "Orbyss.Foundation.Json": "[0.3.8, )",
-          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.8, )"
+          "Orbyss.Foundation.Json": "[0.3.10, )",
+          "Orbyss.Foundation.Web.ProblemDetails": "[0.3.10, )"
         }
       },
       "orbyss.foundation.web.discovery": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.8, )",
-          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.3.8, )",
-          "Orbyss.Foundation.WebDefaults": "[0.3.8, )"
+          "Orbyss.Foundation.Json": "[0.3.10, )",
+          "Orbyss.Foundation.Web.Discovery.Abstractions": "[0.3.10, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.10, )"
         }
       },
       "orbyss.foundation.web.discovery.abstractions": {
@@ -149,9 +149,9 @@
       "orbyss.foundation.web.hostedpages": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Authentication": "[0.3.8, )",
-          "Orbyss.Foundation.Json": "[0.3.8, )",
-          "Orbyss.Foundation.WebDefaults": "[0.3.8, )"
+          "Orbyss.Foundation.Authentication": "[0.3.10, )",
+          "Orbyss.Foundation.Json": "[0.3.10, )",
+          "Orbyss.Foundation.WebDefaults": "[0.3.10, )"
         }
       },
       "orbyss.foundation.web.openapi": {
@@ -163,8 +163,8 @@
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.8, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.8, )"
+          "Orbyss.Foundation.Json": "[0.3.10, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.10, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {
