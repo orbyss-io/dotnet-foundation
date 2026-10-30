@@ -6,5 +6,5 @@
     "exactOptionalPropertyTypes": true, "noUncheckedIndexedAccess": true,
     "skipLibCheck": false
   },
-  "include": ["presentation-types.mts"]
+  "include": ["presentation-types.mts", "autosave-types.mts"]
 }

@@ -60,8 +60,9 @@ jobs:
           npm ci --prefix tests/browser
           node tests/browser/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
           npm run --prefix tests/browser test:types
-          node --test tests/browser/presentation.test.mjs tests/browser/spa-presentation.test.mjs
+          node --test tests/browser/presentation.test.mjs tests/browser/spa-presentation.test.mjs tests/browser/autosave.test.mjs
           node tests/browser/presentation-browser.cjs
+          node tests/browser/autosave-browser.cjs
           node tests/browser/hosted-pages.cjs
           node tests/browser/dynamic-pages.cjs
           node tests/browser/authentication-recovery.cjs

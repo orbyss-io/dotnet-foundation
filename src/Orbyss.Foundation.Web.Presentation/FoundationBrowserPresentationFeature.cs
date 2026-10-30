@@ -116,7 +116,7 @@ public sealed class FoundationBrowserPresentationFeature(ShellSettings settings)
                 else await session!.SignOutAsync(context).ConfigureAwait(false);
             }).WithMetadata(PageMetadata(catalog), new ProblemResponsePurposeMetadata(ProblemResponsePurpose.BrowserPage))
                 .AllowAnonymous().ExcludeFromDescription();
-        foreach (var file in new[] { "configuration.mjs", "configuration.d.mts", "presentation.mjs", "presentation.d.mts", "bff.mjs", "bff.d.mts", "spa.mjs", "spa.d.mts", "session.mjs", "session.d.mts", "page.css", "recovery-focus.mjs" })
+        foreach (var file in new[] { "configuration.mjs", "configuration.d.mts", "presentation.mjs", "presentation.d.mts", "autosave.mjs", "autosave.d.mts", "bff.mjs", "bff.d.mts", "spa.mjs", "spa.d.mts", "session.mjs", "session.d.mts", "page.css", "recovery-focus.mjs" })
         {
             using var resource = typeof(FoundationBrowserPresentationFeature).Assembly.GetManifestResourceStream(
                 "Orbyss.Foundation.Web.Presentation.browser." + file) ?? throw new InvalidDataException("Presentation asset is missing.");

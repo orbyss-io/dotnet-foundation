@@ -37,14 +37,14 @@
       "orbyss.foundation.json": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Collections.Core": "[0.3.11, )"
+          "Orbyss.Foundation.Collections.Core": "[0.3.12, )"
         }
       },
       "orbyss.foundation.web.problemdetails": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.Json": "[0.3.11, )",
-          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.11, )"
+          "Orbyss.Foundation.Json": "[0.3.12, )",
+          "Orbyss.Foundation.Web.ProblemDetails.Core": "[0.3.12, )"
         }
       },
       "orbyss.foundation.web.problemdetails.core": {
