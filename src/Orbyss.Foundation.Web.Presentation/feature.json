@@ -26,7 +26,7 @@
     "BrowserPresentationText.cs": "1b63f76fc2692148697966d9e293f43ff87f1b7d350d732d489c3bad3b2c6fd5",
     "BrowserProblemPageRenderer.cs": "441e46adebb0d1038d707ede1889a723fa183ea5aaf2b9b5dd9bfb2ebf8b21f7",
     "DefaultBrowserRecoveryPageRenderer.cs": "92ebc2c2baaa7bb1ce0177580b3986c50a4dc2dc33edacf118a667b886257da8",
-    "FoundationBrowserPresentationFeature.cs": "ef95b7cdb7b6842033080d1e60347d79b97c98fc3b6eee20457600c038bf5c02",
+    "FoundationBrowserPresentationFeature.cs": "709662f6553308106e84d22faf76e448622533de124e87576ba3d080241bc737",
     "IBrowserRecoveryPageRenderer.cs": "393531ee91951cafb1f3bd7ac5e5f510c68442c655f093d826f79a5c9008c287"
   }
 }
