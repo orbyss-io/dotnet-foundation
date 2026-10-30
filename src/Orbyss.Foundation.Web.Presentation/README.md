@@ -1,5 +1,64 @@
 # Browser presentation
 
+## Optional autosave controller
+
+Foundation 0.3.12 introduces `browser/autosave.mjs`, exporting `createAutosaveController` and
+`AUTOSAVE_CONTRACT` (`foundation-browser-autosave/v1`), with declarations in
+`browser/autosave.d.mts`. Select the released package/profile containing this capability;
+earlier packages retain their existing contracts and do not supply autosave.
+
+Create one controller per editor/account generation. Supply explicit enabled,
+interval and operation-timeout values; registration supplies a bounded opaque target,
+admitted initial local revisions and the application's adapter. The module starts no
+work on import and accesses no storage, session, HTTP or DOM APIs. Application adapters
+retain authorization, JSON/receipt admission, server versions or overwrite policy,
+conflict choices and any recovery storage.
+
+An automatic pass visits each captured target once in registration order, sequentially, then waits another
+interval. Typing and manual saving do not reset the period. Manual save, status and
+identical replay share the same active slot. A concurrent request returns `busy`
+without queueing a stale payload. Conflicted or uncertain targets do not prevent
+other independent targets from saving after the active operation settles.
+
+Register parent targets before dependent targets. The adapter still checks actual
+parent readiness; the controller preserves ordering and does not invent domain dependencies.
+Read `controller.activity` and use `subscribeActivity` to update controls from immutable
+`busy`, `draining`, `suspended` and `disposed` observations. Drain completion announces
+slot availability without changing an unknown business outcome. Activity contains no
+account, payload or receipt data and supplies no authentication or server-stop proof.
+
+Each attempt retains immutable serialized payload, target, operation key and local
+edit revision/generation. Confirmation acknowledges that submitted revision only;
+newer edits remain dirty. Unknown completion retains the original attempt for explicit
+status or supported identical replay. A status lookup cannot classify an absent receipt
+as a no-effect rejection. The module supplies neither backend idempotency nor rollback.
+
+Adapters receive one abort signal and absolute monotonic expiry across admission,
+capture preparation and transport. Expiry before write invokes no writer; expiry after
+write entry remains unknown. Abort does not release the active slot until the actual
+adapter call settles. An uncooperative adapter can therefore keep drain pending; the
+operation budget bounds the reported cutoff, not physical completion or server stop.
+
+`suspend` stops admission and aborts active work. `resume` rearms at most one due pass
+and still requires adapter admission. Dispose on account changes rather than resuming
+the old controller. Disposal fences callbacks synchronously; its idempotent promise
+observes remaining adapter settlement. Private DOM hiding must never wait for drain.
+
+Confirmation callbacks are synchronous and must return `undefined`. A callback failure
+retains the established commit, marks an adapter fault and prevents new target dispatch.
+Observers cannot roll back acknowledgement; throwing/asynchronous observers are removed.
+Only application-admitted recovery snapshots may restore a retained attempt. Restored
+attempts start unknown and never dispatch automatically. Payloads and receipts are not
+logged, copied into browser persistence or exposed as public diagnostics by the module.
+
+The two in-memory test adapters exercise compare-and-swap and version-free overwrite
+policies against the same controller. Their recording receipts establish model behavior,
+not database durability, browser acceptance or a public release. Native asset and
+browser checks separately exercise the shipped module and declarations, nested shell
+paths, original bootstrap admission, current-input preservation and observable drain.
+
+## Native browser presentation
+
 The browser presentation feature and `IProblemPageRenderer` are already released in
 Foundation 0.3.9. The locale catalogs, full recovery layout override, explicit language
 headers and bounded landing-page output below are introduced in **Foundation 0.3.11**. Source

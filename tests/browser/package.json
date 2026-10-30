@@ -3,9 +3,12 @@
   "private": true,
   "scripts": {
     "test:types": "tsc -p tsconfig.json",
-    "test:module": "node --test presentation.test.mjs spa-presentation.test.mjs && node presentation-browser.cjs",
+    "test:module": "node --test presentation.test.mjs spa-presentation.test.mjs autosave.test.mjs && node presentation-browser.cjs",
+    "test:autosave": "node --test autosave.test.mjs",
+    "test:autosave:types": "tsc -p tsconfig.autosave.json",
     "test:spa-client": "node spa-client-browser.cjs",
-    "test": "npm run test:types && npm run test:module && node hosted-pages.cjs && node dynamic-pages.cjs && node authentication-recovery.cjs && node ticket-renewal-race.cjs && node native-presentation.cjs && node recovery-localization.cjs && npm run test:spa-client"
+    "test": "npm run test:types && npm run test:module && npm run test:autosave:browser && node hosted-pages.cjs && node dynamic-pages.cjs && node authentication-recovery.cjs && node ticket-renewal-race.cjs && node native-presentation.cjs && node recovery-localization.cjs && npm run test:spa-client",
+    "test:autosave:browser": "node autosave-browser.cjs"
   },
   "devDependencies": {
     "oidc-client-ts": "3.5.0",

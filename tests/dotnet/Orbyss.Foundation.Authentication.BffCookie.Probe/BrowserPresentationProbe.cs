@@ -89,6 +89,7 @@ internal static class BrowserPresentationProbe
                 using (var bootstrap = await client.GetAsync(prefix + "/auth/configuration"))
                 {
                     var selected = System.Text.Json.JsonDocument.Parse(await bootstrap.Content.ReadAsStringAsync()).RootElement;
+                    Require(selected.EnumerateObject().Count() == 7, "autosave must not change the exact existing bootstrap contract");
                     Require(bootstrap.Content.Headers.ContentType?.MediaType == "application/json"
                         && selected.GetProperty("signOutConfirmation").GetString() == (name == "pages-a" ? "always" : name == "pages" ? "never" : "when-unsaved")
                         && selected.GetProperty("logoutPath").GetString() == prefix + "/bff/logout", "native selected policy/bootstrap binding failed");
@@ -100,10 +101,13 @@ internal static class BrowserPresentationProbe
                 Require(page.Headers.CacheControl?.NoStore == true && page.Headers.GetValues("X-Robots-Tag").Single() == "noindex, nofollow", "private browser headers missing");
                 if (name == "pages-a") Require(html.Contains("Synthetic &lt;Application&gt;", StringComparison.Ordinal) && html.Contains("Aanmelden", StringComparison.Ordinal)
                     && html.Contains("lang=\"nl\"", StringComparison.Ordinal) && html.Contains("data-theme=\"green\"", StringComparison.Ordinal), "branding/theme/locale copy leaked or was not encoded");
-                foreach (var asset in new[] { "page.css", "presentation.mjs", "presentation.d.mts" })
+                foreach (var asset in new[] { "page.css", "presentation.mjs", "presentation.d.mts", "autosave.mjs", "autosave.d.mts" })
                 {
                     using var response = await client.GetAsync(prefix + "/auth/assets/v1/" + asset);
                     Require(response.StatusCode == HttpStatusCode.OK && (await response.Content.ReadAsByteArrayAsync()).Length > 0, "anonymous packaged asset failed");
+                    using var head = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, prefix + "/auth/assets/v1/" + asset));
+                    Require(head.StatusCode == HttpStatusCode.OK && (await head.Content.ReadAsByteArrayAsync()).Length == 0,
+                        "packaged asset HEAD behavior changed");
                 }
                 using (var rejected = await client.PostAsync(prefix + "/auth/sign-out", new FormUrlEncodedContent([])))
                     Require(rejected.StatusCode == HttpStatusCode.BadRequest && rejected.Content.Headers.ContentType?.MediaType == "text/html", "unprotected browser logout");

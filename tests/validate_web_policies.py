@@ -70,6 +70,11 @@ def qualify(package: Path, bff_package: Path | None, work_root: Path | None = No
         bindings.require(presentation is not None,
             "Current BFF/presentation probe requires the exact new Presentation archive in the supplied development/release family.")
         inspected.append(bindings.inspect(presentation))
+        with zipfile.ZipFile(presentation) as archive:
+            for name in ('autosave.mjs', 'autosave.d.mts'):
+                expected = (fixture.ROOT / 'src/Orbyss.Foundation.Web.Presentation/browser' / name).read_bytes()
+                bindings.require(archive.read('browser/' + name) == expected,
+                                 'native autosave package asset differs from its exact source: ' + name)
         with zipfile.ZipFile(bff_package) as archive:
             bff_metadata = json.loads(archive.read("orbyss-foundation/settings.json"))
         timeout = next(setting for setting in bff_metadata["contracts"][0]["settings"] if setting["path"] == "Foundation:Web:RemoteAuthenticationTimeoutSeconds")
