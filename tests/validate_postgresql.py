@@ -8,7 +8,7 @@ import uuid
 from pathlib import Path
 
 
-POSTGRES_IMAGE = "postgres@sha256:979bccfde35445db618c65107d27d08c6c21339d8dc3ad4c830c6633947be0e4"
+POSTGRES_IMAGE = "postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81"
 
 
 def main() -> int:
