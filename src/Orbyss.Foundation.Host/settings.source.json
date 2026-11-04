@@ -2,6 +2,8 @@
   "schemaVersion": 2,
   "packageId": "Orbyss.Foundation.Host",
   "sourceSha256": {
+    "Configuration/FoundationRuntimeSettings.cs": "ffbaf6e1518c7ad5f9fbb0702cbd2328856d5b154bfb1ab2558645d07679bc01",
+    "Configuration/RuntimeSettingsBinding.cs": "8bd4d56f2505434b8605aa129bbfda6756d09363b81819abca85b30bee20d05f",
     "Diagnostics/FoundationRequestDiagnosticConstants.cs": "5af617c572571e482817af0eaa8094097066ce03363cae443f15ab9ca6fb2f25",
     "Diagnostics/FoundationRequestDiagnosticLogger.cs": "573885ff6fef8517d7da3233734a558acfb18aea5b6f96372b1f3d37faf4741d",
     "Diagnostics/FoundationRequestDiagnosticLoggerFactory.cs": "24dfc4a31933434c74785e9e9bcf315282f78582045d564b5cc2d05a609005a3",
@@ -9,7 +11,7 @@
     "Diagnostics/FoundationRequestDiagnosticRedactionRegistration.cs": "2aec2fb08271ba111c7f652697c5f655811d0ed00a27c2c5f82c36ae8314887e",
     "Diagnostics/NeutralBrowserFailureMiddleware.cs": "815ff7d974d5a4f451b13529ee5de33464e3596325a79b996b02e895b19e5888",
     "Feed/NuplaneAssemblyProvider.cs": "a9b450d527431cf6333ccbdf02c61e70a7bd199be3ff672a17ba5b7f85384e7c",
-    "Program.cs": "54f40c525323411c52a8097f5582860c335971a69d71f46e8f3ab65dc8aad964",
+    "Program.cs": "a45e21f383fc6025df949b0403683c83a5de713f040a1da3677fcf2784580a46",
     "Shells/EagerShellActivationHostedService.cs": "365cee121a2245e06f169d61c1d754e68a4e04516ae99402e48f16461ce31e04",
     "Shells/FoundationBootOptions.cs": "5e1a1845c43f5c0f103d141edf3b39e6bad780a17a34ef0cd325c2ab521a7186",
     "Transport/FoundationTransportOptions.cs": "4d3cf053174973aeacd9418fe6088fac59cec7f568aaa5f17696206b986430fb"
@@ -37,6 +39,7 @@
             "hostsettings.json",
             ".orbyss-foundation/web-profile.shells.json",
             "shells.json",
+            "protected runtime settings overlay when configured",
             "environment variables",
             "command-line arguments"
           ],
@@ -59,6 +62,7 @@
             "hostsettings.json",
             ".orbyss-foundation/web-profile.shells.json",
             "shells.json",
+            "protected runtime settings overlay when configured",
             "environment variables",
             "command-line arguments"
           ],
@@ -74,7 +78,7 @@
       "semanticConstraints": [
         "Host binds Foundation:Transport once before Kestrel startup and applies limits before accepting requests.",
         "Transport limits are process-wide and independent of decoded JSON/shell response budgets and reverse-proxy settings.",
-        "Configuration precedence: native WebApplication defaults, optional hostsettings.json, optional web-profile.shells.json, required shells.json, environment variables, command-line arguments.",
+        "Configuration precedence: native WebApplication defaults, optional hostsettings.json, optional web-profile.shells.json, required shells.json, optional protected runtime settings validated against its release-owned binding contract, environment variables, command-line arguments.",
         "All three explicitly added JSON files use reloadOnChange:false; changing transport settings requires process restart."
       ]
     },
@@ -96,6 +100,7 @@
             "hostsettings.json",
             ".orbyss-foundation/web-profile.shells.json",
             "shells.json",
+            "protected runtime settings overlay when configured",
             "environment variables",
             "command-line arguments"
           ],
@@ -115,6 +120,7 @@
             "hostsettings.json",
             ".orbyss-foundation/web-profile.shells.json",
             "shells.json",
+            "protected runtime settings overlay when configured",
             "environment variables",
             "command-line arguments"
           ],

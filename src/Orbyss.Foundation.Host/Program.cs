@@ -8,12 +8,14 @@ using Orbyss.Foundation.Host.Feed;
 using Orbyss.Foundation.Host.Shells;
 using Orbyss.Foundation.Host.Transport;
 using Orbyss.Foundation.Host.Diagnostics;
+using Orbyss.Foundation.Host.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .AddJsonFile("hostsettings.json", optional: true, reloadOnChange: false)
     .AddJsonFile(".orbyss-foundation/web-profile.shells.json", optional: true, reloadOnChange: false)
     .AddJsonFile("shells.json", optional: false, reloadOnChange: false)
+    .AddFoundationRuntimeSettings()
     .AddEnvironmentVariables()
     .AddCommandLine(args);
 var configuration = builder.Configuration;

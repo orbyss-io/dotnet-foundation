@@ -68,6 +68,8 @@ _ = await provider.GetRequiredService<IKeycloakOrganizationAdministration>().Cre
 
 Require(handler.Requests.Count(request => request.PathAndQuery.EndsWith("/protocol/openid-connect/token", StringComparison.Ordinal)) == 1, "service-account token was not safely cached");
 Require(handler.Requests.Any(request => request.PathAndQuery.Contains("/admin/realms/tenant%20realm/", StringComparison.Ordinal)), "target realm was not path encoded");
+await StandaloneAdministrationProbe.RunAsync();
+await ConfigurationAdministrationProbe.RunAsync();
 Console.WriteLine("Keycloak Admin REST features preserve subdomain opt-in, portable contracts, request security, and token caching.");
 
 static void Require(bool condition, string message)
