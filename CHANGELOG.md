@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.14 — explicit identity reconciliation and page-session expiry
+
+- Add separately resolved Keycloak Configuration removal operations for exact default/optional scope assignments and deliberately selected client attribute/flow keys. Omitted maps keep their existing merge semantics; independent implementations of the existing configuration interface remain compatible.
+- Add explicit dynamic-page SessionExpired admission and precommit results through the existing bounded native 401 Problem response. Ordinary forbidden and unavailable outcomes retain their meaning, and an independently valid local session is preserved.
+
 ## 0.3.11 — dynamic pages and recovery
 
 - Add separately selected Web.DynamicPages with consumer-scoped current resolution, bounded safe metadata/bootstrap rendering and mandatory precommit version/eligibility verification.

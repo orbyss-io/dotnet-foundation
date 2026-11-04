@@ -42,6 +42,7 @@ public static class FoundationKeycloakAdminServiceCollectionExtensions
         Add<IKeycloakRealmOperations, KeycloakRealmOperations>(services, features, KeycloakAdminFeatures.RealmOperations);
         Add<IKeycloakRealmAdministration, KeycloakRealmAdministration>(services, features, KeycloakAdminFeatures.Realms);
         Add<IKeycloakConfigurationAdministration, KeycloakConfigurationAdministration>(services, features, KeycloakAdminFeatures.Configuration);
+        Add<IKeycloakConfigurationRemoval, KeycloakConfigurationRemoval>(services, features, KeycloakAdminFeatures.Configuration);
         return services;
     }
 

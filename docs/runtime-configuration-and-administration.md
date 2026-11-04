@@ -60,6 +60,24 @@ Use separate mapper and scope-assignment operations during updates; initial nest
 belong only to creation/import. Client logout redirect policy uses Keycloak's
 `post.logout.redirect.uris` attribute. Role attributes are multi-valued, unlike client/scope attributes.
 
+Foundation 0.3.14's same explicit `Configuration` capability additionally registers `IKeycloakConfigurationRemoval`.
+It keeps deliberate removal separate from omission and leaves the existing configuration interface
+unchanged for independent implementations. `RemoveClientScopeAsync(clientId, scopeId, optional)`
+removes exactly one selected default or optional assignment, rather than deleting the reusable scope.
+To replace an owned bounded membership set, read its current assignments, calculate its exact delta,
+authorize each change, then add/remove only those assignments and read back the effective set.
+
+`RemoveClientConfigurationKeysAsync(clientId, attributeKeys, authenticationFlowBindingOverrideKeys)`
+removes only the explicitly named client-map keys. Each selection is bounded to 128 unique nonblank
+keys of at most 256 characters without controls. Both empty selections do no I/O. The operation reads fresh maps,
+preserves unselected entries (including independently configured MFA flows), sends no client scalar,
+credential, user or grant fields, and avoids a write when all selected keys are already absent.
+An explicit final-key removal sends an empty map. Partial updates still merge supplied map keys;
+omitted keys and empty update maps do not authorize removal. The caller owns object/key authorization,
+stale-plan rejection, serialization of concurrent administrative changes and read-back/retry; the
+native provider API does not make a multi-operation update atomic. Never infer ownership from an
+absent declaration or use configuration removal to delete a foreign operator's keys.
+
 ## Protected Host settings overlay
 
 The Host can load a protected JSON settings file after `shells.json` and before environment and

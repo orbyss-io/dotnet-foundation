@@ -163,6 +163,7 @@ public sealed class FoundationDynamicPagesFeature(ShellSettings settings) : IWeb
         {
             DynamicPageStatus.NotFound => (404, "resource_not_found"),
             DynamicPageStatus.Forbidden => (403, "authorization_denied"),
+            DynamicPageStatus.SessionExpired => (401, ProblemCodes.AuthenticationRequired),
             _ => (503, "dynamic_page_unavailable")
         };
         return FoundationProblemResults.Problem(new ProblemDefinition(http, code)).ExecuteAsync(context);

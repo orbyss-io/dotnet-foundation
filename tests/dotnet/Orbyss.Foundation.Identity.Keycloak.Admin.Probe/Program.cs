@@ -70,6 +70,7 @@ Require(handler.Requests.Count(request => request.PathAndQuery.EndsWith("/protoc
 Require(handler.Requests.Any(request => request.PathAndQuery.Contains("/admin/realms/tenant%20realm/", StringComparison.Ordinal)), "target realm was not path encoded");
 await StandaloneAdministrationProbe.RunAsync();
 await ConfigurationAdministrationProbe.RunAsync();
+await ConfigurationRemovalProbe.RunAsync();
 Console.WriteLine("Keycloak Admin REST features preserve subdomain opt-in, portable contracts, request security, and token caching.");
 
 static void Require(bool condition, string message)
