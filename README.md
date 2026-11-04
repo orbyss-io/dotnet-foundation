@@ -94,6 +94,15 @@ defaults from sample configuration. No-build publication revalidates typed metad
 source/assembly provenance without refreshing it. Feature descriptors remain the activation
 authority, and settings metadata does not initialize applications, storage or identity clients.
 
+## Protected runtime configuration and identity administration
+
+Foundation 0.3.13 adds a protected, contract-bound Host settings overlay and reusable standalone
+Keycloak administration registration. Typed realm and owned configuration APIs support deployment
+operations without replacing users, credentials or grants. Runtime and deployment authority remain
+separate. See [runtime configuration and administration](docs/runtime-configuration-and-administration.md)
+for capability selection, file admission, precedence and credential ownership. Adopt the exact public
+packages and immutable Host digest only after the official release and consumer qualification succeed.
+
 ## Request-time pages and recovery extension seams
 
 Foundation 0.3.9 already supplies configurable Web.Presentation and IProblemPageRenderer.

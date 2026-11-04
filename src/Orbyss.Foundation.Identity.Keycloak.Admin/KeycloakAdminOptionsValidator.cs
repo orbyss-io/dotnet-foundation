@@ -4,14 +4,23 @@ using Microsoft.Extensions.Options;
 namespace Orbyss.Foundation.Identity.Keycloak.Admin;
 
 /// <summary>Rejects incomplete credentials and unsafe Keycloak Admin REST endpoints.</summary>
-internal sealed class KeycloakAdminOptionsValidator(IHostEnvironment environment)
-    : IValidateOptions<KeycloakAdminOptions>
+internal sealed class KeycloakAdminOptionsValidator : IValidateOptions<KeycloakAdminOptions>
 {
+    /// <summary>Retains the explicitly selected deployment environment for endpoint admission.</summary>
+    private readonly string environmentName;
+
+    /// <summary>Uses the owning host's actual environment for shell composition.</summary>
+    public KeycloakAdminOptionsValidator(IHostEnvironment environment) : this(environment.EnvironmentName) { }
+
+    /// <summary>Uses an explicitly selected environment for standalone composition.</summary>
+    internal KeycloakAdminOptionsValidator(string environmentName) => this.environmentName = environmentName;
+
     /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, KeycloakAdminOptions options)
     {
         var failures = new List<string>();
         if (!Uri.TryCreate(options.ServerUrl, UriKind.Absolute, out var server)
+            || !string.IsNullOrEmpty(server.UserInfo)
             || !string.IsNullOrEmpty(server.Query)
             || !string.IsNullOrEmpty(server.Fragment))
         {
@@ -19,7 +28,7 @@ internal sealed class KeycloakAdminOptionsValidator(IHostEnvironment environment
         }
         else
         {
-            var localHttp = environment.IsDevelopment()
+            var localHttp = string.Equals(environmentName, Environments.Development, StringComparison.OrdinalIgnoreCase)
                 && options.AllowHttpForLocalDevelopment
                 && server.Scheme == Uri.UriSchemeHttp
                 && server.IsLoopback;

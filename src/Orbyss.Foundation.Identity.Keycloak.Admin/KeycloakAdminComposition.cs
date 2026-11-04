@@ -10,8 +10,16 @@ internal static class KeycloakAdminComposition
     public static void AddTransport(IServiceCollection services, ShellSettings settings)
     {
         services.Configure<KeycloakAdminOptions>(settings.GetConfigurationRoot().GetSection(KeycloakAdminOptions.SectionName));
+        AddTransport(services);
+    }
+
+    /// <summary>Adds the shared transport without depending on a shell or an application host.</summary>
+    internal static void AddTransport(IServiceCollection services)
+    {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<KeycloakAdminOptions>, KeycloakAdminOptionsValidator>());
-        services.AddHttpClient(KeycloakAdminTransport.HttpClientName);
+        services.AddHttpClient(KeycloakAdminTransport.HttpClientName)
+            .RemoveAllLoggers()
+            .ConfigurePrimaryHttpMessageHandler(static () => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<KeycloakAdminTransport>();
     }

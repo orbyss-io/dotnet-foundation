@@ -5,5 +5,10 @@ namespace Orbyss.Foundation.Identity.Keycloak.Admin;
 public sealed class FoundationKeycloakAccessAdminFeature(ShellSettings settings) : IShellFeature
 {
     /// <inheritdoc />
-    public void ConfigureServices(IServiceCollection services) { KeycloakAdminComposition.AddTransport(services, settings); services.TryAddSingleton<IIdentityAccessAdministration, KeycloakAccessAdministration>(); }
+    public void ConfigureServices(IServiceCollection services)
+    {
+        KeycloakAdminComposition.AddTransport(services, settings);
+        services.TryAddSingleton<IIdentityAccessAdministration, KeycloakAccessAdministration>();
+        services.TryAddSingleton<IIdentityEffectiveUserRoleReader, KeycloakAccessAdministration>();
+    }
 }

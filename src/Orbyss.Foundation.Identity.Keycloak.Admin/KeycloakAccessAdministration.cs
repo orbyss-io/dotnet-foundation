@@ -3,11 +3,16 @@ using Orbyss.Foundation.Identity.Admin;
 namespace Orbyss.Foundation.Identity.Keycloak.Admin;
 
 /// <summary>Implements portable role and group administration through Keycloak.</summary>
-internal sealed class KeycloakAccessAdministration(KeycloakAdminTransport transport) : IIdentityAccessAdministration
+internal sealed class KeycloakAccessAdministration(KeycloakAdminTransport transport) : IIdentityAccessAdministration, IIdentityEffectiveUserRoleReader
 {
     /// <inheritdoc />
     public async ValueTask<IReadOnlyList<IdentityRole>> GetRolesAsync(CancellationToken cancellationToken = default) =>
         KeycloakJson.Array(await transport.SendAsync(HttpMethod.Get, "roles", cancellationToken: cancellationToken), KeycloakJson.Role);
+
+    /// <inheritdoc />
+    public async ValueTask<IReadOnlyList<IdentityRole>> GetEffectiveUserRolesAsync(string userId, CancellationToken cancellationToken = default) =>
+        KeycloakJson.Array(await transport.SendAsync(HttpMethod.Get,
+            $"users/{KeycloakAdminTransport.Escape(userId)}/role-mappings/realm/composite", cancellationToken: cancellationToken), KeycloakJson.Role);
 
     /// <inheritdoc />
     public async ValueTask CreateRoleAsync(string name, string? description = null, CancellationToken cancellationToken = default) =>

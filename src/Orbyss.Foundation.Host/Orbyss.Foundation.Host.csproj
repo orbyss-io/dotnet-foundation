@@ -20,6 +20,7 @@
     <Content Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Update="hostsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Update="shells.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include=".orbyss-foundation/runtime-capabilities.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
     <Content Include=".orbyss-foundation\web-profile.shells.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('.orbyss-foundation\web-profile.shells.json')" />
     <Folder Include="packages\" />
   </ItemGroup>
