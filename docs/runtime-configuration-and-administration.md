@@ -94,7 +94,9 @@ The protected file is raw nested configuration JSON. Each scalar leaf must match
 path. `required` demands a nonblank supplied value. Supported kinds are `secret`, `value`,
 `https-origin` and `https-uri`; issuer paths such as `/realms/application` use `https-uri`.
 Neither HTTPS kind permits embedded credentials, query parameters or fragments. `https-origin`
-also requires the root path.
+requires the exact canonical `scheme://host[:port]` serialization: lowercase scheme/host, no
+trailing slash, and no explicit default HTTPS port 443. A nondefault port such as 8443 is preserved.
+This matches the literal browser Origin boundary; issuer URLs may carry their declared path.
 
 The loader rejects Nuplane paths, shell activation/identity paths, configuration for nonexistent
 shells, unknown contract fields, duplicate or case-duplicate keys and ambiguous key delimiters.

@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "packageId": "Orbyss.Foundation.Host",
   "sourceSha256": {
-    "Configuration/FoundationRuntimeSettings.cs": "07e9ed33dceac0d6b87a56819a7f33aac867c145eed09397d1a57a78151671d6",
+    "Configuration/FoundationRuntimeSettings.cs": "ffbaf6e1518c7ad5f9fbb0702cbd2328856d5b154bfb1ab2558645d07679bc01",
     "Configuration/RuntimeSettingsBinding.cs": "8bd4d56f2505434b8605aa129bbfda6756d09363b81819abca85b30bee20d05f",
     "Diagnostics/FoundationRequestDiagnosticConstants.cs": "5af617c572571e482817af0eaa8094097066ce03363cae443f15ab9ca6fb2f25",
     "Diagnostics/FoundationRequestDiagnosticLogger.cs": "573885ff6fef8517d7da3233734a558acfb18aea5b6f96372b1f3d37faf4741d",

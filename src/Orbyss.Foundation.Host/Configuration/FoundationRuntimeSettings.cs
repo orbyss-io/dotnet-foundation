@@ -187,7 +187,8 @@ public static class FoundationRuntimeSettings
     /// <summary>Requires a noncredential HTTPS origin without a path or query.</summary>
     private static bool IsHttpsOrigin(string? value) => Uri.TryCreate(value, UriKind.Absolute, out var uri)
         && uri.Scheme == Uri.UriSchemeHttps && string.IsNullOrEmpty(uri.UserInfo)
-        && string.IsNullOrEmpty(uri.Query) && string.IsNullOrEmpty(uri.Fragment) && uri.AbsolutePath == "/";
+        && string.IsNullOrEmpty(uri.Query) && string.IsNullOrEmpty(uri.Fragment) && uri.AbsolutePath == "/"
+        && string.Equals(value, uri.GetLeftPart(UriPartial.Authority), StringComparison.Ordinal);
 
     /// <summary>Requires HTTPS without embedded credentials, query parameters or fragments.</summary>
     private static bool IsHttpsUri(string? value) => Uri.TryCreate(value, UriKind.Absolute, out var uri)

@@ -88,6 +88,10 @@ var admitted = FoundationRuntimeSettings.Read(overlayFile, bindingFile, canonica
 if (admitted[secretPath] != canary || admitted[authorityPath] != "https://identity.example/realms/portal"
     || admitted[originPath] != "https://portal.example" || canonical[originPath] != "https://canonical.example"
     || canonical[secretPath] != "canonical") throw new Exception("Protected overlay values or canonical preservation differ.");
+var nonDefaultPort = validOverlay.Replace("https://portal.example", "https://portal.example:8443");
+File.WriteAllText(overlayFile, nonDefaultPort);
+if (FoundationRuntimeSettings.Read(overlayFile, bindingFile, canonical)[originPath] != "https://portal.example:8443")
+    throw new Exception("Canonical nondefault origin port was not preserved.");
 void RejectOverlay(string overlay, string? changedContract = null) {
     File.WriteAllText(overlayFile, overlay);
     File.WriteAllText(bindingFile, changedContract ?? contract);
@@ -104,7 +108,8 @@ RejectOverlay(validOverlay.Replace("\"" + canary + "\"", "123"));
 RejectOverlay(validOverlay.Replace("https://identity.example/realms/portal", "http://identity.example/realms/portal"));
 RejectOverlay(validOverlay.Replace("https://identity.example/realms/portal", "https://user:password@identity.example/realms/portal"));
 RejectOverlay(validOverlay.Replace("https://identity.example/realms/portal", "https://*.example/realms/portal"));
-foreach (var origin in new[] { "http://localhost:5000", "https://*.example", "https://portal.example/path", "https://user:password@portal.example" })
+foreach (var origin in new[] { "http://localhost:5000", "https://*.example", "https://portal.example/path", "https://user:password@portal.example",
+    "https://portal.example/", "https://portal.example:443", "https://PORTAL.example", "HTTPS://portal.example" })
     RejectOverlay(validOverlay.Replace("https://portal.example", origin));
 RejectOverlay(validOverlay.Replace("[\"https://portal.example\"]", "[\"https://portal.example\",\"https://extra.example\"]"));
 RejectOverlay(validOverlay.Replace("\"ClientSecret\":", "\"clientsecret\":\"duplicate\",\"ClientSecret\":"));
@@ -159,6 +164,7 @@ try {
               'nativeBindingOverrides': True, 'nativeInvalidBooleanRejected': True, 'nativeKestrelBoundsMatch': True,
               'protectedRuntimeOverlayValidated': True, 'immutableCompositionRejected': True,
               'exactOriginArrayLeafValidated': True, 'wildcardOriginRejected': True,
+              'canonicalOriginSerializationValidated': True, 'nonDefaultOriginPortPreserved': True,
               'secretFreeRejectionDiagnostics': True,
               'applicationEntryPointStarted': False, 'storageOrIdentityContacted': False}
     (work / 'results.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
