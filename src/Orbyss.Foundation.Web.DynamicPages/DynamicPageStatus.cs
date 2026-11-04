@@ -10,5 +10,7 @@ public enum DynamicPageStatus
     /// <summary>The caller is not permitted to read this resource.</summary>
     Forbidden = 3,
     /// <summary>Current eligibility could not be established.</summary>
-    Unavailable = 4
+    Unavailable = 4,
+    /// <summary>The resolver explicitly observed that the local session is no longer valid; authentication is required.</summary>
+    SessionExpired = 5
 }

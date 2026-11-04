@@ -59,10 +59,18 @@ enforce their permissions, tenancy, resource ownership and state rules.
 
 The consumer implements `IDynamicPageResolver`. `ResolveAsync` reads current publication
 and resource authorization and returns `DynamicPageResolution(Admitted, version, model)`
-only with an authorized, coherent projection. Other outcomes are NotFound, Forbidden
-and Unavailable. NotFound may deliberately conceal an ineligible resource's existence.
+only with an authorized, coherent projection. Other outcomes are NotFound, Forbidden,
+Unavailable and SessionExpired. NotFound may deliberately conceal an ineligible resource's existence.
 An absent/malformed result or exception yields a safe unavailable response; no old
 model is retained or used as a fallback.
+
+Foundation 0.3.14 adds `SessionExpired`. Return it only after explicitly observing that the local login is no longer
+valid, including a post-I/O lifetime recheck. Both resolution and precommit verification map
+that result through the existing bounded native Problem writer to HTTP 401 and the established
+`authentication_required` code. Forbidden remains 403; unavailable/errors remain 503. Do not
+infer session expiry from arbitrary authorization denials or provider failures, rewrite general
+403/500 responses, or clear an independently valid replacement session. The resolver owns its
+authoritative session/lifetime observation; this result adds no automatic session policy.
 
 The request supplies the native principal, bounded route values, actual application
 prefix and native request-localization Locale. The consumer owns translated resource

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using CShells.AspNetCore.Configuration;
 using CShells.AspNetCore.Extensions;
 using CShells.DependencyInjection;
@@ -130,8 +131,22 @@ try
     using var owner = Client();
     await owner.GetAsync("/a/app/fixture/session/yes");
     using (var response = await owner.GetAsync("/a/app/workspace/market")) Require(response.StatusCode == HttpStatusCode.OK && response.Headers.GetValues("X-Robots-Tag").Single() == "noindex, nofollow", "Authorized private page failed");
+    using (var expired = await owner.GetAsync("/a/app/workspace/expired")) await Rejected(expired, 401);
+    state.ExpireVerification = true;
+    using (var request = new HttpRequestMessage(HttpMethod.Get, "/a/app/workspace/market"))
+    {
+        request.Headers.Accept.ParseAdd("application/problem+json");
+        using var response = await owner.SendAsync(request);
+        await Rejected(response, 401);
+        using var problem = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Require(problem.RootElement.GetProperty("code").GetString() == "authentication_required",
+            "Explicit precommit expiry lost the established authentication-required Problem contract.");
+    }
+    state.ExpireVerification = false;
+    using (var stillValid = await owner.GetAsync("/a/app/workspace/market"))
+        Require(stillValid.StatusCode == HttpStatusCode.OK, "An explicit page expiry destroyed an independently valid native session.");
     using (var response = await owner.GetAsync("/b/app/workspace/market")) Require(response.StatusCode == HttpStatusCode.Redirect, "Foreign shell cookie admitted");
-    Console.WriteLine("Dynamic pages passed: live publication, precommit race, conditional/HEAD requests, scoped resolvers, safe metadata/bootstrap, budgets/deadline, native BFF/permissions, public-only composition, shell isolation and custom layout.");
+    Console.WriteLine("Dynamic pages passed: live publication, precommit race and explicit expiry, conditional/HEAD requests, scoped resolvers, safe metadata/bootstrap, budgets/deadline, native BFF/permissions, public-only composition, shell isolation and custom layout.");
 }
 finally { await app.StopAsync(); }
 

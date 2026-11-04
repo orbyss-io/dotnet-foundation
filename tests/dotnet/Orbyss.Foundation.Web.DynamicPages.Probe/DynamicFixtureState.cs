@@ -7,6 +7,7 @@ internal sealed class DynamicFixtureState
     public bool BlockVerification;
     public bool RejectVerification;
     public bool ThrowVerification;
+    public bool ExpireVerification;
     public bool ChangeVersionOnVerify;
     public readonly TaskCompletionSource VerificationEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public readonly TaskCompletionSource ContinueVerification = new(TaskCreationOptions.RunContinuationsAsynchronously);

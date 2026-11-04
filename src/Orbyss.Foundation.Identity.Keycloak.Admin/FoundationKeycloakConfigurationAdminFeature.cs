@@ -15,5 +15,6 @@ public sealed class FoundationKeycloakConfigurationAdminFeature(ShellSettings se
     {
         KeycloakAdminComposition.AddTransport(services, settings);
         services.TryAddSingleton<IKeycloakConfigurationAdministration, KeycloakConfigurationAdministration>();
+        services.TryAddSingleton<IKeycloakConfigurationRemoval, KeycloakConfigurationRemoval>();
     }
 }

@@ -27,8 +27,8 @@
     "DynamicPageResolverRegistration.cs": "388e5659efea4e928ed8360d41dfbbe407ba49470110c79d5217170d69be6ea1",
     "DynamicPageRouteOptions.cs": "4ff6dbe30dadd31da5a50fde2ccc671f9eeb1e62a8c4b51b918b2eb6285af730",
     "DynamicPageServiceCollectionExtensions.cs": "8283c575f9008c89904e5219f80c47e243cba355bff479874b70e463694e5be9",
-    "DynamicPageStatus.cs": "4cabd762ffb4aebd59efc644d395ab0cb3d095475576ce07ec6796bd90d30d73",
-    "FoundationDynamicPagesFeature.cs": "57ae65551c9964e1cc6e672c5e2844b62b1894a212abadd8299d7179376c4d42",
+    "DynamicPageStatus.cs": "b6641a4957d2b48691f8b368298d1032e358daa620e42d8c96c1c925b99504f1",
+    "FoundationDynamicPagesFeature.cs": "42d66cc38d9e46d1284d11d769410ef885065f161d3de725b59ceb4f32b1e280",
     "IDynamicPageRenderer.cs": "2f9ece8ebe8aae22ec773bca20e11721629e27d3ae0d2623badf7af699a03f8b",
     "IDynamicPageResolver.cs": "b5d745163090c48ffb64ab5d22d7fb81da0c9e2e0de301f3834e974b4e334264"
   }

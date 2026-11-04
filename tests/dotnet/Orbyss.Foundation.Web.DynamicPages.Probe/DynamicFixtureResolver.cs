@@ -18,6 +18,7 @@ internal sealed class DynamicFixtureResolver(DynamicFixtureState state) : IDynam
         }
         if (slug == "failure") throw new InvalidOperationException("private-provider-exception");
         if (slug == "forbidden") return new(DynamicPageStatus.Forbidden);
+        if (slug == "expired") return new(DynamicPageStatus.SessionExpired);
         if (slug == "unknown") return new((DynamicPageStatus)0);
         if (!state.Published || slug == "hidden") return new(DynamicPageStatus.NotFound);
         var data = JsonSerializer.SerializeToElement(new { slug, text = "</script><script>window.injected=true</script>", scope = request.ApplicationPathBase });
@@ -38,6 +39,7 @@ internal sealed class DynamicFixtureResolver(DynamicFixtureState state) : IDynam
             await state.ContinueVerification.Task.WaitAsync(cancellationToken);
         }
         if (state.ThrowVerification) throw new InvalidOperationException("private-verification-exception");
+        if (state.ExpireVerification) return DynamicPageStatus.SessionExpired;
         if (state.RejectVerification) return DynamicPageStatus.Unavailable;
         if (state.ChangeVersionOnVerify) state.Version++;
         return state.Published && version == state.Version.ToString() ? DynamicPageStatus.Admitted : DynamicPageStatus.NotFound;
