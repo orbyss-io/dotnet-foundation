@@ -95,6 +95,23 @@ class IndependentUpdateTests(unittest.TestCase):
         self.assertEqual(lines[0].split(' AS ')[0],lines[1].split(' AS ')[0])
         self.assertIn('@sha256:',lines[0])
 
+    def test_host_removes_only_the_unused_apt_pair_offline_without_essential_package_bypass(self):
+        blocks = []
+        for name in ('Dockerfile', 'Dockerfile.qualified'):
+            text = (ROOT/'src/Orbyss.Foundation.Host'/name).read_text()
+            block = text[text.index('RUN dpkg --purge'):text.index('WORKDIR /app')]
+            blocks.append(block)
+            self.assertEqual("RUN dpkg --purge apt libapt-pkg6.0t64 \\", block.splitlines()[0])
+            for package in ('apt', 'libapt-pkg6.0t64'):
+                self.assertIn('! dpkg-query --status ' + package + ' 2>/dev/null', block)
+            for executable in ('apt', 'apt-get'):
+                self.assertIn('test ! -e /usr/bin/' + executable, block)
+            for forbidden in ('--force', '--allow-remove-essential', 'apt-get update', 'apt-get install', 'autoremove'):
+                self.assertNotIn(forbidden, block)
+            self.assertIn('USER $APP_UID', text)
+            self.assertIn('chown -R $APP_UID:$APP_UID /app', text)
+        self.assertEqual(blocks[0], blocks[1])
+
     def test_real_keycloak_regression_is_owned_and_required_on_linux_and_release(self):
         policy = json.loads((ROOT/'maintenance-policy.json').read_text())
         self.assertIn('tests/validate_keycloak_provider.py', policy['inputs'])
