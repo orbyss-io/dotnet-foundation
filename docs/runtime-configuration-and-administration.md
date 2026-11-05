@@ -63,16 +63,25 @@ belong only to creation/import. Client logout redirect policy uses Keycloak's
 Foundation 0.3.14's same explicit `Configuration` capability additionally registers `IKeycloakConfigurationRemoval`.
 It keeps deliberate removal separate from omission and leaves the existing configuration interface
 unchanged for independent implementations. `RemoveClientScopeAsync(clientId, scopeId, optional)`
-removes exactly one selected default or optional assignment, rather than deleting the reusable scope.
+uses the selected default or optional endpoint to remove the client/scope binding, rather than deleting the reusable scope.
+Keycloak's two DELETE endpoints remove that binding regardless of its current category. When changing
+between default and optional, finish every selected removal before adding any replacement assignments.
 To replace an owned bounded membership set, read its current assignments, calculate its exact delta,
-authorize each change, then add/remove only those assignments and read back the effective set.
+authorize each change, then remove/add only those assignments in that order and read back the effective set.
+The existing portable `IIdentityScopeAdministration.RemoveFromApplicationAsync` remains available under
+the broader `Scopes` capability. Configuration-only deployment clients need not activate that broader
+scope-management surface just to remove one assignment; both APIs share the same authenticated transport.
 
 `RemoveClientConfigurationKeysAsync(clientId, attributeKeys, authenticationFlowBindingOverrideKeys)`
 removes only the explicitly named client-map keys. Each selection is bounded to 128 unique nonblank
 keys of at most 256 characters without controls. Both empty selections do no I/O. The operation reads fresh maps,
 preserves unselected entries (including independently configured MFA flows), sends no client scalar,
 credential, user or grant fields, and avoids a write when all selected keys are already absent.
-An explicit final-key removal sends an empty map. Partial updates still merge supplied map keys;
+Foundation 0.3.15 corrects the native provider removal semantics: the minimal payload contains only
+selected present keys with explicit JSON null values, including a map's final selected key. No unrelated
+map entries are replayed. Keycloak preserves omitted keys and empty maps; the 0.3.14 implementation's
+filtered-map payload did not remove existing keys and must not be used for this operation.
+Partial updates still merge supplied map keys;
 omitted keys and empty update maps do not authorize removal. The caller owns object/key authorization,
 stale-plan rejection, serialization of concurrent administrative changes and read-back/retry; the
 native provider API does not make a multi-operation update atomic. Never infer ownership from an

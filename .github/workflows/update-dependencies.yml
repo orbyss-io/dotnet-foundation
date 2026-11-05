@@ -90,3 +90,5 @@ jobs:
             artifacts/dependency-update-tests/
             artifacts/dependency-update-payloads/*/foundation-knowledge-candidate.json
             artifacts/dependency-security/
+            artifacts/keycloak-provider/*/*.log
+            artifacts/keycloak-provider/*/results.json

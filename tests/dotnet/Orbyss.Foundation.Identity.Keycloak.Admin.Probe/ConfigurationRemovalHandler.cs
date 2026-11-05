@@ -2,7 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-/// <summary>Models native client-map replacement and scope membership deletion independently of the SDK implementation.</summary>
+/// <summary>Models Keycloak's supplied-entry merge and explicit null deletion independently of the SDK implementation.</summary>
 internal sealed class ConfigurationRemovalHandler : HttpMessageHandler
 {
     /// <summary>Gets the client's independent attributes, including an operator-owned MFA setting.</summary>
@@ -31,11 +31,22 @@ internal sealed class ConfigurationRemovalHandler : HttpMessageHandler
         {
             using var payload = JsonDocument.Parse(body!);
             if (payload.RootElement.TryGetProperty("attributes", out var attributes))
-                Attributes = attributes.Deserialize<Dictionary<string, string>>()!;
+                MergeEntries(Attributes, attributes);
             if (payload.RootElement.TryGetProperty("authenticationFlowBindingOverrides", out var bindings))
-                Bindings = bindings.Deserialize<Dictionary<string, string>>()!;
+                MergeEntries(Bindings, bindings);
         }
         return new(HttpStatusCode.NoContent);
+    }
+
+    /// <summary>Processes only supplied keys; omitted entries survive, and null or empty values remove named entries.</summary>
+    private static void MergeEntries(Dictionary<string, string> current, JsonElement changes)
+    {
+        foreach (var entry in changes.EnumerateObject())
+        {
+            var value = entry.Value.GetString();
+            if (string.IsNullOrEmpty(value)) current.Remove(entry.Name);
+            else current[entry.Name] = value;
+        }
     }
 
     /// <summary>Produces an independently serialized provider response.</summary>

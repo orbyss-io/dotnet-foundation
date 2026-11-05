@@ -49,6 +49,10 @@ internal static class RealKeycloakProbe
 
             await enrollment.SetPasswordAsync(userId, "Disposable-Admin-Probe-Password-1!", temporary: true);
             Require((await enrollment.GetCredentialsAsync(userId)).Any(item => item.Type == "password"), "real password administration did not create a credential");
+            var credentials = (await enrollment.GetCredentialsAsync(userId)).Select(item => (item.Id, item.Type)).ToArray();
+            await RealConfigurationRemovalProbe.RunAsync(services, applicationId);
+            Require(credentials.SequenceEqual((await enrollment.GetCredentialsAsync(userId)).Select(item => (item.Id, item.Type))), "Configuration removal changed user credential identities.");
+            Require((await users.GetAsync(userId))?.FirstName == "Updated", "Configuration removal changed the unrelated user.");
             Require((await sessions.GetForUserAsync(userId)).Count == 0, "new disposable user unexpectedly had sessions");
             Require((await services.GetRequiredService<IKeycloakRealmOperations>().GetKeyMetadataAsync()).ValueKind == System.Text.Json.JsonValueKind.Object, "real Keycloak key metadata was unavailable");
         }
@@ -83,6 +87,8 @@ internal static class RealKeycloakProbe
         new FoundationKeycloakEnrollmentAdminFeature(settings).ConfigureServices(collection);
         new FoundationKeycloakSessionsAdminFeature(settings).ConfigureServices(collection);
         new FoundationKeycloakRealmOperationsFeature(settings).ConfigureServices(collection);
+        new FoundationKeycloakConfigurationAdminFeature(settings).ConfigureServices(collection);
+        new FoundationKeycloakAuthenticationFlowsAdminFeature(settings).ConfigureServices(collection);
         return collection.BuildServiceProvider();
     }
 

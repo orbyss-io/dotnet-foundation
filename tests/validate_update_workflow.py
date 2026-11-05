@@ -35,5 +35,27 @@ class IndependentUpdateTests(unittest.TestCase):
         self.assertEqual(lines[0].split(' AS ')[0],lines[1].split(' AS ')[0])
         self.assertIn('@sha256:',lines[0])
 
+    def test_real_keycloak_regression_is_owned_and_required_on_linux_and_release(self):
+        policy = __import__('json').loads((ROOT/'maintenance-policy.json').read_text())
+        self.assertIn('tests/validate_keycloak_provider.py', policy['inputs'])
+        self.assertEqual({'github': 'keycloak/keycloak'}, policy['metadataOverrides']['image:quay.io/keycloak/keycloak'])
+        qualifier = (ROOT/'scripts/validate_foundation.py').read_text()
+        self.assertIn('"validate_keycloak_provider.py"', qualifier)
+        self.assertIn('arguments.keycloak_recording_only and validator == "validate_keycloak_provider.py"', qualifier)
+        ci = (ROOT/'.github/workflows/ci.yml').read_text()
+        self.assertIn('python scripts/validate_foundation.py --postgresql-deadline-only --keycloak-recording-only', ci)
+        for path in ('.github/workflows/release.yml', 'scripts/update_dependencies.py'):
+            source = (ROOT/path).read_text()
+            self.assertIn('validate_foundation.py', source)
+            self.assertNotIn('--keycloak-recording-only', source)
+        fixture = (ROOT/'tests/validate_keycloak_provider.py').read_text()
+        self.assertIn('127.0.0.1::8080', fixture)
+        self.assertIn('ownership != identity', fixture)
+        self.assertIn('realm_file.unlink', fixture)
+        workflow = (ROOT/'.github/workflows/update-dependencies.yml').read_text()
+        self.assertIn('artifacts/keycloak-provider/*/*.log', workflow)
+        self.assertIn('artifacts/keycloak-provider/*/results.json', workflow)
+        self.assertNotIn('            artifacts/keycloak-provider/\n', workflow)
+
 
 if __name__=='__main__': unittest.main()
