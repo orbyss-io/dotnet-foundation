@@ -25,12 +25,12 @@ internal sealed class KeycloakConfigurationRemoval(KeycloakAdminTransport transp
         if (attributes.Count == 0 && bindings.Count == 0) return;
         var current = await configuration.GetClientAsync(clientId, cancellationToken).ConfigureAwait(false)
             ?? throw new InvalidOperationException("The configured client is absent.");
-        var changes = new KeycloakClientConfiguration
-        {
-            Attributes = RemoveKeys(current.Attributes, attributes),
-            AuthenticationFlowBindingOverrides = RemoveKeys(current.AuthenticationFlowBindingOverrides, bindings)
-        };
-        if (changes.Attributes is null && changes.AuthenticationFlowBindingOverrides is null) return;
+        // Keycloak merges supplied map entries. Omitting an existing key or sending an empty
+        // map preserves it; only an explicit null value removes that named entry.
+        var changes = new Dictionary<string, IReadOnlyDictionary<string, string?>>();
+        AddRemovals(changes, "attributes", current.Attributes, attributes);
+        AddRemovals(changes, "authenticationFlowBindingOverrides", current.AuthenticationFlowBindingOverrides, bindings);
+        if (changes.Count == 0) return;
         _ = await transport.SendAsync(HttpMethod.Put, "clients/" + KeycloakAdminTransport.Escape(clientId), changes,
             cancellationToken).ConfigureAwait(false);
     }
@@ -49,10 +49,12 @@ internal sealed class KeycloakConfigurationRemoval(KeycloakAdminTransport transp
         return result;
     }
 
-    /// <summary>Returns a replacement map only when an explicitly named current entry is removed.</summary>
-    private static IReadOnlyDictionary<string, string>? RemoveKeys(IReadOnlyDictionary<string, string>? current, HashSet<string> keys)
+    /// <summary>Emits only explicitly selected current keys with null tombstones; never replays unrelated entries.</summary>
+    private static void AddRemovals(Dictionary<string, IReadOnlyDictionary<string, string?>> changes, string property,
+        IReadOnlyDictionary<string, string>? current, HashSet<string> keys)
     {
-        if (current is null || !current.Keys.Any(keys.Contains)) return null;
-        return current.Where(entry => !keys.Contains(entry.Key)).ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
+        if (current is null) return;
+        var removals = keys.Where(current.ContainsKey).ToDictionary(key => key, _ => (string?)null, StringComparer.Ordinal);
+        if (removals.Count > 0) changes.Add(property, removals);
     }
 }

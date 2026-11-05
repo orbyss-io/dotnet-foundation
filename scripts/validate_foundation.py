@@ -18,6 +18,7 @@ VALIDATORS = (
     "validate_jwks_rotation.py",
     "validate_domain_events.py",
     "validate_keycloak_admin.py",
+    "validate_keycloak_provider.py",
     "validate_web_policy_feed.py",
     "validate_web_policies.py",
     "validate_json.py",
@@ -38,17 +39,26 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--postgresql-deadline-only", action="store_true",
                         help="Explicit deadline-only provider scope for Windows CI; Linux and Release run native PostgreSQL.")
+    parser.add_argument("--keycloak-recording-only", action="store_true",
+                        help="Explicit recording-only scope for Windows CI; Linux and Release run the disposable native Keycloak provider.")
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     for validator in VALIDATORS:
+        if arguments.keycloak_recording_only and validator == "validate_keycloak_provider.py":
+            continue
         command = [sys.executable, str(root / "tests" / validator)]
         if validator == "validate_host_release_payload.py":
             command.append("--self-test")
         if arguments.postgresql_deadline_only and validator == "validate_postgresql.py":
             command.append("--deadline-only")
         subprocess.run(command, cwd=root, check=True)
-    print("All Foundation focused validators passed." if not arguments.postgresql_deadline_only
-          else "Foundation focused validators passed; this run exercises PostgreSQL deadlines only.")
+    scopes = []
+    if arguments.postgresql_deadline_only:
+        scopes.append("PostgreSQL deadlines only")
+    if arguments.keycloak_recording_only:
+        scopes.append("Keycloak recording only")
+    print("Foundation focused validators passed; provider scope: " + ", ".join(scopes) + "." if scopes
+          else "All Foundation focused validators passed, including disposable native PostgreSQL and Keycloak providers.")
 
 if __name__ == "__main__":
     main()

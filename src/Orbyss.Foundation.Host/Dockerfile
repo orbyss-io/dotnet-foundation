@@ -6,6 +6,12 @@ RUN dotnet restore Orbyss.Foundation.slnx --locked-mode --configfile NuGet.confi
 RUN dotnet publish src/Orbyss.Foundation.Host/Orbyss.Foundation.Host.csproj -c Release --no-restore -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:de0ee358cdd672f7017a003bed21e9ac9ed48a27c922a59b18175b6e82fa7fee AS final
+# The Host does not use APT. Remove the non-Essential manager/library offline (CVE-2026-109518).
+RUN dpkg --purge apt libapt-pkg6.0t64 \
+    && ! dpkg-query --status apt 2>/dev/null \
+    && ! dpkg-query --status libapt-pkg6.0t64 2>/dev/null \
+    && test ! -e /usr/bin/apt \
+    && test ! -e /usr/bin/apt-get
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080

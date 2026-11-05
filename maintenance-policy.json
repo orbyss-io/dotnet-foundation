@@ -10,6 +10,7 @@
     "src/Orbyss.Foundation.Build/Orbyss.Foundation.Build.csproj",
     "src/Orbyss.Foundation.OpenApi.Exporter/Orbyss.Foundation.OpenApi.Exporter.csproj",
     "tests/validate_postgresql.py",
+    "tests/validate_keycloak_provider.py",
     ".python-version",
     ".nvmrc",
     "tests/browser/package.json",
@@ -33,6 +34,9 @@
     },
     "image:docker/dockerfile": {
       "tag": "1"
+    },
+    "image:quay.io/keycloak/keycloak": {
+      "github": "keycloak/keycloak"
     },
     "anonymousGithubMetadata": [
       "aquasecurity/setup-trivy",

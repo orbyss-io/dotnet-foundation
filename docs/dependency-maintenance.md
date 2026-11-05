@@ -7,7 +7,7 @@ It has no dependency on Program Kit or another consumer repository.
 The job upgrades active SDKs, runtime/test/tool packages, CI actions and both Host
 Dockerfile digests. It refreshes NuGet locks and vendor settings metadata, builds
 and packs, runs all deterministic validators, qualifies the portable Host with real
-package consumption and PostgreSQL, and scans both candidate image platforms.
+package consumption, PostgreSQL and native Keycloak administration, and scans both candidate image platforms.
 Only a passing job opens an update PR. Failed lookups or checks stop the update and
 preserve diagnostics; fix the failure and rerun. No dependency review forms are needed.
 
@@ -30,6 +30,15 @@ checks; release selection additionally requires the clean candidate export and s
 Add new external inputs to maintenance-policy.json in the same change. Linux CI
 supplies symlink support needed by HostedPages; Windows hosts without that
 privilege cannot pass its link leg.
+
+The native Keycloak regression creates only a uniquely labelled disposable provider on a random
+loopback port, imports a fictional service account, and removes its own container and transient
+realm file afterward. Its immutable image is owned by `tests/validate_keycloak_provider.py` and
+discovered through maintenance policy. It exercises the built native administration probe, including
+explicit client-map tombstones, preservation and both scope category changes. Windows CI explicitly
+selects recording-only Keycloak coverage; Linux CI, dependency qualification and Release run the real
+provider. `python tests/validate_keycloak_provider.py` is the focused entrypoint after the Release
+probe has been built. Raw results and redacted logs remain under ignored `artifacts/keycloak-provider/`.
 
 Runtime and independently released tools retain their own versions. Tagged Release
 workflows publish exact package schemas, descriptors, interfaces and frozen source

@@ -1,5 +1,11 @@
 # Consumer regression repairs
 
+This records the original 0.3.14 recording-based review. Actual provider integration subsequently
+disproved its filtered/empty-map deletion assumption. The corrected implementation and actual native
+provider evidence are recorded in [the 0.3.15 follow-up](validation-client-removal-2026-11-05.md).
+The original source, release and evidence remain preserved; the removal statements below are historical
+claims and do not establish actual provider removal acceptance.
+
 Foundation 0.3.14 consolidates two demonstrated native requirements. Public availability and
 downstream compatibility remain the official release and consumer qualification outcomes.
 

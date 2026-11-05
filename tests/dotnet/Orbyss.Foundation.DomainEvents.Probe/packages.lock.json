@@ -14,7 +14,7 @@
       "orbyss.foundation.domainevents": {
         "type": "Project",
         "dependencies": {
-          "Orbyss.Foundation.DomainEvents.Abstractions": "[0.3.14, )"
+          "Orbyss.Foundation.DomainEvents.Abstractions": "[0.3.15, )"
         }
       },
       "orbyss.foundation.domainevents.abstractions": {

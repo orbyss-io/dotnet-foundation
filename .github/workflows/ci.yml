@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            python scripts/validate_foundation.py --postgresql-deadline-only
+            python scripts/validate_foundation.py --postgresql-deadline-only --keycloak-recording-only
           else
             python scripts/validate_foundation.py
           fi
