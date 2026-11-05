@@ -24,8 +24,8 @@ strict pre-I/O rejection, capability isolation and escaped scope endpoints remai
 
 The retained native real-provider probe passed against immutable Keycloak 26.8.1
 `quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b`.
-Actual read-back verified first and final selected attribute/binding removal, unselected operator/MFA
-configuration, all typed client scalar/login policy, repeat convergence, unrelated user identity and
+Actual read-back verified first and final selected attribute/binding removal, unrelated attributes
+and authentication-flow binding, all typed client scalar/login policy, repeat convergence, unrelated user identity and
 password credential IDs. Both default-to-optional and optional-to-default moves, cross-category DELETE
 semantics and an unrelated retained assignment passed. This is native disposable-provider evidence;
 it does not claim a consumer migration or browser/MFA journey.
@@ -49,6 +49,17 @@ from `[0.3.14, )` to `[0.3.15, )`. The rebuilt native recording probe and actual
 passed again; that provider run took 16.292 seconds and removed its owned container. The three
 workflow and nine dependency-maintenance unit checks passed. Independent tool versions remain
 Build 0.3.3, exporter 0.2.7 and analyzer 0.3.8.
+
+Independent review found the fixture's initial linear cleanup could mask a probe failure if Docker
+diagnostics or removal failed. Cleanup now attempts independent owned operations, always attempts
+private-file deletion, and preserves the primary outcome plus every cleanup failure in results.
+An uncertain create completion still triggers inspection of the unique name; removal requires its
+matching ownership label. Private input requests directory/file modes 0700/0600 where supported,
+without changing Windows ACLs. Console output and evidence redact the fictional service secret.
+Seven focused workflow/cleanup tests cover Docker inspect/log/remove failures, foreign ownership,
+primary plus secondary failure retention, timeout after daemon-side create and CI/Release/maintenance
+artifact allowlists excluding the private realm even when deletion fails. These replace the original
+three-check workflow result; native actual-MFA acceptance remains separately owned by consumers.
 
 Provider contract sources:
 [client map updates](https://github.com/keycloak/keycloak/blob/26.8.1/server-spi-private/src/main/java/org/keycloak/models/utils/RepresentationToModel.java),

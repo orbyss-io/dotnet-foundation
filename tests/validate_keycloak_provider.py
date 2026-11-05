@@ -16,6 +16,34 @@ ROOT = Path(__file__).resolve().parents[1]
 LABEL = "org.orbyss.foundation.disposable"
 
 
+def cleanup_fixture(directory, private_import, name, identity, create_attempted, command, secret):
+    """Attempt independent owned cleanup and retain each failure without masking the probe outcome."""
+    failures = []
+    removed = False
+
+    def attempt(operation, action):
+        try:
+            return action()
+        except BaseException as error:
+            failures.append({"operation": operation, "error": (type(error).__name__ + ": " + str(error)).replace(secret, "[REDACTED]")})
+            return None
+
+    if create_attempted:
+        inspected = attempt("container-ownership", lambda: command([
+            "docker", "inspect", "--format", '{{ index .Config.Labels "' + LABEL + '" }}', name]))
+        if inspected is not None and inspected.stdout.strip() == identity:
+            logs = attempt("container-logs", lambda: command(["docker", "logs", "--tail", "500", name], timeout=30))
+            if logs is not None:
+                attempt("provider-log-write", lambda: (directory / "provider.log").write_text(
+                    (logs.stdout + logs.stderr).replace(secret, "[REDACTED]"), encoding="utf-8"))
+            removed = attempt("container-remove", lambda: command(["docker", "rm", "--force", "--volumes", name])) is not None
+        elif inspected is not None:
+            failures.append({"operation": "container-ownership", "error": "Refusing to remove a container not owned by this qualifier."})
+    attempt("private-realm-delete", lambda: (private_import / "realm.json").unlink(missing_ok=True))
+    attempt("private-directory-delete", private_import.rmdir)
+    return removed, failures
+
+
 def main() -> int:
     identity = uuid.uuid4().hex
     name = "foundation-keycloak-" + identity
@@ -23,16 +51,18 @@ def main() -> int:
     directory.mkdir(parents=True)
     secret = "disposable-" + uuid.uuid4().hex
     private_import = directory / "private-import"
-    private_import.mkdir()
+    private_import.mkdir(mode=0o700)
     realm_file = private_import / "realm.json"
-    realm_file.write_text(json.dumps({"realm": "orbyss-foundation", "enabled": True,
+    realm = {"realm": "orbyss-foundation", "enabled": True,
         "clients": [{"clientId": "orbyss-foundation-admin-probe", "protocol": "openid-connect",
                      "enabled": True, "publicClient": False, "serviceAccountsEnabled": True, "secret": secret}],
         "users": [{"username": "service-account-orbyss-foundation-admin-probe", "enabled": True,
                    "serviceAccountClientId": "orbyss-foundation-admin-probe",
-                   "clientRoles": {"realm-management": ["realm-admin"]}}]}), encoding="utf-8")
+                   "clientRoles": {"realm-management": ["realm-admin"]}}]}
     created = False
+    create_attempted = False
     result = {"image": KEYCLOAK_IMAGE, "container": name, "status": "failed", "consumerStateUsed": False}
+    failure = None
 
     def command(arguments: list[str], timeout: int = 60) -> subprocess.CompletedProcess:
         completed = subprocess.run(arguments, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
@@ -43,6 +73,11 @@ def main() -> int:
 
     started = time.monotonic()
     try:
+        with os.fdopen(os.open(realm_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w", encoding="utf-8") as stream:
+            json.dump(realm, stream)
+        # A timeout can follow a successful daemon-side create. Inspect the unique name
+        # even when the CLI did not acknowledge completion; remove only a matching label.
+        create_attempted = True
         command(["docker", "create", "--name", name, "--label", LABEL + "=" + identity,
                  "--publish", "127.0.0.1::8080", KEYCLOAK_IMAGE, "start-dev", "--import-realm"], timeout=120)
         created = True
@@ -72,25 +107,26 @@ def main() -> int:
         if completed.returncode:
             raise AssertionError("Real native Keycloak probe failed; see " + str(directory))
         result["status"] = "passed"
-        print(completed.stdout.strip())
-        print("Disposable native Keycloak provider: " + KEYCLOAK_IMAGE)
-        return 0
     except BaseException as error:
+        failure = error
         result["failure"] = (type(error).__name__ + ": " + str(error)).replace(secret, "[REDACTED]")
-        raise
     finally:
-        if created:
-            ownership = command(["docker", "inspect", "--format", '{{ index .Config.Labels "' + LABEL + '" }}', name]).stdout.strip()
-            if ownership != identity:
-                raise AssertionError("Refusing to remove a container not owned by this qualifier.")
-            logs = subprocess.run(["docker", "logs", name], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
-            (directory / "provider.log").write_text((logs.stdout + logs.stderr).replace(secret, "[REDACTED]"), encoding="utf-8")
-            command(["docker", "rm", "--force", "--volumes", name])
-            result["isolatedContainerRemoved"] = True
-        realm_file.unlink(missing_ok=True)
-        private_import.rmdir()
+        removed, cleanup_failures = cleanup_fixture(directory, private_import, name, identity, create_attempted, command, secret)
+        result["createAttempted"] = create_attempted
+        result["createCompleted"] = created
+        result["isolatedContainerRemoved"] = removed
+        result["cleanupFailures"] = cleanup_failures
+        if cleanup_failures:
+            result["status"] = "failed"
         result["elapsedSeconds"] = round(time.monotonic() - started, 3)
         (directory / "results.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    if failure is not None:
+        raise RuntimeError(result["failure"] + "; see " + str(directory / "results.json")) from None
+    if cleanup_failures:
+        raise RuntimeError("Disposable Keycloak cleanup failed; see " + str(directory / "results.json"))
+    print(completed.stdout.strip().replace(secret, "[REDACTED]"))
+    print("Disposable native Keycloak provider: " + KEYCLOAK_IMAGE)
+    return 0
 
 
 if __name__ == "__main__":
