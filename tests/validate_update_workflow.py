@@ -1,10 +1,14 @@
 """Foundation can maintain its dependencies without any consumer checkout."""
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import importlib.util
+import io
+import json
+import os
 import subprocess
 import tempfile
+import tarfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import xml.etree.ElementTree as ET
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -48,13 +52,15 @@ class IndependentUpdateTests(unittest.TestCase):
                 if arguments[1] == 'cp':
                     raise OSError('primary import failure')
                 if arguments[1] == 'inspect':
+                    if '{{.Config.User}}' in arguments:
+                        return subprocess.CompletedProcess(arguments, 0, '1000', '')
                     raise OSError('secondary ownership failure')
                 return subprocess.CompletedProcess(arguments, 0, '', '')
             with patch.object(fixture, 'ROOT', Path(temporary)), patch.object(fixture.subprocess, 'run', side_effect=command):
                 with self.assertRaisesRegex(RuntimeError, 'primary import failure'):
                     fixture.main()
             result_file = next(Path(temporary).glob('artifacts/keycloak-provider/*/results.json'))
-            result = __import__('json').loads(result_file.read_text())
+            result = json.loads(result_file.read_text())
             self.assertEqual('failed', result['status'])
             self.assertIn('primary import failure', result['failure'])
             self.assertIn('secondary ownership failure', result['cleanupFailures'][0]['error'])
@@ -90,7 +96,7 @@ class IndependentUpdateTests(unittest.TestCase):
         self.assertIn('@sha256:',lines[0])
 
     def test_real_keycloak_regression_is_owned_and_required_on_linux_and_release(self):
-        policy = __import__('json').loads((ROOT/'maintenance-policy.json').read_text())
+        policy = json.loads((ROOT/'maintenance-policy.json').read_text())
         self.assertIn('tests/validate_keycloak_provider.py', policy['inputs'])
         self.assertEqual({'github': 'keycloak/keycloak'}, policy['metadataOverrides']['image:quay.io/keycloak/keycloak'])
         qualifier = (ROOT/'scripts/validate_foundation.py').read_text()
@@ -121,7 +127,7 @@ class IndependentUpdateTests(unittest.TestCase):
                 calls.append(arguments[1])
                 if arguments[1] == 'create':
                     private = next(Path(temporary).rglob('realm.json'))
-                    if __import__('os').name != 'nt':
+                    if os.name != 'nt':
                         self.assertEqual(0o600, private.stat().st_mode & 0o777)
                         self.assertEqual(0o700, private.parent.stat().st_mode & 0o777)
                     raise subprocess.TimeoutExpired(arguments, 120)
@@ -130,7 +136,7 @@ class IndependentUpdateTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, 'TimeoutExpired'):
                     fixture.main()
             result_file = next(Path(temporary).glob('artifacts/keycloak-provider/*/results.json'))
-            result = __import__('json').loads(result_file.read_text())
+            result = json.loads(result_file.read_text())
             self.assertEqual(['create', 'inspect', 'logs', 'rm'], calls)
             self.assertEqual('failed', result['status'])
             self.assertTrue(result['createAttempted'])
@@ -146,9 +152,51 @@ class IndependentUpdateTests(unittest.TestCase):
             source = (ROOT/'.github/workflows'/name).read_text()
             patterns = [line.strip() for line in source.splitlines() if line.strip().startswith('artifacts/')]
             with self.subTest(workflow=name):
-                self.assertFalse(any(__import__('pathlib').PurePosixPath(private).full_match(pattern) for pattern in patterns))
+                self.assertFalse(any(PurePosixPath(private).full_match(pattern) for pattern in patterns))
                 for path in public:
-                    self.assertTrue(any(__import__('pathlib').PurePosixPath(path).full_match(pattern) for pattern in patterns))
+                    self.assertTrue(any(PurePosixPath(path).full_match(pattern) for pattern in patterns))
+
+    def test_native_probe_timeout_preserves_redacted_partial_streams_and_cleanup(self):
+        spec = importlib.util.spec_from_file_location('native_keycloak_provider', ROOT/'tests/validate_keycloak_provider.py')
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        with tempfile.TemporaryDirectory() as temporary:
+            identity = 'b' * 32
+            def command(arguments, **kwargs):
+                if arguments[0] == 'dotnet':
+                    secret = kwargs['env']['PROGRAM_KIT_KEYCLOAK_ADMIN_SECRET']
+                    raise subprocess.TimeoutExpired(arguments, 120, output=('partial ' + secret).encode(), stderr=('failure ' + secret).encode())
+                output = ('1000' if '{{.Config.User}}' in arguments else identity) if arguments[1] == 'inspect' else ('127.0.0.1:12345' if arguments[1] == 'port' else '')
+                return subprocess.CompletedProcess(arguments, 0, output, '')
+            response = MagicMock()
+            response.__enter__.return_value.status = 200
+            with patch.object(fixture, 'ROOT', Path(temporary)), patch.object(fixture.uuid, 'uuid4', return_value=type('Id', (), {'hex': identity})()), patch.object(fixture.subprocess, 'run', side_effect=command), patch.object(fixture.urllib.request, 'urlopen', return_value=response):
+                with self.assertRaisesRegex(RuntimeError, 'TimeoutExpired'):
+                    fixture.main()
+            result_file = next(Path(temporary).glob('artifacts/keycloak-provider/*/results.json'))
+            result = json.loads(result_file.read_text())
+            self.assertEqual('failed', result['status'])
+            self.assertTrue(result['isolatedContainerRemoved'])
+            self.assertEqual([], result['cleanupFailures'])
+            self.assertTrue(result['privateImportReadableAsNativeUser'])
+            self.assertEqual('partial [REDACTED]', (result_file.parent/'stdout.log').read_text())
+            self.assertEqual('failure [REDACTED]', (result_file.parent/'stderr.log').read_text())
+            self.assertFalse(list(Path(temporary).rglob('realm.json')))
+
+    def test_import_archive_preserves_private_modes_for_only_the_selected_nonroot_user(self):
+        spec = importlib.util.spec_from_file_location('native_keycloak_provider', ROOT/'tests/validate_keycloak_provider.py')
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary)/'realm.json'
+            path.write_bytes(b'fictional-private-realm')
+            with tarfile.open(fileobj=io.BytesIO(fixture.import_archive(path, 1000, 0))) as archive:
+                self.assertEqual(['import', 'import/realm.json'], archive.getnames())
+                directory, realm = archive.getmembers()
+                self.assertTrue(directory.isdir())
+                self.assertTrue(realm.isfile())
+                self.assertEqual([(1000, 0, 0o700), (1000, 0, 0o600)], [(item.uid, item.gid, item.mode) for item in (directory, realm)])
+                self.assertEqual(b'fictional-private-realm', archive.extractfile(realm).read())
 
 
 if __name__=='__main__': unittest.main()

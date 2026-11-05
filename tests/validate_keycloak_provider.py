@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import json
+import io
 import os
 from pathlib import Path
 import subprocess
+import re
+import tarfile
 import time
 import urllib.error
 import urllib.request
@@ -14,6 +17,20 @@ import uuid
 KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b"
 ROOT = Path(__file__).resolve().parents[1]
 LABEL = "org.orbyss.foundation.disposable"
+
+
+def import_archive(realm_file, uid, gid):
+    """Copy only the fictional realm with private modes and the selected native user's ownership."""
+    archive = io.BytesIO()
+    with tarfile.open(fileobj=archive, mode="w") as output:
+        directory = tarfile.TarInfo("import")
+        directory.type, directory.mode, directory.uid, directory.gid = tarfile.DIRTYPE, 0o700, uid, gid
+        output.addfile(directory)
+        content = realm_file.read_bytes()
+        realm = tarfile.TarInfo("import/realm.json")
+        realm.mode, realm.uid, realm.gid, realm.size = 0o600, uid, gid, len(content)
+        output.addfile(realm, io.BytesIO(content))
+    return archive.getvalue()
 
 
 def cleanup_fixture(directory, private_import, name, identity, create_attempted, command, secret):
@@ -64,8 +81,12 @@ def main() -> int:
     result = {"image": KEYCLOAK_IMAGE, "container": name, "status": "failed", "consumerStateUsed": False}
     failure = None
 
-    def command(arguments: list[str], timeout: int = 60) -> subprocess.CompletedProcess:
-        completed = subprocess.run(arguments, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+    def command(arguments: list[str], timeout: int = 60, *, standard_input=None) -> subprocess.CompletedProcess:
+        completed = subprocess.run(arguments, cwd=ROOT, input=standard_input, capture_output=True, timeout=timeout)
+        for stream in ("stdout", "stderr"):
+            content = getattr(completed, stream)
+            if isinstance(content, bytes):
+                setattr(completed, stream, content.decode("utf-8", errors="replace"))
         if completed.returncode:
             raise AssertionError("Disposable Keycloak command failed: " + arguments[0] + " " + arguments[1]
                                  + "\n" + completed.stdout.replace(secret, "[REDACTED]") + completed.stderr.replace(secret, "[REDACTED]"))
@@ -81,8 +102,16 @@ def main() -> int:
         command(["docker", "create", "--name", name, "--label", LABEL + "=" + identity,
                  "--publish", "127.0.0.1::8080", KEYCLOAK_IMAGE, "start-dev", "--import-realm"], timeout=120)
         created = True
-        command(["docker", "cp", str(private_import), name + ":/opt/keycloak/data/import"])
+        native_user = command(["docker", "inspect", "--format", "{{.Config.User}}", name]).stdout.strip()
+        selected_user = re.fullmatch(r"([1-9][0-9]*)(?::([0-9]+))?", native_user)
+        if selected_user is None:
+            raise AssertionError("The selected Keycloak fixture must declare a numeric non-root runtime user.")
+        uid, gid = int(selected_user[1]), int(selected_user[2] or "0")
+        command(["docker", "cp", "--archive", "-", name + ":/opt/keycloak/data/"], standard_input=import_archive(realm_file, uid, gid))
+        result["nativeUser"] = native_user
         command(["docker", "start", name])
+        command(["docker", "exec", name, "/bin/sh", "-c", "test -x /opt/keycloak/data/import && test -r /opt/keycloak/data/import/realm.json"])
+        result["privateImportReadableAsNativeUser"] = True
         binding = command(["docker", "port", name, "8080/tcp"]).stdout.strip()
         origin = "http://127.0.0.1:" + binding.rsplit(":", 1)[1]
         ready_by = time.monotonic() + 120
@@ -100,8 +129,14 @@ def main() -> int:
         environment["PROGRAM_KIT_KEYCLOAK_ADMIN_URL"] = origin
         environment["PROGRAM_KIT_KEYCLOAK_ADMIN_SECRET"] = secret
         probe = ROOT / "tests/dotnet/Orbyss.Foundation.Identity.Keycloak.Admin.Probe/bin/Release/net10.0/Orbyss.Foundation.Identity.Keycloak.Admin.Probe.dll"
-        completed = subprocess.run(["dotnet", str(probe)], cwd=ROOT, env=environment, capture_output=True,
-                                   text=True, encoding="utf-8", errors="replace", timeout=120)
+        try:
+            completed = subprocess.run(["dotnet", str(probe)], cwd=ROOT, env=environment, capture_output=True,
+                                       text=True, encoding="utf-8", errors="replace", timeout=120)
+        except subprocess.TimeoutExpired as error:
+            for stream, content in (("stdout", error.stdout), ("stderr", error.stderr)):
+                value = content.decode("utf-8", errors="replace") if isinstance(content, bytes) else (content or "")
+                (directory / (stream + ".log")).write_text(value.replace(secret, "[REDACTED]"), encoding="utf-8")
+            raise
         for stream in ("stdout", "stderr"):
             (directory / (stream + ".log")).write_text(getattr(completed, stream).replace(secret, "[REDACTED]"), encoding="utf-8")
         if completed.returncode:

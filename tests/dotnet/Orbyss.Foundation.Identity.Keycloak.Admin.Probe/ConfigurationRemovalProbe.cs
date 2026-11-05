@@ -10,6 +10,7 @@ internal static class ConfigurationRemovalProbe
     /// <summary>Verifies capability isolation, pre-I/O rejection, precise mutations, preservation and retry convergence.</summary>
     internal static async Task RunAsync()
     {
+        VerifyPreservationComparison();
         using var handler = new ConfigurationRemovalHandler();
         using var client = new HttpClient(handler);
         var services = new ServiceCollection();
@@ -66,6 +67,23 @@ internal static class ConfigurationRemovalProbe
         var unselected = new ServiceCollection();
         unselected.AddFoundationKeycloakAdministration(_ => { }, KeycloakAdminFeatures.Users);
         Require(unselected.All(descriptor => descriptor.ServiceType != typeof(IKeycloakConfigurationRemoval)), "Removal leaked outside Configuration capability.");
+    }
+
+    /// <summary>Rejects substantive preservation changes while admitting only unordered map/scope enumeration.</summary>
+    private static void VerifyPreservationComparison()
+    {
+        var client = new KeycloakClientConfiguration { Enabled = true, RedirectUris = ["https://one.test", "https://two.test"],
+            DefaultClientScopes = ["one", "two"], OptionalClientScopes = ["three", "four"],
+            Attributes = new Dictionary<string, string> { ["one"] = "1", ["two"] = "2" },
+            AuthenticationFlowBindingOverrides = new Dictionary<string, string> { ["browser"] = "one", ["direct_grant"] = "two" } };
+        Require(RealConfigurationRemovalProbe.EquivalentClients(client, client with { DefaultClientScopes = ["two", "one"], OptionalClientScopes = ["four", "three"],
+            Attributes = new Dictionary<string, string> { ["two"] = "2", ["one"] = "1" },
+            AuthenticationFlowBindingOverrides = new Dictionary<string, string> { ["direct_grant"] = "two", ["browser"] = "one" } }), "Preservation comparison treated unordered enumeration as a mutation.");
+        foreach (var changed in new[] { client with { DefaultClientScopes = ["one", "one", "two"] }, client with { OptionalClientScopes = ["three"] },
+            client with { RedirectUris = ["https://two.test", "https://one.test"] }, client with { Enabled = false },
+            client with { Attributes = new Dictionary<string, string> { ["one"] = "changed", ["two"] = "2" } },
+            client with { AuthenticationFlowBindingOverrides = new Dictionary<string, string> { ["browser"] = "changed", ["direct_grant"] = "two" } } })
+            Require(!RealConfigurationRemovalProbe.EquivalentClients(client, changed), "Preservation comparison admitted a substantive mutation.");
     }
 
     /// <summary>Rejects the entire explicit selection before token acquisition or any administrative request.</summary>

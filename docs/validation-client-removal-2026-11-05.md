@@ -56,10 +56,33 @@ private-file deletion, and preserves the primary outcome plus every cleanup fail
 An uncertain create completion still triggers inspection of the unique name; removal requires its
 matching ownership label. Private input requests directory/file modes 0700/0600 where supported,
 without changing Windows ACLs. Console output and evidence redact the fictional service secret.
-Seven focused workflow/cleanup tests cover Docker inspect/log/remove failures, foreign ownership,
+Nine focused workflow/cleanup tests cover Docker inspect/log/remove failures, foreign ownership,
 primary plus secondary failure retention, timeout after daemon-side create and CI/Release/maintenance
 artifact allowlists excluding the private realm even when deletion fails. These replace the original
 three-check workflow result; native actual-MFA acceptance remains separately owned by consumers.
+
+Review also caught that plain `docker cp` would make host-private 0700/0600 files root-owned inside
+the non-root Linux provider. The bounded in-memory import archive now contains only its import
+directory and realm file with those private modes, owned by the selected container's numeric native
+user (1000 for this image). Archive copy preserves that ownership; the default native user must
+successfully read the imported file before provider qualification continues. No root runtime or broad
+permission change is used. The archive regression checks exact members, ownership, modes and bytes.
+
+A confirming run exposed a test comparison defect: the provider returned the same default scope
+names in a different order. Structure-only diagnostics identified `DefaultClientScopes` as the only
+changed typed field, with ordered equality false and ordinal-sorted sequence equality true. Actual
+scope membership and duplicates/cardinality were unchanged. The comparison now canonicalizes map
+keys and only `DefaultClientScopes`/`OptionalClientScopes`; every other scalar and array remains exact.
+Negative controls reject missing or duplicate scopes, changed redirect-URI ordering, scalar changes
+and attribute/binding value changes. No complete provider DTO is written to diagnostics.
+
+The first failed assertion invoked Windows crash reporting and timed out after 120 seconds
+(134.742 seconds including fixture cleanup); its original partial streams were unavailable. A native
+probe catch now reports fixture exceptions and returns failure directly. Subsequent focused failures
+retained their actual assertion and successful owned cleanup; timeout partial-stream preservation is
+also covered. The final focused source build, recording controls and real-provider fixture passed.
+The final provider result took 15.480 seconds, retained native-user readability, reported no cleanup
+failures, removed the owned container and deleted private input. Original failures remain preserved.
 
 Provider contract sources:
 [client map updates](https://github.com/keycloak/keycloak/blob/26.8.1/server-spi-private/src/main/java/org/keycloak/models/utils/RepresentationToModel.java),

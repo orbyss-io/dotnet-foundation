@@ -31,7 +31,8 @@ internal static class RealConfigurationRemovalProbe
             && after.AuthenticationFlowBindingOverrides?["direct_grant"] == directGrant, "Removal changed unselected attributes or authentication bindings.");
         Require(Scalars(before) == Scalars(after), "Removal changed client scalar fields or login policy.");
         await removal.RemoveClientConfigurationKeysAsync(clientId, ["owned.remove"], ["browser"]);
-        Require(JsonSerializer.Serialize(after) == JsonSerializer.Serialize(await RequiredClientAsync(configuration, clientId)), "Repeated real removal did not converge.");
+        var retry = await RequiredClientAsync(configuration, clientId);
+        Require(EquivalentClients(after, retry), "Repeated real removal did not converge.");
         await removal.RemoveClientConfigurationKeysAsync(clientId, [], ["direct_grant"]);
         Require((await RequiredClientAsync(configuration, clientId)).AuthenticationFlowBindingOverrides?.Count is null or 0, "Final real flow binding survived removal.");
         await removal.RemoveClientConfigurationKeysAsync(clientId, ["operator.keep", "mfa.keep"], []);
@@ -70,12 +71,24 @@ internal static class RealConfigurationRemovalProbe
         Console.WriteLine("Real Keycloak preserved scalar/login policy and unselected maps; explicit first/final-key removals and retry converged; both scope category moves and cross-category DELETE semantics passed.");
     }
 
+    /// <summary>Compares complete typed values; only map keys and the provider's two scope membership collections are unordered.</summary>
+    internal static bool EquivalentClients(KeycloakClientConfiguration left, KeycloakClientConfiguration right) => CanonicalClient(left) == CanonicalClient(right);
+
     /// <summary>Reads the created fixture client without treating absence as an empty configuration.</summary>
     private static async Task<KeycloakClientConfiguration> RequiredClientAsync(IKeycloakConfigurationAdministration configuration, string clientId) =>
         await configuration.GetClientAsync(clientId) ?? throw new InvalidOperationException("Disposable client disappeared.");
 
     /// <summary>Compares every typed scalar and array policy while excluding the two deliberately mutated maps.</summary>
-    private static string Scalars(KeycloakClientConfiguration client) => JsonSerializer.Serialize(client with { Attributes = null, AuthenticationFlowBindingOverrides = null });
+    private static string Scalars(KeycloakClientConfiguration client) => CanonicalClient(client with { Attributes = null, AuthenticationFlowBindingOverrides = null });
+
+    /// <summary>Retains scope cardinality/duplicates and every other array/scalar exactly while normalizing only declared unordered collections.</summary>
+    private static string CanonicalClient(KeycloakClientConfiguration client) => JsonSerializer.Serialize(client with
+    {
+        DefaultClientScopes = client.DefaultClientScopes?.Order(StringComparer.Ordinal).ToArray(),
+        OptionalClientScopes = client.OptionalClientScopes?.Order(StringComparer.Ordinal).ToArray(),
+        Attributes = client.Attributes?.OrderBy(entry => entry.Key, StringComparer.Ordinal).ToDictionary(entry => entry.Key, entry => entry.Value),
+        AuthenticationFlowBindingOverrides = client.AuthenticationFlowBindingOverrides?.OrderBy(entry => entry.Key, StringComparer.Ordinal).ToDictionary(entry => entry.Key, entry => entry.Value)
+    });
 
     /// <summary>Checks actual membership in both categories instead of trusting a successful mutation response.</summary>
     private static async Task RequireScopeAsync(IKeycloakConfigurationAdministration configuration, string clientId, string scopeId, bool? expectedOptional)

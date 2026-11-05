@@ -8,7 +8,17 @@ using Orbyss.Foundation.Identity.Keycloak.Admin;
 
 if (Environment.GetEnvironmentVariable("PROGRAM_KIT_KEYCLOAK_ADMIN_URL") is { Length: > 0 })
 {
-    await RealKeycloakProbe.RunAsync();
+    try
+    {
+        await RealKeycloakProbe.RunAsync();
+    }
+    catch (Exception exception)
+    {
+        // Report fixture assertions directly instead of leaving Windows crash reporting
+        // holding redirected handles after an unhandled test exception.
+        Console.Error.WriteLine(exception);
+        Environment.ExitCode = 1;
+    }
     return;
 }
 
