@@ -14,7 +14,7 @@ import urllib.request
 import uuid
 
 
-KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b"
+KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:26.8.1@sha256:3f3c5f8e03c614774b4bd9173b88391fefa4153bfc010d8012d59ad825377332"
 ROOT = Path(__file__).resolve().parents[1]
 LABEL = "org.orbyss.foundation.disposable"
 
